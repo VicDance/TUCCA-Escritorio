@@ -11,4 +11,5 @@ package idao;
  */
 public interface iClienteDAO {
     public void insertar(int id);
+    public void insertarAdmin(int id);
 }

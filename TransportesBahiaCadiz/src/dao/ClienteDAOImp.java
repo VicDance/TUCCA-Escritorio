@@ -43,4 +43,27 @@ public class ClienteDAOImp implements iClienteDAO{
         }
     }
     
+    @Override
+    public void insertarAdmin(int id) {
+        try {
+            con.connect();
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            //ResultSet rs;
+            String sqlNuevoUsuario = "INSERT INTO administrador (idadministrador) "
+                    + "VALUES (?)";
+            insertar = connection.prepareStatement(sqlNuevoUsuario);
+            insertar.setInt(1, id);
+            if(insertar.executeUpdate() != 0){
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            insertado = false;
+            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            con.disconect();
+        }
+    }
 }
