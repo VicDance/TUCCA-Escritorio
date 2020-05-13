@@ -2,7 +2,6 @@ package view;
 
 import connector.Clave;
 import connector.Encriptar;
-import dao.ClienteDAOImp;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import static view.LoginForm.dataIn;
 import static view.LoginForm.dataOut;
 
 /*
@@ -21,10 +21,11 @@ import static view.LoginForm.dataOut;
  *
  * @author Vicky
  */
-public class RegisterForm extends javax.swing.JFrame implements Clave{
+public class RegisterForm extends javax.swing.JFrame implements Clave {
+
     private Encriptar encriptar;
     private String contraseñaCifrada;
-    
+
     public RegisterForm() {
         initComponents();
         //centrar pantalla
@@ -35,7 +36,6 @@ public class RegisterForm extends javax.swing.JFrame implements Clave{
         return contraseñaCifrada;
     }
 
-    
     public boolean compruebaTfno(String tfno) {
         boolean valido = false;
         try {
@@ -73,22 +73,22 @@ public class RegisterForm extends javax.swing.JFrame implements Clave{
         boolean llenos = false;
         if (this.txtUsuario != null && this.txtContraseña != null && this.txtRepetirContraseña != null
                 && this.txtCorreo != null && this.txtTfno != null && this.dateChooserNacimiento != null) {
-            if(compruebaRepetirContraseña()){
+            if (compruebaRepetirContraseña()) {
                 llenos = true;
             }
         }
         return llenos;
     }
-    
-    private boolean compruebaRepetirContraseña(){
+
+    private boolean compruebaRepetirContraseña() {
         boolean correcta = false;
         String contraseña = new String(txtContraseña.getPassword());
         String contraseñaRepetida = new String(txtRepetirContraseña.getPassword());
-        
-        if(contraseña.compareTo(contraseñaRepetida) == 0){
+
+        if (contraseña.compareTo(contraseñaRepetida) == 0) {
             correcta = true;
         }
-        
+
         return correcta;
     }
 
@@ -352,18 +352,22 @@ public class RegisterForm extends javax.swing.JFrame implements Clave{
 
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
         if (compruebaCampos() && compruebaTfno(txtTfno.getText()) && compruebaEmail(txtCorreo.getText())) {
-            ClienteDAOImp cdi = new ClienteDAOImp();
-            encriptar = new Encriptar();
             try {
-                String contraseña = new String(txtContraseña.getPassword());
-                contraseñaCifrada = encriptar.encriptar(contraseña, CLAVE);
-                java.sql.Date date = new java.sql.Date(dateChooserNacimiento.getDate().getTime());
-                //System.out.println(contraseña);
-                cdi.insertar(txtUsuario.getText(), contraseñaCifrada, txtCorreo.getText(), date, Integer.parseInt(txtTfno.getText()));
-            } catch (Exception ex) {
+                dataOut.writeUTF("encriptar");
+                dataOut.flush();
+                dataOut.writeUTF(txtUsuario.getText() + "/" + new String(txtContraseña.getPassword()) + "/"
+                        + txtCorreo.getText() + "/" + txtTfno.getText() + "/" + dateChooserNacimiento.getDate().getTime());
+                dataOut.flush();
+                String estado = dataIn.readUTF();
+                if(estado.equalsIgnoreCase("correcto")){
+                    JOptionPane.showMessageDialog(this, "Inserción correcta");
+                }else{
+                    JOptionPane.showMessageDialog(this, "No se pudo insertar");
+                }
+            } catch (IOException ex) {
                 Logger.getLogger(RegisterForm.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }else{
+        } else {
             JOptionPane.showMessageDialog(this, "Campos vacíos");
         }
     }//GEN-LAST:event_btnRegisterActionPerformed

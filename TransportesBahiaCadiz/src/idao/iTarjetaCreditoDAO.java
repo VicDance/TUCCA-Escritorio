@@ -5,10 +5,14 @@
  */
 package idao;
 
+import java.util.List;
+import model.TarjetaCredito;
+
 /**
  *
  * @author Vicky
  */
-public interface iClienteDAO {
-    public void insertar(int id);
+public interface iTarjetaCreditoDAO {
+    public List<TarjetaCredito> getAllTarjetas();
+    public void insertar(TarjetaCredito tarjeta);
 }

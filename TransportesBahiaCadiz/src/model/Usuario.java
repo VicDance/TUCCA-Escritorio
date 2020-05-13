@@ -29,6 +29,15 @@ public class Usuario {
         this.fecha_nac = fecha_nac;
         this.tfno = tfno;
     }
+    
+    public Usuario(int id, String nombre, String contraseña, String correo, Date fecha_nac, int tfno){
+        this.id = id;
+        this.nombre = nombre;
+        this.contraseña = contraseña;
+        this.correo = correo;
+        this.fecha_nac = fecha_nac;
+        this.tfno = tfno;
+    }
 
     public int getId() {
         return id;

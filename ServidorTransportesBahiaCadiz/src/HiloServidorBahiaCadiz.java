@@ -8,22 +8,27 @@ import connector.Clave;
 import connector.Conector;
 import connector.Encriptar;
 import dao.ClienteDAOImp;
+import dao.UsuarioDAOImp;
 import dao.LineaDAOImp;
 import dao.MunicipioDAOImp;
 import dao.NucleoDAOImp;
 import dao.ParadaDAOImp;
+import dao.TarjetaCreditoDAOImp;
 import dao.ZonaDAOImp;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Cliente;
 import model.Linea;
 import model.Municipio;
 import model.Nucleo;
 import model.Parada;
+import model.TarjetaCredito;
 import model.Usuario;
 import model.Zona;
 
@@ -44,14 +49,17 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private List<Municipio> municipios;
     private List<Nucleo> nucleos;
     private List<Zona> zonas;
-    private ClienteDAOImp cdi;
+    private List<TarjetaCredito> tarjetas;
+    private UsuarioDAOImp udi;
     private LineaDAOImp ldi;
     private ParadaDAOImp pdi;
     private MunicipioDAOImp mdi;
     private NucleoDAOImp ndi;
     private ZonaDAOImp zdi;
+    private TarjetaCreditoDAOImp tcdi;
     private String texto;
     private String[] datos;
+    private Usuario usuario;
 
     public HiloServidorBahiaCadiz(Socket cliente) {
         this.cliente = cliente;
@@ -67,8 +75,48 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                 System.out.println("servidor escuchando");
                 String cadena = dataIn.readUTF();
                 System.out.println(cadena);
-                cdi = new ClienteDAOImp();
+                udi = new UsuarioDAOImp();
                 switch (cadena) {
+                    case "encriptar":
+                        texto = dataIn.readUTF();
+                        System.out.println(texto);
+                        datos = texto.split("/");
+                        String encriptada;
+                        encriptar = new Encriptar();
+                        if (datos.length == 5) {
+                            encriptada = encriptar.encriptar(datos[1], CLAVE);
+                            usuario = new Usuario(datos[0], encriptada, datos[2], new Date(Long.parseLong(datos[4])),
+                                    Integer.parseInt(datos[3]));
+                            udi.insertar(usuario);
+                            Usuario us = udi.getId(datos[0]);
+                            ClienteDAOImp cdi = new ClienteDAOImp();
+                            cdi.insertar(us.getId());
+                            if (udi.insertado && cdi.insertado) {
+                                dataOut.writeUTF("correcto");
+                                dataOut.flush();
+                            } else {
+                                dataOut.writeUTF("incorrecto");
+                                dataOut.flush();
+                            }
+                        } else {
+                            if (datos[0].equalsIgnoreCase("cliente")) {
+                                encriptada = encriptar.encriptar(datos[2], CLAVE);
+                                usuario = new Usuario(datos[1], encriptada, datos[3], new Date(Long.parseLong(datos[5])),
+                                        Integer.parseInt(datos[4]));
+                                udi.insertar(usuario);
+                                Usuario us = udi.getId(datos[1]);
+                                ClienteDAOImp cdi = new ClienteDAOImp();
+                                cdi.insertar(us.getId());
+                                if (udi.insertado && cdi.insertado) {
+                                    dataOut.writeUTF("correcto");
+                                    dataOut.flush();
+                                } else {
+                                    dataOut.writeUTF("incorrecto");
+                                    dataOut.flush();
+                                }
+                            }
+                        }
+                        break;
                     case "inicio":
                         String usuario = dataIn.readUTF();
                         String contraseña = dataIn.readUTF();
@@ -143,9 +191,23 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         }
                         break;
 
+                    case "tarjetas":
+                        System.out.println("entra");
+                        tcdi = new TarjetaCreditoDAOImp();
+                        tarjetas = tcdi.getAllTarjetas();
+                        System.out.println(tarjetas.size());
+                        dataOut.writeInt(tarjetas.size());
+                        dataOut.flush();
+                        for (TarjetaCredito tarjeta : tarjetas) {
+                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "-" + tarjeta.getIdUser() + "-"
+                                    + tarjeta.getCaducidad() + "-" + tarjeta.getTitular());
+                            dataOut.flush();
+                        }
+                        break;
+
                     case "usuario":
                         texto = dataIn.readUTF();
-                        usuarios = cdi.getUsuario(texto);
+                        usuarios = udi.getUsuario(texto);
                         dataOut.writeInt(usuarios.size());
                         dataOut.flush();
                         for (Usuario usuario1 : usuarios) {
@@ -264,6 +326,24 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         }
                         break;
 
+                    case "ntarjeta":
+                        texto = dataIn.readUTF();
+                        datos = texto.split("-");
+                        TarjetaCredito tarjeta = new TarjetaCredito(datos[0], Integer.parseInt(datos[1]),
+                                datos[2], datos[3]);
+                        //tcdi = new TarjetaCreditoDAOImp();
+                        tcdi.insertar(tarjeta);
+                        System.out.println(tcdi.insertado);
+                        if (tcdi.insertado) {
+                            System.out.println("entra");
+                            dataOut.writeUTF("correcto");
+                            dataOut.flush();
+                        } else {
+                            System.out.println("entra tb");
+                            dataOut.writeUTF("incorrecto");
+                            dataOut.flush();
+                        }
+                        break;
                     case "exit":
                         break;
                 }
@@ -286,7 +366,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
 
     private boolean comprobarCredenciales(String usuario, String contraseña) {
         boolean correcto = false;
-        usuarios = cdi.getAll();
+        usuarios = udi.getAll();
         encriptar = new Encriptar();
         for (int i = 0; i < usuarios.size(); i++) {
             String convertida = encriptar.encriptar(contraseña, CLAVE);
@@ -295,19 +375,20 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                 try {
                     dataOut.writeUTF("correcto");
                     dataOut.flush();
-                    dataOut.writeUTF(usuario + " " + usuarios.get(i).getCorreo() + " " + usuarios.get(i).getFecha_nac() + " "
-                            + usuarios.get(i).getTfno());
+                    dataOut.writeUTF(usuario + "/" + usuarios.get(i).getCorreo() + "/" + usuarios.get(i).getFecha_nac()
+                            + "/" + usuarios.get(i).getTfno() + "/" + usuarios.get(i).getId());
+                    break;
                 } catch (IOException ex) {
                     Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                break;
-            } else {
-                try {
-                    dataOut.writeUTF("incorrecto");
-                    dataOut.flush();
-                } catch (IOException ex) {
-                    Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
-                }
+            }
+        }
+        if (!correcto) {
+            try {
+                dataOut.writeUTF("incorrecto");
+                dataOut.flush();
+            } catch (IOException ex) {
+                Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return correcto;

@@ -5,25 +5,13 @@
  */
 package view;
 
-import dao.ClienteDAOImp;
-import dao.LineaDAOImp;
-import dao.MunicipioDAOImp;
-import dao.NucleoDAOImp;
-import dao.ParadaDAOImp;
 import java.awt.Color;
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import model.Linea;
-import model.Municipio;
-import model.Nucleo;
-import model.Parada;
-import model.Usuario;
 import static view.LoginForm.dataIn;
 import static view.LoginForm.dataOut;
 
