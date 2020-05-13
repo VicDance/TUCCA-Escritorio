@@ -90,7 +90,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             udi.insertar(usuario);
                             Usuario us = udi.getId(datos[0]);
                             ClienteDAOImp cdi = new ClienteDAOImp();
-                            cdi.insertar(us.getId());
+                            cdi.insertarAdmin(us.getId());
                             if (udi.insertado && cdi.insertado) {
                                 dataOut.writeUTF("correcto");
                                 dataOut.flush();
