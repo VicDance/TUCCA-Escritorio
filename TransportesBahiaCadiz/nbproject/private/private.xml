@@ -3,13 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/view/InsertForm.java</file>
-            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/view/RegisterForm.java</file>
-            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/model/Zona.java</file>
-            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/dao/MunicipioDAOImp.java</file>
-            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/dao/TarjetaCreditoDAOImp.java</file>
-            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/view/AdminForm.java</file>
-            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/model/TarjetaCredito.java</file>
+            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/dao/ClienteDAOImp.java</file>
+            <file>file:/C:/Users/Vicky/Documents/NetBeansProjects/TransportesBahiaCadiz/src/idao/iClienteDAO.java</file>
         </group>
     </open-files>
 </project-private>

@@ -5,15 +5,12 @@
  */
 package idao;
 
-import java.util.List;
-import model.Cliente;
+import model.TarjetaBus;
 
 /**
  *
  * @author Vicky
  */
-public interface iClienteDAO {
-    public void insertar(int id);
-    public void insertarAdmin(int id);
-    public List<Cliente> getAllClientes();
+public interface iTarjetaBusDAO {
+    public void insertar(TarjetaBus tarjeta);
 }

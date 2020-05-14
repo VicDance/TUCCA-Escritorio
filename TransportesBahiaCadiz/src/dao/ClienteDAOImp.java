@@ -9,7 +9,13 @@ import connector.Conector;
 import idao.iClienteDAO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import model.Cliente;
 
 /**
  *
@@ -65,5 +71,28 @@ public class ClienteDAOImp implements iClienteDAO{
         }finally{
             con.disconect();
         }
+    }
+
+    @Override
+    public List<Cliente> getAllClientes() {
+        con.connect();
+        Connection connection = con.getConnection();
+        List<Cliente> clientes = null;
+        PreparedStatement buscar;
+        try {
+            String buscaUsuarios = "SELECT * FROM cliente";
+            buscar = connection.prepareStatement(buscaUsuarios);
+            ResultSet rs = buscar.executeQuery();
+            clientes = new ArrayList<Cliente>();
+            while (rs.next()) {
+                Cliente cli = new Cliente();
+                cli.setIdCliente(rs.getInt(1));
+                clientes.add(cli);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        con.disconect();
+        return clientes;
     }
 }

@@ -13,7 +13,9 @@ import dao.LineaDAOImp;
 import dao.MunicipioDAOImp;
 import dao.NucleoDAOImp;
 import dao.ParadaDAOImp;
+import dao.TarjetaBusDAOImp;
 import dao.TarjetaCreditoDAOImp;
+import dao.TarjetasBusDAOImp;
 import dao.ZonaDAOImp;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -28,7 +30,9 @@ import model.Linea;
 import model.Municipio;
 import model.Nucleo;
 import model.Parada;
+import model.TarjetaBus;
 import model.TarjetaCredito;
+import model.TarjetaEstandar;
 import model.Usuario;
 import model.Zona;
 
@@ -50,16 +54,22 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private List<Nucleo> nucleos;
     private List<Zona> zonas;
     private List<TarjetaCredito> tarjetas;
+    private List<Cliente> clientes;
+    private List<TarjetaEstandar> estandares;
     private UsuarioDAOImp udi;
     private LineaDAOImp ldi;
     private ParadaDAOImp pdi;
     private MunicipioDAOImp mdi;
     private NucleoDAOImp ndi;
     private ZonaDAOImp zdi;
+    private ClienteDAOImp cdi;
     private TarjetaCreditoDAOImp tcdi;
+    private TarjetaBusDAOImp tbdi;
+    private TarjetasBusDAOImp tsbdi;
     private String texto;
     private String[] datos;
     private Usuario usuario;
+    private TarjetaBus tarjetaBus;
 
     public HiloServidorBahiaCadiz(Socket cliente) {
         this.cliente = cliente;
@@ -89,7 +99,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                                     Integer.parseInt(datos[3]));
                             udi.insertar(usuario);
                             Usuario us = udi.getId(datos[0]);
-                            ClienteDAOImp cdi = new ClienteDAOImp();
+                            cdi = new ClienteDAOImp();
                             cdi.insertarAdmin(us.getId());
                             if (udi.insertado && cdi.insertado) {
                                 dataOut.writeUTF("correcto");
@@ -105,7 +115,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                                         Integer.parseInt(datos[4]));
                                 udi.insertar(usuario);
                                 Usuario us = udi.getId(datos[1]);
-                                ClienteDAOImp cdi = new ClienteDAOImp();
+                                cdi = new ClienteDAOImp();
                                 cdi.insertar(us.getId());
                                 if (udi.insertado && cdi.insertado) {
                                     dataOut.writeUTF("correcto");
@@ -181,6 +191,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "zonas":
+                        //System.out.println("entra zonas");
                         zdi = new ZonaDAOImp();
                         zonas = zdi.getAll();
                         dataOut.writeInt(zonas.size());
@@ -192,7 +203,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "tarjetas":
-                        System.out.println("entra");
+                        //System.out.println("entra");
                         tcdi = new TarjetaCreditoDAOImp();
                         tarjetas = tcdi.getAllTarjetas();
                         System.out.println(tarjetas.size());
@@ -201,6 +212,18 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         for (TarjetaCredito tarjeta : tarjetas) {
                             dataOut.writeUTF(tarjeta.getNumTarjeta() + "-" + tarjeta.getIdUser() + "-"
                                     + tarjeta.getCaducidad() + "-" + tarjeta.getTitular());
+                            dataOut.flush();
+                        }
+                        break;
+                        
+                    case "tarjetasb":
+                        tsbdi = new TarjetasBusDAOImp();
+                        estandares = tsbdi.getAllTarjetasEstandar();
+                        //System.out.println(tarjetas.size());
+                        dataOut.writeInt(estandares.size());
+                        dataOut.flush();
+                        for (TarjetaEstandar tarjeta : estandares) {
+                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "-" + tarjeta.getFecha_expedicion());
                             dataOut.flush();
                         }
                         break;
@@ -274,6 +297,13 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         }
                         break;
 
+                    case "cliente":
+                        texto = dataIn.readUTF();
+                        Usuario user = udi.getId(texto);
+                        dataOut.writeUTF(user.getNombre() + "/" + user.getContraseña() + "/" + user.getCorreo() + "/"
+                                + user.getFecha_nac() + "/" + user.getTfno());
+                        break;
+
                     case "ilinea":
                         texto = dataIn.readUTF();
                         ldi.insertar(texto);
@@ -344,6 +374,26 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             dataOut.flush();
                         }
                         break;
+
+                    case "tarjeta_es":
+                        texto = dataIn.readUTF();
+                        datos = texto.split("/");
+                        tarjetaBus = new TarjetaBus(Long.parseLong(datos[0]), Integer.parseInt(datos[1]), 0, 0.1);
+                        tbdi = new TarjetaBusDAOImp();
+                        tbdi.insertar(tarjetaBus);
+                        TarjetaEstandar es = new TarjetaEstandar(Long.parseLong(datos[0]));
+                        tsbdi = new TarjetasBusDAOImp();
+                        tsbdi.insertarEstandar(es.getNumTarjeta());
+                        if (tbdi.insertado && tsbdi.insertado) {
+                            //System.out.println("entra");
+                            dataOut.writeUTF("correcto");
+                            dataOut.flush();
+                        } else {
+                            System.out.println("entra tb");
+                            dataOut.writeUTF("incorrecto");
+                            dataOut.flush();
+                        }
+                        break;
                     case "exit":
                         break;
                 }
@@ -367,24 +417,32 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private boolean comprobarCredenciales(String usuario, String contraseña) {
         boolean correcto = false;
         usuarios = udi.getAll();
+        cdi = new ClienteDAOImp();
+        clientes = cdi.getAllClientes();
         encriptar = new Encriptar();
         for (int i = 0; i < usuarios.size(); i++) {
             String convertida = encriptar.encriptar(contraseña, CLAVE);
-            if (usuario.equals(usuarios.get(i).getNombre()) && convertida.equals(usuarios.get(i).getContraseña())) {
-                correcto = true;
-                try {
-                    dataOut.writeUTF("correcto");
-                    dataOut.flush();
-                    dataOut.writeUTF(usuario + "/" + usuarios.get(i).getCorreo() + "/" + usuarios.get(i).getFecha_nac()
-                            + "/" + usuarios.get(i).getTfno() + "/" + usuarios.get(i).getId());
-                    break;
-                } catch (IOException ex) {
-                    Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
+            for (int j = 0; j < clientes.size(); j++) {
+                if (usuario.equals(usuarios.get(i).getNombre()) && convertida.equals(usuarios.get(i).getContraseña())
+                        && clientes.get(j).getIdCliente() == usuarios.get(i).getId()) {
+                    correcto = true;
+                    try {
+                        dataOut.writeUTF("correcto");
+                        dataOut.flush();
+                        dataOut.writeInt(clientes.get(j).getIdCliente());
+                        dataOut.flush();
+                        /*dataOut.writeUTF(usuario + "/" + usuarios.get(i).getCorreo() + "/" + usuarios.get(i).getFecha_nac()
+                         + "/" + usuarios.get(i).getTfno() + "/" + usuarios.get(i).getId());*/
+                        break;
+                    } catch (IOException ex) {
+                        Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }
         if (!correcto) {
             try {
+                System.out.println("entra");
                 dataOut.writeUTF("incorrecto");
                 dataOut.flush();
             } catch (IOException ex) {

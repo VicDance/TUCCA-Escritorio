@@ -22,11 +22,12 @@ import model.Usuario;
  *
  * @author Vicky
  */
-public class UsuarioDAOImp implements iUsuarioDAO{
+public class UsuarioDAOImp implements iUsuarioDAO {
+
     Conector con = new Conector();
     public boolean insertado;
-    
-    public UsuarioDAOImp(){
+
+    public UsuarioDAOImp() {
         //con.connect();
     }
 
@@ -45,7 +46,7 @@ public class UsuarioDAOImp implements iUsuarioDAO{
             insertar.setString(3, usuario.getCorreo());
             insertar.setDate(4, usuario.getFecha_nac());
             insertar.setInt(5, usuario.getTfno());
-            if(insertar.executeUpdate() != 0){
+            if (insertar.executeUpdate() != 0) {
                 System.out.println("Insercción exitosa");
                 insertado = true;
             }
@@ -53,7 +54,7 @@ public class UsuarioDAOImp implements iUsuarioDAO{
             ex.printStackTrace();
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+        } finally {
             con.disconect();
         }
     }
@@ -109,8 +110,9 @@ public class UsuarioDAOImp implements iUsuarioDAO{
             }
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            con.disconect();
         }
-        con.disconect();
         return usuarios;
     }
 
@@ -122,7 +124,7 @@ public class UsuarioDAOImp implements iUsuarioDAO{
             if (usuario1.getNombre().equals(nombre)) {
                 usuario = new Usuario(usuario1.getId(), nombre, usuario1.getContraseña(), usuario1.getCorreo(), usuario1.getFecha_nac(), usuario1.getTfno());
             }
-        }   
+        }
         return usuario;
     }
 }
