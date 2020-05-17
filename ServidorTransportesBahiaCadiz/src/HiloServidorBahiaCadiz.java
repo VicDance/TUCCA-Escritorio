@@ -22,6 +22,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +35,8 @@ import model.Parada;
 import model.TarjetaBus;
 import model.TarjetaCredito;
 import model.TarjetaEstandar;
+import model.TarjetaEstudiante;
+import model.TarjetaJubilado;
 import model.Usuario;
 import model.Zona;
 
@@ -56,6 +60,8 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private List<TarjetaCredito> tarjetas;
     private List<Cliente> clientes;
     private List<TarjetaEstandar> estandares;
+    private List<TarjetaEstudiante> estudiantes;
+    private List<TarjetaJubilado> jubilados;
     private UsuarioDAOImp udi;
     private LineaDAOImp ldi;
     private ParadaDAOImp pdi;
@@ -70,6 +76,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private String[] datos;
     private Usuario usuario;
     private TarjetaBus tarjetaBus;
+    private long numAbsoluto;
 
     public HiloServidorBahiaCadiz(Socket cliente) {
         this.cliente = cliente;
@@ -215,15 +222,28 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             dataOut.flush();
                         }
                         break;
-                        
+
                     case "tarjetasb":
                         tsbdi = new TarjetasBusDAOImp();
                         estandares = tsbdi.getAllTarjetasEstandar();
-                        //System.out.println(tarjetas.size());
-                        dataOut.writeInt(estandares.size());
+                        estudiantes = tsbdi.getAllTarjetasEstudiante();
+                        jubilados = tsbdi.getAllTarjetasJubilado();
+                        System.out.println(estandares.size() + estudiantes.size() + jubilados.size());
+                        dataOut.writeInt(estandares.size() + estudiantes.size() + jubilados.size());
                         dataOut.flush();
                         for (TarjetaEstandar tarjeta : estandares) {
-                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "-" + tarjeta.getFecha_expedicion());
+                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "/" + tarjeta.getFecha_expedicion()
+                            + "/" + "estandar");
+                            dataOut.flush();
+                        }
+                        for (TarjetaEstudiante tarjeta : estudiantes) {
+                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "/" + tarjeta.getFecha_ini()
+                            + "/" + tarjeta.getFecha_fin() + "/" + "estudiante");
+                            dataOut.flush();
+                        }
+                        for (TarjetaJubilado tarjeta : jubilados) {
+                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "/" + tarjeta.getAñoValidez()
+                            + "/" + "jubilado");
                             dataOut.flush();
                         }
                         break;
@@ -355,6 +375,19 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             dataOut.flush();
                         }
                         break;
+                        
+                    case "btarjetaBus":
+                        int posicion = dataIn.readInt();
+                        tbdi = new TarjetaBusDAOImp();
+                        tbdi.borrar(posicion);
+                        if(tbdi.borrado){
+                            dataOut.writeUTF("correcto");
+                            dataOut.flush();
+                        }else {
+                            dataOut.writeUTF("incorrecto");
+                            dataOut.flush();
+                        }
+                        break;
 
                     case "ntarjeta":
                         texto = dataIn.readUTF();
@@ -378,10 +411,11 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                     case "tarjeta_es":
                         texto = dataIn.readUTF();
                         datos = texto.split("/");
-                        tarjetaBus = new TarjetaBus(Long.parseLong(datos[0]), Integer.parseInt(datos[1]), 0, 0.1);
+                        numAbsoluto = Math.abs(Long.parseLong(datos[0]));
+                        tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.1);
                         tbdi = new TarjetaBusDAOImp();
                         tbdi.insertar(tarjetaBus);
-                        TarjetaEstandar es = new TarjetaEstandar(Long.parseLong(datos[0]));
+                        TarjetaEstandar es = new TarjetaEstandar(numAbsoluto);
                         tsbdi = new TarjetasBusDAOImp();
                         tsbdi.insertarEstandar(es.getNumTarjeta());
                         if (tbdi.insertado && tsbdi.insertado) {
@@ -391,6 +425,71 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         } else {
                             System.out.println("entra tb");
                             dataOut.writeUTF("incorrecto");
+                            dataOut.flush();
+                        }
+                        break;
+
+                    case "tarjeta_ju":
+                        texto = dataIn.readUTF();
+                        datos = texto.split("/");
+                        if (compruebaFechaJubilado(Integer.parseInt(datos[1]))) {
+                            numAbsoluto = Math.abs(Long.parseLong(datos[0]));
+                            tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.5);
+                            tbdi = new TarjetaBusDAOImp();
+                            tbdi.insertar(tarjetaBus);
+                            TarjetaJubilado jubilado = new TarjetaJubilado(numAbsoluto);
+                            tsbdi = new TarjetasBusDAOImp();
+                            tsbdi.insertarJubilado(jubilado.getNumTarjeta(), getAñoValidez());
+                            if (tbdi.insertado && tsbdi.insertado) {
+                                //System.out.println("entra");
+                                dataOut.writeUTF("correcto");
+                                dataOut.flush();
+                            } else {
+                                //System.out.println("entra tb");
+                                dataOut.writeUTF("incorrecto");
+                                dataOut.flush();
+                            }
+                        } else {
+                            dataOut.writeUTF("invalido");
+                            dataOut.flush();
+                        }
+                        break;
+
+                    case "tarjeta_estu":
+                        texto = dataIn.readUTF();
+                        datos = texto.split("/");
+                        if (compruebaMes(Integer.parseInt(datos[1]))) {
+                            numAbsoluto = Math.abs(Long.parseLong(datos[0]));
+                            tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.3);
+                            tbdi = new TarjetaBusDAOImp();
+                            tbdi.insertar(tarjetaBus);
+                            Calendar calendarIni = Calendar.getInstance();
+                            Calendar calendarFin = new GregorianCalendar();
+                            calendarIni.set(Calendar.MONTH, 8);
+                            calendarIni.set(Calendar.DAY_OF_MONTH, 1);
+                            calendarFin.set(Calendar.MONTH, 5);
+                            calendarFin.set(Calendar.DAY_OF_MONTH, 30);
+                            java.util.Date dateIni = calendarIni.getTime();
+                            java.sql.Date date2Ini = new java.sql.Date(dateIni.getTime());
+                            java.util.Date dateFin = calendarFin.getTime();
+                            java.sql.Date date2Fin = new java.sql.Date(dateFin.getTime());
+                            TarjetaEstudiante estudiante = new TarjetaEstudiante(numAbsoluto,
+                                    date2Ini,
+                                    date2Fin);
+                            tsbdi = new TarjetasBusDAOImp();
+                            //System.out.println(calendarFin.get(Calendar.YEAR));
+                            tsbdi.insertarEstudiante(estudiante.getNumTarjeta(), estudiante.getFecha_ini(), estudiante.getFecha_fin());
+                            if (tbdi.insertado && tsbdi.insertado) {
+                                //System.out.println("entra");
+                                dataOut.writeUTF("correcto");
+                                dataOut.flush();
+                            } else {
+                                //System.out.println("entra tb");
+                                dataOut.writeUTF("incorrecto");
+                                dataOut.flush();
+                            }
+                        }else {
+                            dataOut.writeUTF("invalido");
                             dataOut.flush();
                         }
                         break;
@@ -447,6 +546,50 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                 dataOut.flush();
             } catch (IOException ex) {
                 Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return correcto;
+    }
+
+    private boolean compruebaFechaJubilado(int idCliente) {
+        boolean correcto = false;
+        Calendar calendar = Calendar.getInstance();
+        Calendar calendar2 = Calendar.getInstance();
+        java.util.Date d = new java.util.Date();
+        java.sql.Date date2 = new java.sql.Date(d.getTime());
+        calendar2.setTime(date2);
+        int anioActual = calendar2.get(Calendar.YEAR);
+        for (int i = 0; i < usuarios.size(); i++) {
+            calendar.setTime(usuarios.get(i).getFecha_nac());
+            int anioCliente = calendar.get(Calendar.YEAR);
+            if ((anioActual - anioCliente >= 65) && idCliente == usuarios.get(i).getId()) {
+                correcto = true;
+            }
+        }
+
+        return correcto;
+    }
+
+    private int getAñoValidez() {
+        int anio = 0;
+        Calendar calendar = Calendar.getInstance();
+        java.util.Date d = new java.util.Date();
+        java.sql.Date date2 = new java.sql.Date(d.getTime());
+        calendar.setTime(date2);
+        anio = calendar.get(Calendar.YEAR) - 65;
+        return anio;
+    }
+
+    private boolean compruebaMes(int idCliente) {
+        boolean correcto = false;
+        Calendar calendar = Calendar.getInstance();
+        java.util.Date d = new java.util.Date();
+        java.sql.Date date2 = new java.sql.Date(d.getTime());
+        calendar.setTime(date2);
+        int mesActual = calendar.get(Calendar.MONTH);
+        for (int i = 0; i < usuarios.size(); i++) {
+            if ((mesActual >= 9 || mesActual <= 6) && idCliente == usuarios.get(i).getId()) {
+                correcto = true;
             }
         }
         return correcto;

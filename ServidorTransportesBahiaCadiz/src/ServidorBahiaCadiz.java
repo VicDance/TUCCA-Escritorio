@@ -18,10 +18,10 @@ import java.util.logging.Logger;
  * @author Vicky
  */
 public class ServidorBahiaCadiz {
+    ServerSocket servidor = null;
 
-    private void listen() {
+    public ServidorBahiaCadiz(){
         Properties configuracion = new Properties();
-        ServerSocket servidor = null;
         final int PUERTO; 
         try {
             configuracion.load(new FileInputStream("config.props"));
@@ -32,6 +32,20 @@ public class ServidorBahiaCadiz {
             System.out.println("IMPOSIBLE CONECTAR CON EL SERVIDOR " + servidor);
             System.exit(-1);
         }
+    }
+    private void listen() {
+        /*Properties configuracion = new Properties();
+        ServerSocket servidor = null;
+        final int PUERTO; 
+        try {
+            configuracion.load(new FileInputStream("config.props"));
+            PUERTO = Integer.valueOf(configuracion.getProperty("port"));
+            servidor = new ServerSocket(PUERTO);
+            System.out.println("Conectado al servidor: " + servidor);
+        } catch (IOException ex) {
+            System.out.println("IMPOSIBLE CONECTAR CON EL SERVIDOR " + servidor);
+            System.exit(-1);
+        }*/
 
         Socket cliente = null;
 

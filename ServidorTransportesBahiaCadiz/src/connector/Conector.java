@@ -1,8 +1,13 @@
 package connector;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -14,19 +19,22 @@ import java.sql.SQLException;
  * @author Vicky
  */
 public class Conector {
-
-    //?useServerPrepStmts=true
+    Properties configuracion = new Properties();
     private Connection con;
-    private final String server = "jdbc:mysql://localhost:3306/transportes_cadiz?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
-    private final String user = "root";
-    private final String password = "ItsMeVicky";
 
     public Conector() {
     }
-    
-    public void connect(){
+
+    public void connect() {
         con = null;
+        final String server;
+        final String user;
+        final String password;
         try {
+            configuracion.load(new FileInputStream("config.props"));
+            server = configuracion.getProperty("server");
+            user = configuracion.getProperty("user");
+            password = configuracion.getProperty("password");
             con = DriverManager.getConnection(server, user, password);
             if (con != null) {
                 System.out.println("Conexion exitosa");
@@ -35,6 +43,8 @@ public class Conector {
             //System.out.println(ex.getSQLState());
             System.out.println("No se pudo conectar con la base de datos" + ex);
             System.exit(-1);
+        } catch (IOException ex) {
+            Logger.getLogger(Conector.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
