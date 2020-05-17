@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.TarjetaEstandar;
+import model.TarjetaEstudiante;
+import model.TarjetaJubilado;
 
 /**
  *
@@ -28,6 +30,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
 
     @Override
     public void insertarEstandar(long numTarjeta) {
+        insertado = false;
         try {
             con.connect();
             Connection connection = con.getConnection();
@@ -53,13 +56,54 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
     }
 
     @Override
-    public void insertarEstudiante(long numTarjeta) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void insertarEstudiante(long numTarjeta, java.sql.Date inicio, java.sql.Date fin) {
+        insertado = false;
+        try {
+            con.connect();
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String sqlNuevaTarjeta = "INSERT INTO tarjeta_estudiante (num_tarjeta_estudiante, fecha_ini, fecha_fin) "
+                    + "VALUES (?, ?, ?)";
+            insertar = connection.prepareStatement(sqlNuevaTarjeta);
+            insertar.setLong(1, numTarjeta);
+            insertar.setDate(2, inicio);
+            insertar.setDate(3, fin);
+            if (insertar.executeUpdate() != 0) {
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            insertado = false;
+            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            con.disconect();
+        }
     }
 
     @Override
-    public void insertarJubilado(long numTarjeta) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void insertarJubilado(long numTarjeta, int año) {
+        insertado = false;
+        try {
+            con.connect();
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String sqlNuevaTarjeta = "INSERT INTO tarjeta_jubilado (num_tarjeta_jubilado, año_validez) "
+                    + "VALUES (?, ?)";
+            insertar = connection.prepareStatement(sqlNuevaTarjeta);
+            insertar.setLong(1, numTarjeta);
+            insertar.setInt(2, año);
+            if (insertar.executeUpdate() != 0) {
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            insertado = false;
+            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            con.disconect();
+        }
     }
 
     @Override
@@ -69,14 +113,65 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         List<TarjetaEstandar> tarjetas = null;
         PreparedStatement buscar;
         try {
-            String buscaMunicipios = "SELECT * FROM tarjeta_estandar";
-            buscar = connection.prepareStatement(buscaMunicipios);
+            String buscaTarjeta = "SELECT * FROM tarjeta_estandar";
+            buscar = connection.prepareStatement(buscaTarjeta);
             ResultSet rs = buscar.executeQuery();
             tarjetas = new ArrayList<TarjetaEstandar>();
             while (rs.next()) {
                 TarjetaEstandar tarjeta = new TarjetaEstandar();
                 tarjeta.setNumTarjeta(rs.getLong(1));
                 tarjeta.setFecha_expedicion(rs.getDate(2));
+                tarjetas.add(tarjeta);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            con.disconect();
+        }
+        return tarjetas;
+    }
+
+    @Override
+    public List<TarjetaEstudiante> getAllTarjetasEstudiante() {
+        con.connect();
+        Connection connection = con.getConnection();
+        List<TarjetaEstudiante> tarjetas = null;
+        PreparedStatement buscar;
+        try {
+            String buscaTarjeta = "SELECT * FROM tarjeta_estudiante";
+            buscar = connection.prepareStatement(buscaTarjeta);
+            ResultSet rs = buscar.executeQuery();
+            tarjetas = new ArrayList<TarjetaEstudiante>();
+            while (rs.next()) {
+                TarjetaEstudiante tarjeta = new TarjetaEstudiante();
+                tarjeta.setNumTarjeta(rs.getLong(1));
+                tarjeta.setFecha_ini(rs.getDate(2));
+                tarjeta.setFecha_fin(rs.getDate(3));
+                tarjetas.add(tarjeta);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            con.disconect();
+        }
+        return tarjetas;
+    }
+
+    @Override
+    public List<TarjetaJubilado> getAllTarjetasJubilado() {
+        con.connect();
+        Connection connection = con.getConnection();
+        List<TarjetaJubilado> tarjetas = null;
+        PreparedStatement buscar;
+        try {
+            String buscaTarjeta = "SELECT * FROM tarjeta_jubilado";
+            buscar = connection.prepareStatement(buscaTarjeta);
+            ResultSet rs = buscar.executeQuery();
+            tarjetas = new ArrayList<TarjetaJubilado>();
+            while (rs.next()) {
+                TarjetaJubilado tarjeta = new TarjetaJubilado();
+                tarjeta.setNumTarjeta(rs.getLong(1));
+                tarjeta.setAñoValidez(rs.getDate(2));
                 tarjetas.add(tarjeta);
             }
         } catch (SQLException ex) {

@@ -5,6 +5,7 @@
  */
 package idao;
 
+import java.util.List;
 import model.TarjetaBus;
 
 /**
@@ -13,4 +14,6 @@ import model.TarjetaBus;
  */
 public interface iTarjetaBusDAO {
     public void insertar(TarjetaBus tarjeta);
+    public void borrar(int posicion);
+    public List<TarjetaBus> getAllTarjetas();
 }

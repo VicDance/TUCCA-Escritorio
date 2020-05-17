@@ -11,21 +11,19 @@ import java.sql.Date;
  *
  * @author Vicky
  */
-public class TarjetaEstandar extends TarjetaBus{
+public class TarjetaJubilado {
     private long numTarjeta;
-    private Date fecha_expedicion;
+    private Date añoValidez;
     
-    public TarjetaEstandar(){
-        
-    }
+    public TarjetaJubilado(){}
     
-    public TarjetaEstandar(long numTarjeta){
+    public TarjetaJubilado(long numTarjeta){
         this.numTarjeta = numTarjeta;
     }
     
-    public TarjetaEstandar(long numTarjeta, Date fecha_expedicion){
+    public TarjetaJubilado(long numTarjeta, Date añoValidez){
         this.numTarjeta = numTarjeta;
-        this.fecha_expedicion = fecha_expedicion;
+        this.añoValidez = añoValidez;
     }
 
     public long getNumTarjeta() {
@@ -36,17 +34,16 @@ public class TarjetaEstandar extends TarjetaBus{
         this.numTarjeta = numTarjeta;
     }
 
-    public Date getFecha_expedicion() {
-        return fecha_expedicion;
+    public Date getAñoValidez() {
+        return añoValidez;
     }
 
-    public void setFecha_expedicion(Date fecha_expedicion) {
-        this.fecha_expedicion = fecha_expedicion;
+    public void setAñoValidez(Date añoValidez) {
+        this.añoValidez = añoValidez;
     }
 
     @Override
     public String toString() {
-        return "TarjetaEstandar{" + "numTarjeta=" + numTarjeta + ", fecha_expedicion=" + fecha_expedicion + '}';
+        return "TarjetaJubilado{" + "numTarjeta=" + numTarjeta + ", a\u00f1oValidez=" + añoValidez + '}';
     }
-
 }

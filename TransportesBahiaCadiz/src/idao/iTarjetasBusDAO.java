@@ -5,8 +5,11 @@
  */
 package idao;
 
+import java.sql.Date;
 import java.util.List;
 import model.TarjetaEstandar;
+import model.TarjetaEstudiante;
+import model.TarjetaJubilado;
 
 /**
  *
@@ -14,7 +17,9 @@ import model.TarjetaEstandar;
  */
 public interface iTarjetasBusDAO {
     public void insertarEstandar(long numTarjeta);
-    public void insertarEstudiante(long numTarjeta);
-    public void insertarJubilado(long numTarjeta);
+    public void insertarEstudiante(long numTarjeta, Date inicio, Date fin);
+    public void insertarJubilado(long numTarjeta, int año);
     public List<TarjetaEstandar> getAllTarjetasEstandar();
+    public List<TarjetaEstudiante> getAllTarjetasEstudiante();
+    public List<TarjetaJubilado> getAllTarjetasJubilado();
 }
