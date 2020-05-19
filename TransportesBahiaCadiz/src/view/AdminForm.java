@@ -26,6 +26,7 @@ public class AdminForm extends javax.swing.JFrame {
     private String[] newDatos;
     private int size;
     private InsertForm inf;
+    private DeleteForm df;
 
     public AdminForm() {
         initComponents();
@@ -57,6 +58,7 @@ public class AdminForm extends javax.swing.JFrame {
                     newDatos[3], newDatos[4]};
 
                 model.addRow(filas);
+                //System.out.println(newDatos[0]);
             } catch (IOException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -211,6 +213,35 @@ public class AdminForm extends javax.swing.JFrame {
         table.setModel(model);
     }
 
+    private void setColumnasClientes() {
+        columnas = new Object[]{"Id cliente", "Nombre", "Email", "Fecha nacimiento", "Teléfono"};
+        try {
+            dataOut.writeUTF("clientes");
+            dataOut.flush();
+            size = dataIn.readInt();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        model = new DefaultTableModel(columnas, size);
+    }
+
+    private void setFilasClienttes() {
+        Object[] filas;
+        model.setRowCount(0);
+        for (int i = 0; i < size; i++) {
+            String datos;
+            try {
+                datos = dataIn.readUTF();
+                newDatos = datos.split("/");
+                filas = new Object[]{newDatos[0], newDatos[1], newDatos[2], newDatos[3], newDatos[4]};
+                model.addRow(filas);
+            } catch (IOException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        table.setModel(model);
+    }
+
     private void buscar(String campoBusqueda, String texto) {
         try {
             switch (campoBusqueda) {
@@ -316,6 +347,12 @@ public class AdminForm extends javax.swing.JFrame {
         inf = new InsertForm();
         inf.setVisible(true);
         inf.setLocationRelativeTo(null);
+    }
+
+    private void mostrarBorrado() {
+        df = new DeleteForm();
+        df.setVisible(true);
+        df.setLocationRelativeTo(null);
     }
 
     private void muestraCamposLinea() {
@@ -501,10 +538,11 @@ public class AdminForm extends javax.swing.JFrame {
 
         jPanel2.setBackground(new java.awt.Color(44, 62, 80));
 
-        pnlLateral.setBackground(new java.awt.Color(248, 135, 37));
+        pnlLateral.setBackground(new java.awt.Color(44, 62, 100));
 
-        lblUsuarios.setBackground(new java.awt.Color(248, 135, 37));
+        lblUsuarios.setBackground(new java.awt.Color(44, 62, 100));
         lblUsuarios.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblUsuarios.setForeground(new java.awt.Color(255, 255, 255));
         lblUsuarios.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblUsuarios.setText("USUARIOS");
         lblUsuarios.setOpaque(true);
@@ -520,7 +558,8 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblRevisor.setBackground(new java.awt.Color(248, 135, 37));
+        lblRevisor.setBackground(new java.awt.Color(44, 62, 100));
+        lblRevisor.setForeground(new java.awt.Color(255, 255, 255));
         lblRevisor.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblRevisor.setText("Revisor");
         lblRevisor.setOpaque(true);
@@ -536,7 +575,8 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblCliente.setBackground(new java.awt.Color(248, 135, 37));
+        lblCliente.setBackground(new java.awt.Color(44, 62, 100));
+        lblCliente.setForeground(new java.awt.Color(255, 255, 255));
         lblCliente.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCliente.setText("Cliente");
         lblCliente.setOpaque(true);
@@ -552,8 +592,9 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblLineas.setBackground(new java.awt.Color(248, 135, 37));
+        lblLineas.setBackground(new java.awt.Color(44, 62, 100));
         lblLineas.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblLineas.setForeground(new java.awt.Color(255, 255, 255));
         lblLineas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblLineas.setText("Líneas");
         lblLineas.setOpaque(true);
@@ -569,8 +610,9 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblMunicipios.setBackground(new java.awt.Color(248, 135, 37));
+        lblMunicipios.setBackground(new java.awt.Color(44, 62, 100));
         lblMunicipios.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblMunicipios.setForeground(new java.awt.Color(255, 255, 255));
         lblMunicipios.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblMunicipios.setText("Municipios");
         lblMunicipios.setOpaque(true);
@@ -586,7 +628,8 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblCabecera.setBackground(new java.awt.Color(248, 135, 37));
+        lblCabecera.setBackground(new java.awt.Color(44, 62, 100));
+        lblCabecera.setForeground(new java.awt.Color(255, 255, 255));
         lblCabecera.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCabecera.setText("Cabecera");
         lblCabecera.setOpaque(true);
@@ -602,7 +645,8 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblRegular.setBackground(new java.awt.Color(248, 135, 37));
+        lblRegular.setBackground(new java.awt.Color(44, 62, 100));
+        lblRegular.setForeground(new java.awt.Color(255, 255, 255));
         lblRegular.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblRegular.setText("Regular");
         lblRegular.setOpaque(true);
@@ -618,8 +662,9 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblParadas.setBackground(new java.awt.Color(248, 135, 37));
+        lblParadas.setBackground(new java.awt.Color(44, 62, 100));
         lblParadas.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblParadas.setForeground(new java.awt.Color(255, 255, 255));
         lblParadas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblParadas.setText("Paradas");
         lblParadas.setOpaque(true);
@@ -635,8 +680,9 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblNucleos.setBackground(new java.awt.Color(248, 135, 37));
+        lblNucleos.setBackground(new java.awt.Color(44, 62, 100));
         lblNucleos.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblNucleos.setForeground(new java.awt.Color(255, 255, 255));
         lblNucleos.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblNucleos.setText("Núcleos");
         lblNucleos.setOpaque(true);
@@ -652,8 +698,9 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblZonas.setBackground(new java.awt.Color(248, 135, 37));
+        lblZonas.setBackground(new java.awt.Color(44, 62, 100));
         lblZonas.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblZonas.setForeground(new java.awt.Color(255, 255, 255));
         lblZonas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblZonas.setText("Zonas");
         lblZonas.setOpaque(true);
@@ -852,78 +899,85 @@ public class AdminForm extends javax.swing.JFrame {
         } else {
             Animacion.Animacion.mover_derecha(-188, 0, 2, 2, pnlLateral);
             jPanel2.setSize(jPanel2.getWidth() - 142, jPanel2.getHeight());
-            jScrollPane1.setBounds(jScrollPane1.getX() + 142, jScrollPane1.getY(), jPanel2.getWidth()-142, jScrollPane1.getHeight());
+            jScrollPane1.setBounds(jScrollPane1.getX() + 142, jScrollPane1.getY(), jPanel2.getWidth() - 142, jScrollPane1.getHeight());
             table.setSize(jPanel2.getWidth(), table.getHeight());
         }
     }//GEN-LAST:event_lblMenuMouseClicked
 
     private void lblUsuariosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUsuariosMouseEntered
         lblUsuarios.setBackground(new Color(44, 62, 80));
-        lblUsuarios.setForeground(new Color(255, 255, 255));
+        //lblUsuarios.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblUsuariosMouseEntered
 
     private void lblUsuariosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUsuariosMouseExited
-        lblUsuarios.setBackground(new Color(248, 135, 37));
-        lblUsuarios.setForeground(new Color(0, 0, 0));
+        lblUsuarios.setBackground(new Color(44, 62, 100));
+        //lblUsuarios.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblUsuariosMouseExited
 
     private void lblUsuariosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUsuariosMouseClicked
         setColumnasUsuarios();
         setFilasUsuarios();
+        btnAñadir.setEnabled(true);
+        btnBorrar.setEnabled(true);
     }//GEN-LAST:event_lblUsuariosMouseClicked
 
     private void lblRevisorMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseEntered
         lblRevisor.setBackground(new Color(44, 62, 80));
-        lblRevisor.setForeground(new Color(255, 255, 255));
+        //lblRevisor.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblRevisorMouseEntered
 
     private void lblRevisorMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseExited
-        lblRevisor.setBackground(new Color(248, 135, 37));
-        lblRevisor.setForeground(new Color(0, 0, 0));
+        lblRevisor.setBackground(new Color(44, 62, 100));
+        //lblRevisor.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblRevisorMouseExited
 
     private void lblRevisorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseClicked
-
+        btnAñadir.setEnabled(true);
+        btnBorrar.setEnabled(true);
     }//GEN-LAST:event_lblRevisorMouseClicked
 
     private void lblClienteMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseEntered
         lblCliente.setBackground(new Color(44, 62, 80));
-        lblCliente.setForeground(new Color(255, 255, 255));
+        //lblCliente.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblClienteMouseEntered
 
     private void lblClienteMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseExited
-        lblCliente.setBackground(new Color(248, 135, 37));
-        lblCliente.setForeground(new Color(0, 0, 0));
+        lblCliente.setBackground(new Color(44, 62, 100));
+        //lblCliente.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblClienteMouseExited
 
     private void lblLineasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLineasMouseClicked
         setColumnasLineas();
         setFilasLineas();
+        btnAñadir.setEnabled(false);
+        btnBorrar.setEnabled(false);
     }//GEN-LAST:event_lblLineasMouseClicked
 
     private void lblLineasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLineasMouseEntered
         lblLineas.setBackground(new Color(44, 62, 80));
-        lblLineas.setForeground(new Color(255, 255, 255));
+        //lblLineas.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblLineasMouseEntered
 
     private void lblLineasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLineasMouseExited
-        lblLineas.setBackground(new Color(248, 135, 37));
-        lblLineas.setForeground(new Color(0, 0, 0));
+        lblLineas.setBackground(new Color(44, 62, 100));
+        //lblLineas.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblLineasMouseExited
 
     private void lblMunicipiosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMunicipiosMouseClicked
         setColumnasMunicipios();
         setFilasMunicipios();
+        btnAñadir.setEnabled(false);
+        btnBorrar.setEnabled(false);
     }//GEN-LAST:event_lblMunicipiosMouseClicked
 
     private void lblMunicipiosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMunicipiosMouseEntered
         lblMunicipios.setBackground(new Color(44, 62, 80));
-        lblMunicipios.setForeground(new Color(255, 255, 255));
+        //lblMunicipios.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblMunicipiosMouseEntered
 
     private void lblMunicipiosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMunicipiosMouseExited
-        lblMunicipios.setBackground(new Color(248, 135, 37));
-        lblMunicipios.setForeground(new Color(0, 0, 0));
+        lblMunicipios.setBackground(new Color(44, 62, 100));
+        //lblMunicipios.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblMunicipiosMouseExited
 
     private void lblCabeceraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseClicked
@@ -932,12 +986,12 @@ public class AdminForm extends javax.swing.JFrame {
 
     private void lblCabeceraMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseEntered
         lblCabecera.setBackground(new Color(44, 62, 80));
-        lblCabecera.setForeground(new Color(255, 255, 255));
+        //lblCabecera.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblCabeceraMouseEntered
 
     private void lblCabeceraMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseExited
-        lblCabecera.setBackground(new Color(248, 135, 37));
-        lblCabecera.setForeground(new Color(0, 0, 0));
+        lblCabecera.setBackground(new Color(44, 62, 100));
+        //lblCabecera.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblCabeceraMouseExited
 
     private void lblRegularMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseClicked
@@ -946,46 +1000,53 @@ public class AdminForm extends javax.swing.JFrame {
 
     private void lblRegularMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseEntered
         lblRegular.setBackground(new Color(44, 62, 80));
-        lblRegular.setForeground(new Color(255, 255, 255));
+        //lblRegular.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblRegularMouseEntered
 
     private void lblRegularMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseExited
-        lblRegular.setBackground(new Color(248, 135, 37));
-        lblRegular.setForeground(new Color(0, 0, 0));
+        lblRegular.setBackground(new Color(44, 62, 100));
+        //lblRegular.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblRegularMouseExited
 
     private void lblClienteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseClicked
-        // TODO add your handling code here:
+        setColumnasClientes();
+        setFilasClienttes();
+        btnAñadir.setEnabled(true);
+        btnBorrar.setEnabled(true);
     }//GEN-LAST:event_lblClienteMouseClicked
 
     private void lblParadasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseClicked
         setColumnasParadas();
         setFilasParadas();
+        btnAñadir.setEnabled(false);
+        btnBorrar.setEnabled(false);
     }//GEN-LAST:event_lblParadasMouseClicked
 
     private void lblParadasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseEntered
         lblParadas.setBackground(new Color(44, 62, 80));
-        lblParadas.setForeground(new Color(255, 255, 255));
+        //lblParadas.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblParadasMouseEntered
 
     private void lblParadasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseExited
-        lblParadas.setBackground(new Color(248, 135, 37));
-        lblParadas.setForeground(new Color(0, 0, 0));
+        lblParadas.setBackground(new Color(44, 62, 100));
+        //lblParadas.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblParadasMouseExited
 
     private void lblNucleosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblNucleosMouseClicked
         setColumnasNucleos();
         setFilasNucleos();
+        btnAñadir.setEnabled(false);
+        btnBorrar.setEnabled(false);
     }//GEN-LAST:event_lblNucleosMouseClicked
 
     private void lblNucleosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblNucleosMouseEntered
         lblNucleos.setBackground(new Color(44, 62, 80));
-        lblNucleos.setForeground(new Color(255, 255, 255));
+        //lblNucleos.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblNucleosMouseEntered
 
     private void lblNucleosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblNucleosMouseExited
-        lblNucleos.setBackground(new Color(248, 135, 37));
-        lblNucleos.setForeground(new Color(0, 0, 0));
+        lblNucleos.setBackground(new Color(44, 62, 100));
+        //lblNucleos.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblNucleosMouseExited
 
     private void txtBusquedaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBusquedaKeyPressed
@@ -1023,74 +1084,35 @@ public class AdminForm extends javax.swing.JFrame {
     private void btnAñadirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAñadirActionPerformed
         if (table.getColumnName(0).trim().toLowerCase().contains("usuario")) {
             mostrarInsert();
+            inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" cliente"));
+        } else if (table.getColumnName(0).trim().toLowerCase().contains("cliente")) {
+            mostrarInsert();
+            inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" cliente"));
+        }else if (table.getColumnName(0).trim().toLowerCase().contains("revisor")) {
+            mostrarInsert();
             inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" revisor"));
-        } else if (table.getColumnName(0).trim().toLowerCase().contains("linea")) {
-            mostrarInsert();
-            muestraCamposLinea();
-        } else if (table.getColumnName(0).trim().toLowerCase().contains("municipio")) {
-            mostrarInsert();
-            muestraCamposMunicipio();
-        } else if (table.getColumnName(0).trim().toLowerCase().contains("nucleo")) {
-
-        } else if (table.getColumnName(0).trim().toLowerCase().contains("parada")) {
-            /*campo = "bparada";
-             inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" parada"));*/
-        } else if (table.getColumnName(0).trim().toLowerCase().contains("zona")) {
-            mostrarInsert();
-            muestraCamposZonas();
         }
     }//GEN-LAST:event_btnAñadirActionPerformed
 
     private void lblZonasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblZonasMouseClicked
         setColumnasZonas();
         setFilasZonas();
+        btnAñadir.setEnabled(false);
+        btnBorrar.setEnabled(false);
     }//GEN-LAST:event_lblZonasMouseClicked
 
     private void lblZonasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblZonasMouseEntered
         lblZonas.setBackground(new Color(44, 62, 80));
-        lblZonas.setForeground(new Color(255, 255, 255));
+        //lblZonas.setForeground(new Color(255, 255, 255));
     }//GEN-LAST:event_lblZonasMouseEntered
 
     private void lblZonasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblZonasMouseExited
-        lblZonas.setBackground(new Color(248, 135, 37));
-        lblZonas.setForeground(new Color(0, 0, 0));
+        lblZonas.setBackground(new Color(44, 62, 100));
+        //lblZonas.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblZonasMouseExited
 
     private void btnBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarActionPerformed
-        try {
-            /*dataOut.writeUTF("bzona");
-             dataOut.flush();
-             dataOut.writeUTF((String) table.getModel().getValueAt(table.getSelectedRow(), table.getSelectedColumn()));
-             dataOut.flush();
-             String estado = dataIn.readUTF();
-             if(estado.equalsIgnoreCase("correcto")){
-             JOptionPane.showMessageDialog(this, "Borrado correcto");
-             }else{
-             JOptionPane.showMessageDialog(this, "Borrado incorrecto");
-             }*/
-            dataOut.writeUTF("bzona");
-            dataOut.flush();
-            if (table.getModel().getValueAt(table.getSelectedRow(), table.getSelectedColumn()).toString().length() == 1) {
-                String id = (String) table.getModel().getValueAt(table.getSelectedRow(), table.getSelectedColumn());
-                String nombre = (String) table.getModel().getValueAt(table.getSelectedRow(), table.getSelectedColumn() + 1);
-                dataOut.writeUTF(id + "/" + nombre);
-                dataOut.flush();
-            } else {
-                String id = (String) table.getModel().getValueAt(table.getSelectedRow(), table.getSelectedColumn() - 1);
-                String nombre = (String) table.getModel().getValueAt(table.getSelectedRow(), table.getSelectedColumn());
-                dataOut.writeUTF(id + "/" + nombre);
-                dataOut.flush();
-            }
-            String estado = dataIn.readUTF();
-            if (estado.equalsIgnoreCase("correcto")) {
-                JOptionPane.showMessageDialog(this, "Borrado correcto");
-            } else {
-                JOptionPane.showMessageDialog(this, "Borrado incorrecto");
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        //System.out.println(table.getModel().getValueAt(table.getSelectedRow(), table.getSelectedColumn()));
+        mostrarBorrado();
     }//GEN-LAST:event_btnBorrarActionPerformed
 
     /**

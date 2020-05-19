@@ -254,7 +254,7 @@ public class LoginForm extends javax.swing.JFrame{
     private void btnIniciarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarSesionActionPerformed
         try {
             if (txtUsuario.getText().length() != 0 && txtPassword.getPassword().length != 0) {
-                dataOut.writeUTF("inicio");
+                dataOut.writeUTF("inicioAdmin");
                 dataOut.flush();
                 dataOut.writeUTF(txtUsuario.getText());
                 dataOut.flush();
@@ -262,7 +262,7 @@ public class LoginForm extends javax.swing.JFrame{
                 dataOut.flush();
                 String respuesta = dataIn.readUTF();
                 if(respuesta.equalsIgnoreCase("correcto")){
-                    String datos = dataIn.readUTF();
+                    //String datos = dataIn.readUTF();
                     mostrarFormAdmin();
                 }else{
                     JOptionPane.showMessageDialog(this, "Usuarios o contraseña incorrectos");

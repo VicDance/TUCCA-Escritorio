@@ -383,42 +383,22 @@ public class InsertForm extends javax.swing.JFrame {
     private void btnInsertarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertarActionPerformed
         try {
             String estado;
-            if (this.lblTitulo.getText().contains("línea")) {
-                dataOut.writeUTF("ilinea");
+            if (lblTitulo.getText().contains("cliente")) {
+                dataOut.writeUTF("icliente");
                 dataOut.flush();
-                dataOut.writeUTF(txtUsuario.getText());
+            } else {
+                dataOut.writeUTF("irevisor");
                 dataOut.flush();
-                estado = dataIn.readUTF();
-                if(estado.equalsIgnoreCase("correcto")){
-                    JOptionPane.showMessageDialog(this, "Inserción correcta");
-                    this.dispose();
-                }else{
-                    JOptionPane.showMessageDialog(this, "No se pudo insertar el registro");
-                }
-            }else if (this.lblTitulo.getText().contains("municipio")) {
-                dataOut.writeUTF("ilinea");
-                dataOut.flush();
-                dataOut.writeUTF(txtUsuario.getText());
-                dataOut.flush();
-                estado = dataIn.readUTF();
-                if(estado.equalsIgnoreCase("correcto")){
-                    JOptionPane.showMessageDialog(this, "Inserción correcta");
-                    this.dispose();
-                }else{
-                    JOptionPane.showMessageDialog(this, "No se pudo insertar el registro");
-                }
-            }else if (this.lblTitulo.getText().contains("zona")) {
-                dataOut.writeUTF("izona");
-                dataOut.flush();
-                dataOut.writeUTF(txtUsuario.getText() + "/" + txtCorreo.getText());
-                dataOut.flush();
-                estado = dataIn.readUTF();
-                if(estado.equalsIgnoreCase("correcto")){
-                    JOptionPane.showMessageDialog(this, "Inserción correcta");
-                    this.dispose();
-                }else{
-                    JOptionPane.showMessageDialog(this, "No se pudo insertar el registro");
-                }
+            }
+            dataOut.writeUTF(txtUsuario.getText() + "/" + new String(txtPassword.getPassword()) + "/" + txtCorreo.getText()
+                    + "/" + txtTfno.getText() + "/" + dateChooserNacimiento.getDate().getTime());
+            dataOut.flush();
+            estado = dataIn.readUTF();
+            if (estado.equalsIgnoreCase("correcto")) {
+                JOptionPane.showMessageDialog(this, "Inserción correcta");
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo insertar el registro");
             }
         } catch (IOException ex) {
             Logger.getLogger(InsertForm.class.getName()).log(Level.SEVERE, null, ex);

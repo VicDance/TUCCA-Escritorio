@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Cliente;
 import model.Usuario;
 
 /**
@@ -26,13 +27,15 @@ public class UsuarioDAOImp implements iUsuarioDAO {
 
     Conector con = new Conector();
     public boolean insertado;
+    public boolean borrado;
 
     public UsuarioDAOImp() {
         //con.connect();
     }
 
     @Override
-    public void insertar(/*String nombre, String contraseña, String email, Date fecha_nac, int tfno*/Usuario usuario) {
+    public void insertar(Usuario usuario) {
+        insertado = false;
         try {
             con.connect();
             Connection connection = con.getConnection();
@@ -55,6 +58,80 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
+            con.disconect();
+        }
+    }
+    
+    @Override
+    public void insertarCliente(int id) {
+        insertado = false;
+        try {
+            con.connect();
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            //ResultSet rs;
+            String sqlNuevoUsuario = "INSERT INTO cliente (id_user)"
+                    + "VALUES (?)";
+            insertar = connection.prepareStatement(sqlNuevoUsuario);
+            insertar.setInt(1, id);
+            if (insertar.executeUpdate() != 0) {
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            insertado = false;
+            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            con.disconect();
+        }
+    }
+    
+    @Override
+    public void insertarAdmin(int id) {
+        insertado = false;
+        try {
+            con.connect();
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            //ResultSet rs;
+            String sqlNuevoUsuario = "INSERT INTO administrador (idadministrador) "
+                    + "VALUES (?)";
+            insertar = connection.prepareStatement(sqlNuevoUsuario);
+            insertar.setInt(1, id);
+            if(insertar.executeUpdate() != 0){
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            insertado = false;
+            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            con.disconect();
+        }
+    }
+    
+    @Override
+    public void borrar(int id){
+        borrado = false;
+        con.connect();
+        Connection connection = con.getConnection();
+        PreparedStatement borrar;
+        try {
+            String borraUsuario = "DELETE FROM usuario WHERE idusuario = ?";
+            borrar = connection.prepareStatement(borraUsuario);
+            borrar.setInt(1, id);
+            if(borrar.executeUpdate() != 0){
+                System.out.println("borrado con exito");
+                borrado = true;
+            }
+            //borrar.executeUpdate();
+        } catch (SQLException ex) {
+            //Logger.getLogger(ZonaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+            borrado = false;
+            ex.printStackTrace();
+        }finally{
             con.disconect();
         }
     }
@@ -126,5 +203,59 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             }
         }
         return usuario;
+    }
+    
+    @Override
+    public List<Cliente> getAllAdmins() {
+        con.connect();
+        Connection connection = con.getConnection();
+        List<Cliente> clientes = null;
+        PreparedStatement buscar;
+        try {
+            String buscaUsuarios = "SELECT * FROM administrador";
+            buscar = connection.prepareStatement(buscaUsuarios);
+            ResultSet rs = buscar.executeQuery();
+            clientes = new ArrayList<Cliente>();
+            while (rs.next()) {
+                Cliente cliente = new Cliente();
+                cliente.setIdCliente(rs.getInt(1));
+                clientes.add(cliente);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            con.disconect();
+        }
+        return clientes;
+    }
+    
+    @Override
+    public List<Usuario> getAllClientes() {
+        con.connect();
+        Connection connection = con.getConnection();
+        List<Cliente> clientes = null;
+        List<Usuario> usuarios = null;
+        PreparedStatement buscar;
+        try {
+            String buscaUsuarios = "SELECT * FROM usuario JOIN cliente ON idusuario = id_user";
+            buscar = connection.prepareStatement(buscaUsuarios);
+            ResultSet rs = buscar.executeQuery();
+            usuarios = new ArrayList<Usuario>();
+            while (rs.next()) {
+                Usuario cli = new Cliente();
+                cli.setId(rs.getInt(1));
+                cli.setNombre(rs.getString(2));
+                cli.setContraseña(rs.getString(3));
+                cli.setCorreo(rs.getString(4));
+                cli.setFecha_nac(rs.getDate(5));
+                cli.setTfno(rs.getInt(6));
+                usuarios.add(cli);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            con.disconect();
+        }
+        return usuarios;
     }
 }

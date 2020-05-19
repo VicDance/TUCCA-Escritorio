@@ -11,7 +11,7 @@ import java.sql.Date;
  *
  * @author Vicky
  */
-public class TarjetaJubilado {
+public class TarjetaJubilado extends TarjetaBus{
     private long numTarjeta;
     private Date añoValidez;
     

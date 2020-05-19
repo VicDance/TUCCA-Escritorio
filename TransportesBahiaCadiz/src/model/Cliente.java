@@ -9,11 +9,10 @@ package model;
  *
  * @author Vicky
  */
-public class Cliente {
+public class Cliente extends Usuario{
     private int idCliente;
     
     public Cliente(){
-        
     }
     
     public Cliente(int idCliente){
