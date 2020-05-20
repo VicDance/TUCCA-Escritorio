@@ -90,11 +90,12 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
             dataOut = new DataOutputStream(cliente.getOutputStream());
             dataIn = new DataInputStream(cliente.getInputStream());
             con = new Conector();
+            con.connect();
             while (true) {
                 System.out.println("servidor escuchando");
                 String cadena = dataIn.readUTF();
                 System.out.println("cadena: " + cadena);
-                udi = new UsuarioDAOImp();
+                udi = new UsuarioDAOImp(con);
                 switch (cadena) {
                     case "encriptar":
                         texto = dataIn.readUTF();
@@ -172,7 +173,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "lineas":
-                        ldi = new LineaDAOImp();
+                        ldi = new LineaDAOImp(con);
                         lineas = ldi.getAllLineas();
                         dataOut.writeInt(lineas.size());
                         dataOut.flush();
@@ -183,7 +184,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "paradas":
-                        pdi = new ParadaDAOImp();
+                        pdi = new ParadaDAOImp(con);
                         paradas = pdi.getAllParadas();
                         dataOut.writeInt(paradas.size());
                         dataOut.flush();
@@ -196,7 +197,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "municipios":
-                        mdi = new MunicipioDAOImp();
+                        mdi = new MunicipioDAOImp(con);
                         municipios = mdi.getAllMunicipios();
                         dataOut.writeInt(municipios.size());
                         dataOut.flush();
@@ -207,7 +208,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "nucleos":
-                        ndi = new NucleoDAOImp();
+                        ndi = new NucleoDAOImp(con);
                         nucleos = ndi.getAllNucleos();
                         dataOut.writeInt(nucleos.size());
                         dataOut.flush();
@@ -220,7 +221,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
 
                     case "zonas":
                         //System.out.println("entra zonas");
-                        zdi = new ZonaDAOImp();
+                        zdi = new ZonaDAOImp(con);
                         zonas = zdi.getAll();
                         dataOut.writeInt(zonas.size());
                         dataOut.flush();
@@ -232,7 +233,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
 
                     case "tarjetas":
                         //System.out.println("entra");
-                        tcdi = new TarjetaCreditoDAOImp();
+                        tcdi = new TarjetaCreditoDAOImp(con);
                         tarjetas = tcdi.getAllTarjetas();
                         System.out.println(tarjetas.size());
                         dataOut.writeInt(tarjetas.size());
@@ -245,7 +246,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "tarjetasb":
-                        tsbdi = new TarjetasBusDAOImp();
+                        tsbdi = new TarjetasBusDAOImp(con);
                         estandares = tsbdi.getAllTarjetasEstandar();
                         estudiantes = tsbdi.getAllTarjetasEstudiante();
                         jubilados = tsbdi.getAllTarjetasJubilado();
@@ -384,9 +385,11 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
 
                     case "btarjetaBus":
                         int posicion = dataIn.readInt();
-                        tbdi = new TarjetaBusDAOImp();
-                        tbdi.borrar(posicion);
-                        if (tbdi.borrado) {
+                        tsbdi = new TarjetasBusDAOImp(con);
+                        tsbdi.borrarTarjeta(posicion);
+                        /*tbdi = new TarjetaBusDAOImp(con);
+                        tbdi.borrar(posicion);*/
+                        if (tsbdi.borrado) {
                             dataOut.writeUTF("correcto");
                             dataOut.flush();
                         } else {
@@ -419,7 +422,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         datos = texto.split("/");
                         numAbsoluto = Math.abs(Long.parseLong(datos[0]));
                         tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.1);
-                        tsbdi = new TarjetasBusDAOImp();
+                        tsbdi = new TarjetasBusDAOImp(con);
                         //tbdi = new TarjetaBusDAOImp();
                         tsbdi.insertarTarjeta(tarjetaBus);
                         TarjetaEstandar es = new TarjetaEstandar(numAbsoluto);
@@ -442,7 +445,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             numAbsoluto = Math.abs(Long.parseLong(datos[0]));
                             tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.5);
                             //tbdi = new TarjetaBusDAOImp();
-                            tsbdi = new TarjetasBusDAOImp();
+                            tsbdi = new TarjetasBusDAOImp(con);
                             tsbdi.insertarTarjeta(tarjetaBus);
                             TarjetaJubilado jubilado = new TarjetaJubilado(numAbsoluto);
                             //tsbdi = new TarjetasBusDAOImp();
@@ -469,7 +472,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             numAbsoluto = Math.abs(Long.parseLong(datos[0]));
                             tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.3);
                             //tbdi = new TarjetaBusDAOImp();
-                            tsbdi = new TarjetasBusDAOImp();
+                            tsbdi = new TarjetasBusDAOImp(con);
                             tsbdi.insertarTarjeta(tarjetaBus);
                             Calendar calendarIni = Calendar.getInstance();
                             Calendar calendarFin = new GregorianCalendar();
@@ -522,6 +525,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             dataOut.flush();
                         }
                         break;
+                        
                     case "exit":
                         break;
                 }
@@ -533,6 +537,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
             Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
+                con.disconect();
                 cliente.close();
                 dataIn.close();
                 dataOut.close();
