@@ -23,13 +23,20 @@ import model.Usuario;
  * @author Vicky
  */
 public class ClienteDAOImp implements iClienteDAO{
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
     public boolean insertado;
     
+    public ClienteDAOImp(){
+        
+    }
+
+    public ClienteDAOImp(Conector con) {
+        this.con = con;
+    }
     @Override
     public void insertar(int id) {
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             //ResultSet rs;
@@ -46,14 +53,14 @@ public class ClienteDAOImp implements iClienteDAO{
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
     
     @Override
     public void insertarAdmin(int id) {
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             //ResultSet rs;
@@ -70,13 +77,13 @@ public class ClienteDAOImp implements iClienteDAO{
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public List<Cliente> getAllClientes() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Cliente> clientes = null;
         PreparedStatement buscar;
@@ -93,7 +100,7 @@ public class ClienteDAOImp implements iClienteDAO{
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return clientes;
     }
 }

@@ -22,7 +22,14 @@ import model.Nucleo;
  * @author Vicky
  */
 public class NucleoDAOImp implements iNucleoDAO{
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
+
+    public NucleoDAOImp() {
+    }
+
+    public NucleoDAOImp(Conector con) {
+        this.con = con;
+    }
 
     @Override
     public void insertar(int idMunicipio, char idZona, String nombreNucleo) {
@@ -36,7 +43,7 @@ public class NucleoDAOImp implements iNucleoDAO{
     
     @Override
     public List<Nucleo> getNucleo(String nombre){
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Nucleo> nucleos = null;
         PreparedStatement buscar;
@@ -56,13 +63,13 @@ public class NucleoDAOImp implements iNucleoDAO{
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return nucleos;
     }
 
     @Override
     public List<Nucleo> getAllNucleos() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Nucleo> nucleos = null;
         PreparedStatement buscar;
@@ -82,7 +89,7 @@ public class NucleoDAOImp implements iNucleoDAO{
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return nucleos;
     }
     

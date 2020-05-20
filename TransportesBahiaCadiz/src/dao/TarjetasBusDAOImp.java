@@ -27,16 +27,23 @@ import model.TarjetaJubilado;
  */
 public class TarjetasBusDAOImp implements iTarjetasBusDAO {
 
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
     public boolean insertado;
     public boolean borrado;
     public boolean recarga;
+
+    public TarjetasBusDAOImp() {
+    }
+
+    public TarjetasBusDAOImp(Conector con) {
+        this.con = con;
+    }
 
     @Override
     public void insertarTarjeta(TarjetaBus tarjeta) {
         insertado = false;
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String sqlNuevaTarjeta = "INSERT INTO tarjeta (num_tarjeta, id_user, saldo, descuento) "
@@ -55,7 +62,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
 
@@ -63,7 +70,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
     public void insertarEstandar(long numTarjeta) {
         insertado = false;
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String sqlNuevaTarjeta = "INSERT INTO tarjeta_estandar (num_tarjeta_estandar, fecha_expedicion) "
@@ -82,7 +89,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
 
@@ -90,7 +97,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
     public void insertarEstudiante(long numTarjeta, java.sql.Date inicio, java.sql.Date fin) {
         insertado = false;
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String sqlNuevaTarjeta = "INSERT INTO tarjeta_estudiante (num_tarjeta_estudiante, fecha_ini, fecha_fin) "
@@ -108,7 +115,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
 
@@ -116,7 +123,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
     public void insertarJubilado(long numTarjeta, int año) {
         insertado = false;
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String sqlNuevaTarjeta = "INSERT INTO tarjeta_jubilado (num_tarjeta_jubilado, año_validez) "
@@ -133,13 +140,13 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public List<TarjetaBus> getAllTarjetas() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<TarjetaBus> tarjetas = null;
         PreparedStatement buscar;
@@ -159,14 +166,14 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return tarjetas;
     }
 
     @Override
     public List<TarjetaEstandar> getAllTarjetasEstandar() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<TarjetaEstandar> tarjetas = null;
         PreparedStatement buscar;
@@ -184,14 +191,14 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return tarjetas;
     }
 
     @Override
     public List<TarjetaEstudiante> getAllTarjetasEstudiante() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<TarjetaEstudiante> tarjetas = null;
         PreparedStatement buscar;
@@ -210,14 +217,14 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return tarjetas;
     }
 
     @Override
     public List<TarjetaJubilado> getAllTarjetasJubilado() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<TarjetaJubilado> tarjetas = null;
         PreparedStatement buscar;
@@ -235,7 +242,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return tarjetas;
     }
@@ -255,7 +262,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
     @Override
     public void borrarTarjeta(int posicion) {
         borrado = false;
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<TarjetaBus> tarjetas = getAllTarjetas();
         PreparedStatement borrar;
@@ -278,14 +285,14 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             borrado = false;
             ex.printStackTrace();
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public boolean recargarTarjeta(long numTarjeta, int saldo) {
         recarga = false;
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         PreparedStatement actualizar;
         String actualizaTarjeta = "UPDATE tarjeta SET saldo = saldo + '" + saldo + "'  where num_tarjeta = ?";
@@ -302,7 +309,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return recarga;
     }

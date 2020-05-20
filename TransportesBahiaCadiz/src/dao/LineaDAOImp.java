@@ -22,12 +22,19 @@ import model.Linea;
  * @author Vicky
  */
 public class LineaDAOImp implements iLineaDAO{
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
     public boolean insertado = false;
+    
+    public LineaDAOImp(){}
+    
+    public LineaDAOImp(Conector con){
+        this.con = con;
+    }
+    
     @Override
     public void insertar(String nombreLinea) {
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String insertaLinea = "INSERT INTO linea (nombre_linea) VALUES (?)";
@@ -41,7 +48,7 @@ public class LineaDAOImp implements iLineaDAO{
             //Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
             insertado = false;
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
 
@@ -52,7 +59,7 @@ public class LineaDAOImp implements iLineaDAO{
 
     @Override
     public List<Linea> getLinea(String nombre){
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Linea> lineas = null;
         PreparedStatement buscar;
@@ -70,13 +77,13 @@ public class LineaDAOImp implements iLineaDAO{
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return lineas;
     }
     
     @Override
     public List<Linea> getAllLineas() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Linea> lineas = null;
         PreparedStatement buscar;
@@ -94,7 +101,7 @@ public class LineaDAOImp implements iLineaDAO{
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return lineas;
     }
     

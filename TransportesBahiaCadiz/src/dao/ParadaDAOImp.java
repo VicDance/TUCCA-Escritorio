@@ -22,8 +22,14 @@ import model.Parada;
  * @author Vicky
  */
 public class ParadaDAOImp implements iParadaDAO {
+    Conector con/* = new Conector()*/;
 
-    Conector con = new Conector();
+    public ParadaDAOImp() {
+    }
+
+    public ParadaDAOImp(Conector con) {
+        this.con = con;
+    }
 
     @Override
     public void insertar(char idZona, String nombreParada, String latitud, String longitud) {
@@ -37,7 +43,7 @@ public class ParadaDAOImp implements iParadaDAO {
 
     @Override
     public List<Parada> getParada(String nombre) {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Parada> paradas = null;
         PreparedStatement buscar;
@@ -58,13 +64,13 @@ public class ParadaDAOImp implements iParadaDAO {
         } catch (SQLException ex) {
             Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return paradas;
     }
     
     @Override
     public List<Parada> getAllParadas() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Parada> paradas = null;
         PreparedStatement buscar;
@@ -85,7 +91,7 @@ public class ParadaDAOImp implements iParadaDAO {
         } catch (SQLException ex) {
             Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return paradas;
     }
 }

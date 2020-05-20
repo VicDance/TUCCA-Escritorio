@@ -22,13 +22,20 @@ import model.Municipio;
  * @author Vicky
  */
 public class MunicipioDAOImp implements iMunicipioDAO{
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
     public boolean insertado = false;
+
+    public MunicipioDAOImp() {
+    }
+
+    public MunicipioDAOImp(Conector con) {
+        this.con = con;
+    }
     
     @Override
     public void insertar(String nombreMunicipio) {
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String insertaMuni = "INSERT INTO municipio (nombre_municipio) VALUES (?)";
@@ -42,7 +49,7 @@ public class MunicipioDAOImp implements iMunicipioDAO{
             //Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
             insertado = false;
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
 
@@ -53,7 +60,7 @@ public class MunicipioDAOImp implements iMunicipioDAO{
 
     @Override
     public List<Municipio> getMunicipio(String nombre){
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Municipio> municipios = null;
         PreparedStatement buscar;
@@ -71,13 +78,13 @@ public class MunicipioDAOImp implements iMunicipioDAO{
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return municipios;
     }
     
     @Override
     public List<Municipio> getAllMunicipios() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Municipio> municipios = null;
         PreparedStatement buscar;
@@ -95,7 +102,7 @@ public class MunicipioDAOImp implements iMunicipioDAO{
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return municipios;
     }
     

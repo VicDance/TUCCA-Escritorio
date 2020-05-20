@@ -23,14 +23,21 @@ import model.TarjetaEstandar;
  * @author Vicky
  */
 public class TarjetaBusDAOImp implements iTarjetaBusDAO{
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
     public boolean insertado;
     public boolean borrado;
+
+    public TarjetaBusDAOImp() {
+    }
+
+    public TarjetaBusDAOImp(Conector con) {
+        this.con = con;
+    }
     
     @Override
     public void insertar(TarjetaBus tarjeta) {
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String sqlNuevaTarjeta = "INSERT INTO tarjeta (num_tarjeta, id_user, saldo, descuento) "
@@ -49,14 +56,14 @@ public class TarjetaBusDAOImp implements iTarjetaBusDAO{
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public void borrar(int posicion) {
         borrado = false;
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<TarjetaBus> tarjetas = getAllTarjetas();
         PreparedStatement borrar;
@@ -79,13 +86,13 @@ public class TarjetaBusDAOImp implements iTarjetaBusDAO{
             borrado = false;
             ex.printStackTrace();
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public List<TarjetaBus> getAllTarjetas() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<TarjetaBus> tarjetas = null;
         PreparedStatement buscar;
@@ -105,7 +112,7 @@ public class TarjetaBusDAOImp implements iTarjetaBusDAO{
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return tarjetas;
     }

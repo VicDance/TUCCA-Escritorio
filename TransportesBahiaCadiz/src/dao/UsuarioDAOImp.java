@@ -25,19 +25,23 @@ import model.Usuario;
  */
 public class UsuarioDAOImp implements iUsuarioDAO {
 
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
     public boolean insertado;
     public boolean borrado;
 
     public UsuarioDAOImp() {
         //con.connect();
     }
+    
+    public UsuarioDAOImp(Conector con){
+        this.con = con;
+    }
 
     @Override
     public void insertar(Usuario usuario) {
         insertado = false;
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             //ResultSet rs;
@@ -58,7 +62,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
     
@@ -66,7 +70,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
     public void insertarCliente(int id) {
         insertado = false;
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             //ResultSet rs;
@@ -83,7 +87,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
     
@@ -91,7 +95,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
     public void insertarAdmin(int id) {
         insertado = false;
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             //ResultSet rs;
@@ -108,14 +112,14 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
     
     @Override
     public void borrar(int id){
         borrado = false;
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         PreparedStatement borrar;
         try {
@@ -132,13 +136,13 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             borrado = false;
             ex.printStackTrace();
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public List<Usuario> getUsuario(String nombre) {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Usuario> usuarios = null;
         PreparedStatement buscar;
@@ -160,13 +164,13 @@ public class UsuarioDAOImp implements iUsuarioDAO {
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        con.disconect();
+        //con.disconect();
         return usuarios;
     }
 
     @Override
     public List<Usuario> getAll() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Usuario> usuarios = null;
         PreparedStatement buscar;
@@ -188,7 +192,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return usuarios;
     }
@@ -207,7 +211,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
     
     @Override
     public List<Cliente> getAllAdmins() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Cliente> clientes = null;
         PreparedStatement buscar;
@@ -224,14 +228,14 @@ public class UsuarioDAOImp implements iUsuarioDAO {
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return clientes;
     }
     
     @Override
     public List<Usuario> getAllClientes() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Cliente> clientes = null;
         List<Usuario> usuarios = null;
@@ -254,7 +258,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            con.disconect();
+            //con.disconect();
         }
         return usuarios;
     }

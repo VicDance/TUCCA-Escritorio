@@ -23,14 +23,22 @@ import model.Zona;
  */
 public class ZonaDAOImp implements iZonaDAO {
 
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
     public boolean insertado = false;
     public boolean borrado = false;
+    
+    public ZonaDAOImp(){
+        
+    }
+    
+    public ZonaDAOImp(Conector con){
+        this.con = con;
+    }
 
     @Override
     public void insertar(String idZona, String nombre) {
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             //ResultSet rs;
@@ -47,13 +55,13 @@ public class ZonaDAOImp implements iZonaDAO {
             //Logger.getLogger(ClienteDAOImp.class.getName()).log(Level.SEVERE, null, ex);
             insertado = false;
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public List<Zona> getZona(String nombre) {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Zona> zonas = null;
         PreparedStatement buscar;
@@ -71,14 +79,14 @@ public class ZonaDAOImp implements iZonaDAO {
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return zonas;
     }
 
     @Override
     public List<Zona> getAll() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<Zona> zonas = null;
         PreparedStatement buscar;
@@ -96,14 +104,14 @@ public class ZonaDAOImp implements iZonaDAO {
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return zonas;
     }
 
     @Override
     public void deleteId(Zona zona) {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         PreparedStatement borrar;
         try {
@@ -121,13 +129,13 @@ public class ZonaDAOImp implements iZonaDAO {
             borrado = false;
             ex.printStackTrace();
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public void deleteNombre(Zona zona) {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         PreparedStatement borrar;
         try {
@@ -144,7 +152,7 @@ public class ZonaDAOImp implements iZonaDAO {
             borrado = false;
             ex.printStackTrace();
         }finally{
-            con.disconect();
+            //con.disconect();
         }
     }
 

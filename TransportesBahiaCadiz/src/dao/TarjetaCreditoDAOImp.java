@@ -23,13 +23,20 @@ import model.TarjetaCredito;
  */
 public class TarjetaCreditoDAOImp implements iTarjetaCreditoDAO {
 
-    Conector con = new Conector();
+    Conector con/* = new Conector()*/;
     public boolean insertado = false;
+
+    public TarjetaCreditoDAOImp() {
+    }
+
+    public TarjetaCreditoDAOImp(Conector con) {
+        this.con = con;
+    }
 
     @Override
     public void insertar(TarjetaCredito tarjeta) {
         try {
-            con.connect();
+            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             //ResultSet rs;
@@ -49,13 +56,13 @@ public class TarjetaCreditoDAOImp implements iTarjetaCreditoDAO {
             //Logger.getLogger(ClienteDAOImp.class.getName()).log(Level.SEVERE, null, ex);
             insertado = false;
         } finally {
-            con.disconect();
+            //con.disconect();
         }
     }
 
     @Override
     public List<TarjetaCredito> getAllTarjetas() {
-        con.connect();
+        //con.connect();
         Connection connection = con.getConnection();
         List<TarjetaCredito> tarjetas = null;
         PreparedStatement buscar;
@@ -75,7 +82,7 @@ public class TarjetaCreditoDAOImp implements iTarjetaCreditoDAO {
         } catch (SQLException ex) {
             Logger.getLogger(TarjetaCreditoDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            con.disconect();
+            //con.disconect();
         }
         return tarjetas;
     }
