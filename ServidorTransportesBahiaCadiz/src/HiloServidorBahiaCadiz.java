@@ -39,6 +39,7 @@ import model.TarjetaEstudiante;
 import model.TarjetaJubilado;
 import model.Usuario;
 import model.Zona;
+import scripts.Corresponde;
 
 /**
  *
@@ -196,6 +197,45 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         }
                         break;
 
+                    case "paradas_viaje":
+                        texto = dataIn.readUTF();
+                        datos = texto.split("/");
+                        pdi = new ParadaDAOImp(con);
+                        ldi = new LineaDAOImp(con);
+                        lineas = ldi.getLineasNucleo(Integer.parseInt(datos[1]), Integer.parseInt(datos[3]));
+                        dataOut.writeInt(lineas.size());
+                        dataOut.flush();
+                        //int[] stringParadas;
+                        for (Linea linea : lineas) {
+                            String l = ldi.getNombreLinea(linea.getIdLinea());
+                            dataOut.writeUTF(l);
+                            dataOut.flush();
+                            paradas = pdi.getParadasViaje(linea.getIdLinea(), Integer.parseInt(datos[1]), Integer.parseInt(datos[3]));
+                            System.out.println(l);
+                            dataOut.writeInt(paradas.size());
+                            dataOut.flush();
+                            for (Parada parada : paradas) {
+                                System.out.println(parada);
+                                //System.out.println("sale bucle");
+                                //String idParada
+                                dataOut.writeUTF(parada.getIdParada() + "/" + parada.getIdZona()
+                                        + "/" + parada.getNombreParada() + "/" + parada.getLatitud() + "/"
+                                        + parada.getLongitud());
+                                dataOut.flush();
+                            }
+                            /*System.out.println("NombreLinea: " + l);
+                             for(Parada parada : paradas){
+                             System.out.println(parada);
+                             System.out.println("sale bucle");
+                             }*/
+                            //
+                            /*dataOut.writeUTF(parada.getIdParada() + "/" + parada.getIdZona()
+                             + "/" + parada.getNombreParada() + "/" + parada.getLatitud() + "/"
+                             + parada.getLongitud());
+                             dataOut.flush();*/
+                        }
+                        break;
+
                     case "municipios":
                         mdi = new MunicipioDAOImp(con);
                         municipios = mdi.getAllMunicipios();
@@ -345,7 +385,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         dataOut.writeUTF(user.getNombre() + "/" + user.getContraseña() + "/" + user.getCorreo() + "/"
                                 + user.getFecha_nac() + "/" + user.getTfno());
                         break;
-                        
+
                     case "tarjeta":
                         texto = dataIn.readUTF();
                         //System.out.println(texto);
@@ -355,22 +395,22 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         dataOut.writeInt(bus.getSaldo());
                         dataOut.flush();
                         break;
-                        
+
                     case "rtarjeta":
                         int saldo = dataIn.readInt();
                         //System.out.println(saldo);
                         texto = dataIn.readUTF();
                         tsbdi.recargarTarjeta(Long.parseLong(texto), saldo);
                         System.out.println(tsbdi.recarga);
-                        if(tsbdi.recarga){
+                        if (tsbdi.recarga) {
                             dataOut.writeUTF("correcto");
                             dataOut.flush();
-                        }else{
+                        } else {
                             dataOut.writeUTF("incorrecto");
                             dataOut.flush();
                         }
                         break;
-                        
+
                     case "busuario":
                         int id = dataIn.readInt();
                         udi.borrar(id);
@@ -388,7 +428,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         tsbdi = new TarjetasBusDAOImp(con);
                         tsbdi.borrarTarjeta(posicion);
                         /*tbdi = new TarjetaBusDAOImp(con);
-                        tbdi.borrar(posicion);*/
+                         tbdi.borrar(posicion);*/
                         if (tsbdi.borrado) {
                             dataOut.writeUTF("correcto");
                             dataOut.flush();
@@ -525,7 +565,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             dataOut.flush();
                         }
                         break;
-                        
+
                     case "exit":
                         break;
                 }
