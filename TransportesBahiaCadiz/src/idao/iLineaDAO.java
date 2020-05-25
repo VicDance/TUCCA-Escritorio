@@ -17,4 +17,6 @@ public interface iLineaDAO {
     public void borrar(int idLinea);
     public List<Linea> getLinea(String nombre);
     public List<Linea> getAllLineas();
+    public List<Linea> getLineasNucleo(int idNucleoOrigen, int idNucleoDestino);
+    public String getNombreLinea(int idLinea);
 }

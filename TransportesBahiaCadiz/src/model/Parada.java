@@ -19,6 +19,10 @@ public class Parada {
     public Parada(){
         
     }
+    
+    public Parada(String nombreParada){
+        this.nombreParada = nombreParada;
+    }
 
     public int getIdParada() {
         return idParada;

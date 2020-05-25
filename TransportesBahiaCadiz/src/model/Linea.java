@@ -16,6 +16,19 @@ public class Linea {
     public Linea(){
         
     }
+    
+    public Linea(int idLinea){
+        this.idLinea = idLinea;
+    }
+    
+    public Linea(String nombreLinea){
+        this.nombreLinea = nombreLinea;
+    }
+
+    public Linea(int idLinea, String nombreLinea) {
+        this.idLinea = idLinea;
+        this.nombreLinea = nombreLinea;
+    }
 
     public int getIdLinea() {
         return idLinea;

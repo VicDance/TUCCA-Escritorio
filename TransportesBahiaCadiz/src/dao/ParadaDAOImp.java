@@ -23,6 +23,7 @@ import model.Parada;
  */
 public class ParadaDAOImp implements iParadaDAO {
     Conector con/* = new Conector()*/;
+    public boolean insertado = false;
 
     public ParadaDAOImp() {
     }
@@ -32,8 +33,23 @@ public class ParadaDAOImp implements iParadaDAO {
     }
 
     @Override
-    public void insertar(char idZona, String nombreParada, String latitud, String longitud) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void insertarCorresponde(int idLinea, int idParada) {
+        try {
+            //con.connect();
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String insertaCorresponde = "INSERT INTO corresponde (id_linea, id_parada) VALUES (?, ?)";
+            insertar = connection.prepareStatement(insertaCorresponde);
+            insertar.setInt(1, idLinea);
+            insertar.setInt(2, idParada);
+            if(insertar.executeUpdate() != 0){
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            insertado = false;
+        }
     }
 
     @Override
@@ -94,4 +110,72 @@ public class ParadaDAOImp implements iParadaDAO {
         //con.disconect();
         return paradas;
     }
+
+    @Override
+    public List<Parada> getParadasViaje(int idLinea, int idNucleoOrigen, int idNucleoDestino) {
+        Connection connection = con.getConnection();
+        List<Parada> paradas = null;
+        List<Parada> paradasOrigen = null;
+        List<Parada> paradasDestino = null;
+        PreparedStatement buscar;
+        //paradasDestino = new ArrayList<Parada>();
+        try {
+            String buscaParadasOrigen = "SELECT idparada, id_zona, nombre_parada, latitud, longitud "
+                    + "FROM parada p JOIN corresponde c ON p.idparada = c.id_parada WHERE c.id_linea = ? AND p.id_zona IN "
+                    + "(SELECT id_zona FROM nucleo WHERE nombre_nucleo IN (SELECT nombre_nucleo FROM nucleo WHERE idnucleo "
+                    + "= ?))";
+            buscar = connection.prepareStatement(buscaParadasOrigen);
+            buscar.setInt(1, idLinea);
+            buscar.setInt(2, idNucleoOrigen);
+            ResultSet rs = buscar.executeQuery();
+            paradas = new ArrayList<Parada>();
+            paradasOrigen = new ArrayList<Parada>();
+            paradasDestino = new ArrayList<Parada>();
+            while (rs.next()) {
+                Parada parada = new Parada();
+                parada.setIdParada(rs.getInt(1));
+                parada.setIdZona(rs.getString(2).charAt(0));
+                parada.setNombreParada(rs.getString(3));
+                parada.setLatitud(rs.getString(4));
+                parada.setLongitud(rs.getString(5));
+                paradasOrigen.add(parada);
+            }
+            String buscaParadasDestino = "SELECT idparada, id_zona, nombre_parada, latitud, longitud "
+                    + "FROM parada p JOIN corresponde c ON p.idparada = c.id_parada WHERE c.id_linea = ? AND p.id_zona IN "
+                    + "(SELECT id_zona FROM nucleo WHERE nombre_nucleo IN (SELECT nombre_nucleo FROM nucleo WHERE idnucleo "
+                    + "= ?))";
+            buscar = connection.prepareStatement(buscaParadasDestino);
+            buscar.setInt(1, idLinea);
+            buscar.setInt(2, idNucleoDestino);
+            rs = buscar.executeQuery();
+            paradas = new ArrayList<Parada>();
+            while (rs.next()) {
+                Parada parada = new Parada();
+                parada.setIdParada(rs.getInt(1));
+                parada.setIdZona(rs.getString(2).charAt(0));
+                parada.setNombreParada(rs.getString(3));
+                parada.setLatitud(rs.getString(4));
+                parada.setLongitud(rs.getString(5));
+                paradasDestino.add(parada);
+            }
+            //int size = paradasOrigen.size() + paradasDestino.size();
+            for(int i = 0; i < paradasOrigen.size(); i++){
+                paradas.add(paradasOrigen.get(i));
+            }
+            for(int i = 0; i < paradasDestino.size(); i++){
+                paradas.add(paradasDestino.get(i));
+            }
+            /*System.out.println("IdLinea: " + idLinea);
+            System.out.println("IdNucleoOrigen: " + idNucleoOrigen);
+            System.out.println("IdNucleoDestino: " + idNucleoDestino);*/
+            /*for(int i = 0; i < paradas.size(); i++){
+                System.out.println("IdLinea: " + idLinea + " " + paradas.get(i)
+                + " IdNucleo: " + idNucleo);
+            }*/
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //con.disconect();
+        return paradas;
+    } 
 }

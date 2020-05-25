@@ -13,6 +13,7 @@ import dao.LineaDAOImp;
 import dao.MunicipioDAOImp;
 import dao.NucleoDAOImp;
 import dao.ParadaDAOImp;
+import dao.PuntoVentaDAOImp;
 import dao.TarjetaBusDAOImp;
 import dao.TarjetaCreditoDAOImp;
 import dao.TarjetasBusDAOImp;
@@ -32,6 +33,7 @@ import model.Linea;
 import model.Municipio;
 import model.Nucleo;
 import model.Parada;
+import model.PuntoVenta;
 import model.TarjetaBus;
 import model.TarjetaCredito;
 import model.TarjetaEstandar;
@@ -310,6 +312,18 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         }
                         break;
 
+                    case "puntos_venta":
+                        ndi = new NucleoDAOImp(con);
+                        nucleos = ndi.getAllNucleos();
+                        //System.out.println(nucleos.size());
+                        dataOut.writeInt(nucleos.size());
+                        dataOut.flush();
+                        for (int i = 0; i < nucleos.size(); i++) {
+                            dataOut.writeUTF(nucleos.get(i).getNombreNucleo() + "/" + nucleos.get(i).getIdNucleo());
+                            dataOut.flush();
+                        }
+                        break;
+
                     case "usuario":
                         texto = dataIn.readUTF();
                         usuarios = udi.getUsuario(texto);
@@ -394,6 +408,20 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         dataOut.flush();
                         dataOut.writeInt(bus.getSaldo());
                         dataOut.flush();
+                        break;
+
+                    case "puntos_venta_mapa":
+                        int idNucleo = dataIn.readInt();
+                        PuntoVentaDAOImp pvdi = new PuntoVentaDAOImp(con);
+                        //System.out.println(idNucleo);
+                        List<PuntoVenta> puntos = pvdi.getPuntosVentaNucleo(idNucleo);
+                        dataOut.writeInt(puntos.size());
+                        dataOut.flush();
+                        for (int i = 0; i < puntos.size(); i++) {
+                            //System.out.println(puntos.get(i).getLatitud() + "/" + puntos.get(i).getLongitud());
+                            dataOut.writeUTF(puntos.get(i).getLatitud() + "/" + puntos.get(i).getLongitud());
+                            dataOut.flush();
+                        }
                         break;
 
                     case "rtarjeta":

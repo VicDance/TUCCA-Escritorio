@@ -13,8 +13,9 @@ import model.Parada;
  * @author Vicky
  */
 public interface iParadaDAO {
-    public void insertar(char idZona, String nombreParada, String latitud, String longitud);
+    public void insertarCorresponde(int idLinea, int idParada);
     public void borrar(int idParada);
     public List<Parada> getParada(String nombre);
     public List<Parada> getAllParadas();
+    public List<Parada> getParadasViaje(int idLinea, int idNucleoOrigen, int idNucleoDestino);
 }
