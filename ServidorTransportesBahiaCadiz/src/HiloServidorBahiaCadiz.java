@@ -4,10 +4,10 @@
  * and open the template in the editor.
  */
 
+import com.google.gson.Gson;
 import connector.Clave;
 import connector.Conector;
 import connector.Encriptar;
-import dao.ClienteDAOImp;
 import dao.UsuarioDAOImp;
 import dao.LineaDAOImp;
 import dao.MunicipioDAOImp;
@@ -17,12 +17,19 @@ import dao.PuntoVentaDAOImp;
 import dao.TarjetaBusDAOImp;
 import dao.TarjetaCreditoDAOImp;
 import dao.TarjetasBusDAOImp;
+import dao.ViajeDAOImp;
 import dao.ZonaDAOImp;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.sql.Date;
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -40,8 +47,8 @@ import model.TarjetaEstandar;
 import model.TarjetaEstudiante;
 import model.TarjetaJubilado;
 import model.Usuario;
+import model.Viaje;
 import model.Zona;
-import scripts.Corresponde;
 
 /**
  *
@@ -75,6 +82,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private TarjetaCreditoDAOImp tcdi;
     private TarjetaBusDAOImp tbdi;
     private TarjetasBusDAOImp tsbdi;
+    private ViajeDAOImp vdi;
     private String texto;
     private String[] datos;
     private Usuario usuario;
@@ -82,6 +90,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private long numAbsoluto;
     private String nombreUsuario;
     private String contraseña;
+    //private int cont = 1;
 
     public HiloServidorBahiaCadiz(Socket cliente) {
         this.cliente = cliente;
@@ -347,6 +356,13 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         }
                         break;
 
+                    case "id_linea":
+                        texto = dataIn.readUTF();
+                        int idLinea = ldi.getIdLinea(texto);
+                        dataOut.writeInt(idLinea);
+                        dataOut.flush();
+                        break;
+
                     case "parada":
                         texto = dataIn.readUTF();
                         paradas = pdi.getParada(texto);
@@ -396,8 +412,16 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                     case "cliente":
                         texto = dataIn.readUTF();
                         Usuario user = udi.getId(texto);
-                        dataOut.writeUTF(user.getNombre() + "/" + user.getContraseña() + "/" + user.getCorreo() + "/"
-                                + user.getFecha_nac() + "/" + user.getTfno());
+                        //System.out.println(user);
+                        if (user.getImagen() == null) {
+                            dataOut.writeUTF(user.getId() + "¬" + user.getNombre() + "¬" + user.getContraseña() + "¬" + user.getCorreo() + "¬"
+                                    + user.getFecha_nac() + "¬" + user.getTfno());
+                            //dataOut.flush();
+                        } else {
+                            dataOut.writeUTF(user.getId() + "¬" + user.getNombre() + "¬" + user.getContraseña() + "¬" + user.getCorreo() + "¬"
+                                    + user.getFecha_nac() + "¬" + user.getTfno() + "¬" + user.getImagen());
+                        }
+                        dataOut.flush();
                         break;
 
                     case "tarjeta":
@@ -406,7 +430,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         TarjetaBus bus = tsbdi.getTarjeta(Long.parseLong(texto));
                         dataOut.writeUTF(texto);
                         dataOut.flush();
-                        dataOut.writeInt(bus.getSaldo());
+                        dataOut.writeUTF(bus.getSaldo() + "/" + bus.getDescuento());
                         dataOut.flush();
                         break;
 
@@ -425,9 +449,10 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "rtarjeta":
-                        int saldo = dataIn.readInt();
+                        double saldo = dataIn.readDouble();
                         //System.out.println(saldo);
                         texto = dataIn.readUTF();
+                        //System.out.println(texto);
                         tsbdi.recargarTarjeta(Long.parseLong(texto), saldo);
                         System.out.println(tsbdi.recarga);
                         if (tsbdi.recarga) {
@@ -594,6 +619,64 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         }
                         break;
 
+                    case "i_imagen":
+                        texto = dataIn.readUTF();
+                        System.out.println(texto);
+                        datos = texto.split("¬");
+                        udi.insertarImagen(datos[0], datos[1]);
+                        if (udi.insertado) {
+                            dataOut.writeUTF("correcto");
+                            dataOut.flush();
+                        } else {
+                            dataOut.writeUTF("incorrecto");
+                            dataOut.flush();
+                        }
+                        break;
+
+                    case "iviaje":
+                        texto = dataIn.readUTF();
+                        datos = texto.split("/");
+                        DateFormat sdf = new SimpleDateFormat("hh:mm");
+                        //DateFormat sdfSalida = new SimpleDateFormat("hh:mm:ss");
+                        /*java.util.Date dateSalida = (java.util.Date) sdf.parse(datos[4]);
+                        java.util.Date dateLlegada = (java.util.Date) sdf.parse(datos[5]);
+                        Time timeLlegada = new Time(dateLlegada.getTime());
+                        Time timeSalida = new Time(dateSalida.getTime());*/
+                        //System.out.println(timeSalida + " " + timeLlegada);
+                        java.util.Date d = new java.util.Date();
+                        java.sql.Date date = new java.sql.Date(d.getTime());
+                        Viaje viaje = new Viaje(Integer.parseInt(datos[0]), Integer.parseInt(datos[1]),
+                                Integer.parseInt(datos[2]), Double.parseDouble(datos[3]), datos[4], datos[5], date);
+                        vdi = new ViajeDAOImp(con);
+                        vdi.insertarViaje(viaje);
+                        if(vdi.insertado){
+                            dataOut.writeUTF("correcto");
+                            dataOut.flush();
+                        }else{
+                            dataOut.writeUTF("incorrecto");
+                            dataOut.flush();
+                        }
+                        break;
+
+                    case "actualiza_saldo":
+                        texto = dataIn.readUTF();
+                        datos = texto.split("/");
+                        //if (Integer.parseInt(datos[2]) == cont) {
+                        for (int i = 0; i < 1; i++) {
+                            //double nuevoSaldo = Double.parseDouble(datos[0]) - (Double.parseDouble(datos[2]) * Double.parseDouble(datos[3]));
+                            //System.out.println("Nuevo saldo: " + nuevoSaldo);
+                            tsbdi.restaSaldo(Long.parseLong(datos[1]), /*nuevoSaldo*/ Double.parseDouble(datos[0]));
+                            if (tsbdi.recarga) {
+                                //cont++;
+                                dataOut.writeUTF("correcto");
+                                dataOut.flush();
+                            } else {
+                                dataOut.writeUTF("incorrecto");
+                                dataOut.flush();
+                            }
+                        }
+                        break;
+
                     case "exit":
                         break;
                 }
@@ -648,7 +731,9 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         try {
                             dataOut.writeUTF("correcto");
                             dataOut.flush();
-                            dataOut.writeInt(clientes.get(j).getId());
+                            System.out.println("Cliente " + clientes.get(j).getId());
+                            System.out.println("Usuarios " + usuarios.get(i).getId());
+                            dataOut.writeInt(usuarios.get(i).getId());
                             dataOut.flush();
                             break;
                         } catch (IOException ex) {

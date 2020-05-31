@@ -20,6 +20,7 @@ public interface iUsuarioDAO {
     public void insertarCliente(int id);    
     public void insertarAdmin(int id);  
     public void borrar(int id);
+    public void insertarImagen(String nombre, String ruta);
     public List<Usuario> getUsuario(String nombre);
     public List<Usuario> getAll();
     public List<Cliente> getAllAdmins();

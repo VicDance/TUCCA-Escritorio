@@ -37,7 +37,6 @@ public class LineaDAOImp implements iLineaDAO {
     @Override
     public void insertar(String nombreLinea) {
         try {
-            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String insertaLinea = "INSERT INTO linea (nombre_linea) VALUES (?)";
@@ -50,8 +49,6 @@ public class LineaDAOImp implements iLineaDAO {
         } catch (SQLException ex) {
             //Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
             insertado = false;
-        } finally {
-            //con.disconect();
         }
     }
 
@@ -180,6 +177,18 @@ public class LineaDAOImp implements iLineaDAO {
             }
         }
         return linea;
+    }
+
+    @Override
+    public int getIdLinea(String nombreLinea) {
+        List<Linea> lineas = getAllLineas();
+        int idLinea = 0;
+        for (int i = 0; i < lineas.size(); i++) {
+            if (nombreLinea.equalsIgnoreCase(lineas.get(i).getNombreLinea())) {
+                idLinea = lineas.get(i).getIdLinea();
+            }
+        }
+        return idLinea;
     }
 
 }

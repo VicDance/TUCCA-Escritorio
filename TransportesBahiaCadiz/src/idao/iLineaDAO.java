@@ -19,4 +19,5 @@ public interface iLineaDAO {
     public List<Linea> getAllLineas();
     public List<Linea> getLineasNucleo(int idNucleoOrigen, int idNucleoDestino);
     public String getNombreLinea(int idLinea);
+    public int getIdLinea(String nombreLinea);
 }

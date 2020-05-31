@@ -51,7 +51,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             insertar = connection.prepareStatement(sqlNuevaTarjeta);
             insertar.setLong(1, tarjeta.getNumTarjeta());
             insertar.setInt(2, tarjeta.getId());
-            insertar.setInt(3, tarjeta.getSaldo());
+            insertar.setDouble(3, tarjeta.getSaldo());
             insertar.setDouble(4, tarjeta.getDescuento());
             if (insertar.executeUpdate() != 0) {
                 System.out.println("Insercción exitosa");
@@ -159,7 +159,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
                 TarjetaBus tarjeta = new TarjetaBus();
                 tarjeta.setNumTarjeta(rs.getLong(1));
                 tarjeta.setId(rs.getInt(2));
-                tarjeta.setSaldo(rs.getInt(3));
+                tarjeta.setSaldo(rs.getDouble(3));
                 tarjeta.setDescuento(rs.getDouble(4));
                 tarjetas.add(tarjeta);
             }
@@ -290,7 +290,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
     }
 
     @Override
-    public boolean recargarTarjeta(long numTarjeta, int saldo) {
+    public boolean recargarTarjeta(long numTarjeta, double saldo) {
         recarga = false;
         //con.connect();
         Connection connection = con.getConnection();
@@ -302,14 +302,36 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             t.setSaldo(t.getSaldo() + saldo);
             actualizar.setLong(1, t.getNumTarjeta());
             if (actualizar.executeUpdate() != 0) {
-                System.out.println("entra");
-                System.out.println("borrado con exito");
+                //System.out.println("entra recarga");
+                System.out.println("recargado con exito");
                 recarga = true;
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
-        } finally {
-            //con.disconect();
+        }
+        return recarga;
+    }
+
+    @Override
+    public boolean restaSaldo(long numTarjeta, double saldo) {
+        recarga = false;
+        Connection connection = con.getConnection();
+        PreparedStatement actualizar;
+        //String actualizaTarjeta = "UPDATE tarjeta SET saldo =  '" + saldo + "' where num_tarjeta = ?";
+        String actualizaTarjeta = "UPDATE tarjeta SET saldo = ? where num_tarjeta = ?";
+        TarjetaBus t = getTarjeta(numTarjeta);
+        t.setSaldo(saldo);
+        try {
+            actualizar = connection.prepareStatement(actualizaTarjeta);
+            //t.setSaldo(saldo);
+            actualizar.setDouble(1, saldo);
+            actualizar.setLong(2, t.getNumTarjeta());
+            if (actualizar.executeUpdate() != 0) {
+                System.out.println("recargado con exito");
+                recarga = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
         return recarga;
     }

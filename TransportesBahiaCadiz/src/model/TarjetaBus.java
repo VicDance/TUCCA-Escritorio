@@ -12,12 +12,12 @@ package model;
 public class TarjetaBus {
     private long numTarjeta;
     private int id;
-    private int saldo;
+    private double saldo;
     private double descuento;
     
     public TarjetaBus(){}
     
-    public TarjetaBus(long numTarjeta, int id, int saldo, double descuento){
+    public TarjetaBus(long numTarjeta, int id, double saldo, double descuento){
         this.numTarjeta = numTarjeta;
         this.id = id;
         this.saldo = saldo;
@@ -40,11 +40,11 @@ public class TarjetaBus {
         this.id = id;
     }
 
-    public int getSaldo() {
+    public double getSaldo() {
         return saldo;
     }
 
-    public void setSaldo(int saldo) {
+    public void setSaldo(double saldo) {
         this.saldo = saldo;
     }
 

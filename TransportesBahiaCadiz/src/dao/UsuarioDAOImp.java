@@ -7,15 +7,24 @@ package dao;
 
 import connector.Conector;
 import idao.iUsuarioDAO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import model.Cliente;
 import model.Usuario;
 
@@ -32,8 +41,8 @@ public class UsuarioDAOImp implements iUsuarioDAO {
     public UsuarioDAOImp() {
         //con.connect();
     }
-    
-    public UsuarioDAOImp(Conector con){
+
+    public UsuarioDAOImp(Conector con) {
         this.con = con;
     }
 
@@ -65,7 +74,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             //con.disconect();
         }
     }
-    
+
     @Override
     public void insertarCliente(int id) {
         insertado = false;
@@ -90,7 +99,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             //con.disconect();
         }
     }
-    
+
     @Override
     public void insertarAdmin(int id) {
         insertado = false;
@@ -103,7 +112,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
                     + "VALUES (?)";
             insertar = connection.prepareStatement(sqlNuevoUsuario);
             insertar.setInt(1, id);
-            if(insertar.executeUpdate() != 0){
+            if (insertar.executeUpdate() != 0) {
                 System.out.println("Insercción exitosa");
                 insertado = true;
             }
@@ -111,13 +120,11 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             ex.printStackTrace();
             insertado = false;
             //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
-            //con.disconect();
         }
     }
-    
+
     @Override
-    public void borrar(int id){
+    public void borrar(int id) {
         borrado = false;
         //con.connect();
         Connection connection = con.getConnection();
@@ -126,7 +133,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             String borraUsuario = "DELETE FROM usuario WHERE idusuario = ?";
             borrar = connection.prepareStatement(borraUsuario);
             borrar.setInt(1, id);
-            if(borrar.executeUpdate() != 0){
+            if (borrar.executeUpdate() != 0) {
                 System.out.println("borrado con exito");
                 borrado = true;
             }
@@ -135,8 +142,47 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             //Logger.getLogger(ZonaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
             borrado = false;
             ex.printStackTrace();
-        }finally{
+        } finally {
             //con.disconect();
+        }
+    }
+
+    @Override
+    public void insertarImagen(String nombre, String ruta) {
+        insertado = false;
+        byte[] imageByte;
+        BufferedImage image = null;
+        try {
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String sqlNuevoUsuario = "UPDATE usuario SET imagen_perfil = ? WHERE username = ?";
+            insertar = connection.prepareStatement(sqlNuevoUsuario);
+            Usuario usuario = getId(nombre);
+            usuario.setImagen(ruta);
+            if (usuario.getImagen() == null || usuario.getImagen().equals("null")) {
+                usuario.setImagen("");
+            }
+            /*imageByte = Base64.getDecoder().decode(usuario.getImagen());
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+            image = ImageIO.read(bis);
+            ImageIO.write(image, "jpg", new File("media/" + usuario.getId() + "_profile.jpg"));
+            bis.close();
+            usuario.setImagen("media/" + usuario.getId() + "_profile.jpg");*/
+            //String path = ruta + "/" + usuario.getNombre();
+
+            insertar.setString(2, usuario.getNombre());
+            insertar.setString(1, usuario.getImagen());
+            /*usuario.setFoto(ruta.getBytes());
+             //usuario.setImagen("media/" + usuario.getId() + "_profile.jpg");
+             insertar.setBytes(1, usuario.getFoto());
+             
+             //insertar.setString(2, usuario.getNombre());*/
+            if (insertar.executeUpdate() != 0) {
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -187,12 +233,15 @@ public class UsuarioDAOImp implements iUsuarioDAO {
                 usuario.setCorreo(rs.getString(4));
                 usuario.setFecha_nac(rs.getDate(5));
                 usuario.setTfno(rs.getInt(6));
+                String imagen = rs.getString(7);
+                if (imagen != null) {
+                    System.out.println("imagen no nula");
+                    usuario.setImagen(imagen);
+                }
                 usuarios.add(usuario);
             }
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            //con.disconect();
         }
         return usuarios;
     }
@@ -203,12 +252,13 @@ public class UsuarioDAOImp implements iUsuarioDAO {
         List<Usuario> usuarios = getAll();
         for (Usuario usuario1 : usuarios) {
             if (usuario1.getNombre().equals(nombre)) {
-                usuario = new Usuario(usuario1.getId(), nombre, usuario1.getContraseña(), usuario1.getCorreo(), usuario1.getFecha_nac(), usuario1.getTfno());
+                usuario = new Usuario(usuario1.getId(), nombre, usuario1.getContraseña(), usuario1.getCorreo(),
+                        usuario1.getFecha_nac(), usuario1.getTfno(), usuario1.getImagen());
             }
         }
         return usuario;
     }
-    
+
     @Override
     public List<Cliente> getAllAdmins() {
         //con.connect();
@@ -232,7 +282,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
         }
         return clientes;
     }
-    
+
     @Override
     public List<Usuario> getAllClientes() {
         //con.connect();
@@ -257,7 +307,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             }
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+        } finally {
             //con.disconect();
         }
         return usuarios;

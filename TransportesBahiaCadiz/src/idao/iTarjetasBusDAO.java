@@ -27,5 +27,6 @@ public interface iTarjetasBusDAO {
     public List<TarjetaJubilado> getAllTarjetasJubilado();
     public TarjetaBus getTarjeta(long numTarjeta);
     public void borrarTarjeta(int posicion);
-    public boolean recargarTarjeta(long numTarjeta, int saldo);
+    public boolean recargarTarjeta(long numTarjeta, double saldo);
+    public boolean restaSaldo(long numTarjeta, double saldo);
 }

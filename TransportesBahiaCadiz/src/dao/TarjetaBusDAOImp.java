@@ -45,7 +45,7 @@ public class TarjetaBusDAOImp implements iTarjetaBusDAO{
             insertar = connection.prepareStatement(sqlNuevaTarjeta);
             insertar.setLong(1, tarjeta.getNumTarjeta());
             insertar.setInt(2, tarjeta.getId());
-            insertar.setInt(3, tarjeta.getSaldo());
+            insertar.setDouble(3, tarjeta.getSaldo());
             insertar.setDouble(4, tarjeta.getDescuento());
             if(insertar.executeUpdate() != 0){
                 System.out.println("Insercción exitosa");
