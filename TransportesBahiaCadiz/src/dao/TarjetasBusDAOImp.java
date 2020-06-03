@@ -283,8 +283,6 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         } catch (SQLException ex) {
             borrado = false;
             ex.printStackTrace();
-        } finally {
-            //con.disconect();
         }
     }
 

@@ -521,6 +521,12 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             dataOut.flush();
                         }
                         break;
+                        
+                    case "btarjetaCredito":
+                        int pos = dataIn.readInt();
+                        System.out.println(pos);
+                        tcdi.borrar(pos);
+                        break;
 
                     case "ntarjeta":
                         texto = dataIn.readUTF();

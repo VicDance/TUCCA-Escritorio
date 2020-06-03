@@ -23,7 +23,7 @@ import model.TarjetaCredito;
  */
 public class TarjetaCreditoDAOImp implements iTarjetaCreditoDAO {
 
-    Conector con/* = new Conector()*/;
+    Conector con;
     public boolean insertado = false;
 
     public TarjetaCreditoDAOImp() {
@@ -36,10 +36,8 @@ public class TarjetaCreditoDAOImp implements iTarjetaCreditoDAO {
     @Override
     public void insertar(TarjetaCredito tarjeta) {
         try {
-            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
-            //ResultSet rs;
             String sqlNuevaTarjeta = "INSERT INTO tarjeta_banco (num_tarjeta_banco, id_user, caducidad, titular) "
                     + "VALUES (?, ?, ?, ?)";
             insertar = connection.prepareStatement(sqlNuevaTarjeta);
@@ -53,10 +51,7 @@ public class TarjetaCreditoDAOImp implements iTarjetaCreditoDAO {
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
-            //Logger.getLogger(ClienteDAOImp.class.getName()).log(Level.SEVERE, null, ex);
             insertado = false;
-        } finally {
-            //con.disconect();
         }
     }
 
@@ -85,6 +80,28 @@ public class TarjetaCreditoDAOImp implements iTarjetaCreditoDAO {
             //con.disconect();
         }
         return tarjetas;
+    }
+
+    @Override
+    public void borrar(int posicion) {
+        Connection connection = con.getConnection();
+        List<TarjetaCredito> tarjetas = getAllTarjetas();
+        PreparedStatement borrar;
+        String numTarjeta = null;
+        try {
+            String borraTarjeta = "DELETE FROM tarjeta_banco WHERE num_tarjeta_banco = ?";
+            borrar = connection.prepareStatement(borraTarjeta);
+            for (int i = 0; i < tarjetas.size(); i++) {
+                if (i == posicion) {
+                    numTarjeta = tarjetas.get(i).getNumTarjeta();
+                    borrar.setString(1, numTarjeta);
+                    borrar.executeUpdate();
+                    break;
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
 
 }

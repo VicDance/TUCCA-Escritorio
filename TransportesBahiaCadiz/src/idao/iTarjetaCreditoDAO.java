@@ -15,4 +15,5 @@ import model.TarjetaCredito;
 public interface iTarjetaCreditoDAO {
     public List<TarjetaCredito> getAllTarjetas();
     public void insertar(TarjetaCredito tarjeta);
+    public void borrar(int posicion);
 }
