@@ -8,6 +8,7 @@ package dao;
 import connector.Conector;
 import idao.iLineaDAO;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,13 +36,40 @@ public class LineaDAOImp implements iLineaDAO {
     }
 
     @Override
-    public void insertar(String nombreLinea) {
+    public void insertarTablaAux() {
+        Connection connection = con.getConnection();
+        try {
+            DatabaseMetaData data = connection.getMetaData();
+            ResultSet rs = data.getTables(null, null, "linea", null);
+            PreparedStatement insertar;
+            if (rs.next()) {
+                //Table Exist
+                String insertaTabla = "CREATE TABLE IF NOT EXISTS `linea_aux` (\n"
+                        + "  `idlinea` int NOT NULL AUTO_INCREMENT,\n"
+                        + "  `nombre_linea` varchar(100) NOT NULL,\n"
+                        + "  PRIMARY KEY (`idlinea`),\n"
+                        + "  UNIQUE KEY `nombre_linea_UNIQUE` (`nombre_linea`),\n"
+                        + "  UNIQUE KEY `idlinea_UNIQUE` (`idlinea`)\n"
+                        + ")";
+                insertar = connection.prepareStatement(insertaTabla);
+                insertar.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void insertar(Linea linea) {
+        insertado = false;
         try {
             Connection connection = con.getConnection();
             PreparedStatement insertar;
-            String insertaLinea = "INSERT INTO linea (nombre_linea) VALUES (?)";
+            String insertaLinea = "INSERT INTO linea (idlinea, nombre_linea) VALUES (?, ?) ON DUPLICATE KEY UPDATE "
+                    + "idlinea = idlinea";
             insertar = connection.prepareStatement(insertaLinea);
-            insertar.setString(1, nombreLinea);
+            insertar.setInt(1, linea.getIdLinea());
+            insertar.setString(2, linea.getNombreLinea());
             if (insertar.executeUpdate() != 0) {
                 System.out.println("Insercción exitosa");
                 insertado = true;
@@ -53,8 +81,62 @@ public class LineaDAOImp implements iLineaDAO {
     }
 
     @Override
-    public void borrar(int idLinea) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void insertarAux(Linea linea) {
+        insertado = false;
+        try {
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String insertaLinea = "INSERT INTO linea_aux (idlinea, nombre_linea) VALUES (?, ?) ON DUPLICATE KEY UPDATE "
+                    + "idlinea = idlinea";
+            insertar = connection.prepareStatement(insertaLinea);
+            insertar.setInt(1, linea.getIdLinea());
+            insertar.setString(2, linea.getNombreLinea());
+            if (insertar.executeUpdate() != 0) {
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            //Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+            insertado = false;
+        }
+    }
+
+    @Override
+    public void dropTablaAux() {
+        Connection connection = con.getConnection();
+        try {
+            PreparedStatement borrar;
+            String borraTabla = "DROP TABLE IF EXISTS linea_aux";
+            borrar = connection.prepareStatement(borraTabla);
+            borrar.executeUpdate();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Override
+    public List<Linea> getIntersectLinea() {
+        Connection connection = con.getConnection();
+        PreparedStatement buscar;
+        List<Linea> lineas = null;
+        String buscaParadas = "SELECT * FROM linea_aux aux WHERE aux.idlinea NOT IN (SELECT l.idlinea "
+                + "FROM linea l)";
+        try {
+            buscar = connection.prepareStatement(buscaParadas);
+            ResultSet rs = buscar.executeQuery();
+            lineas = new ArrayList<Linea>();
+            while (rs.next()) {
+                Linea l = new Linea();
+                l.setIdLinea(rs.getInt(1));
+                l.setNombreLinea(rs.getString(2));
+                lineas.add(l);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return lineas;
     }
 
     @Override
@@ -156,9 +238,9 @@ public class LineaDAOImp implements iLineaDAO {
             }
 
             /*for (int i = 0; i < lineas.size(); i++) {
-                System.out.println("Lineas: " + lineas.get(i));
-                //lineas.add(lineasDestino.get(i));
-            }*/
+             System.out.println("Lineas: " + lineas.get(i));
+             //lineas.add(lineasDestino.get(i));
+             }*/
             //lineas = lineas.stream().distinct().collect(Collectors.toList());
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);

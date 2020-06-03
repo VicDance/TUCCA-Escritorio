@@ -13,8 +13,11 @@ import model.Linea;
  * @author Vicky
  */
 public interface iLineaDAO {
-    public void insertar(String nombreLinea);
-    public void borrar(int idLinea);
+    public void insertarTablaAux();
+    public void insertar(Linea linea);
+    public void insertarAux(Linea linea);
+    public void dropTablaAux();
+    public List<Linea> getIntersectLinea();
     public List<Linea> getLinea(String nombre);
     public List<Linea> getAllLineas();
     public List<Linea> getLineasNucleo(int idNucleoOrigen, int idNucleoDestino);

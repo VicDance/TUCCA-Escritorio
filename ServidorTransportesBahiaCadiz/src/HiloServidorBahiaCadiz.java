@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 
-import com.google.gson.Gson;
 import connector.Clave;
 import connector.Conector;
 import connector.Encriptar;
@@ -292,6 +291,23 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         for (TarjetaCredito tarjeta : tarjetas) {
                             dataOut.writeUTF(tarjeta.getNumTarjeta() + "-" + tarjeta.getIdUser() + "-"
                                     + tarjeta.getCaducidad() + "-" + tarjeta.getTitular());
+                            dataOut.flush();
+                        }
+                        break;
+
+                    case "viajes":
+                        int idUsuario = dataIn.readInt();
+                        vdi = new ViajeDAOImp(con);
+                        List<Viaje> viajes = vdi.getViajesId(idUsuario);
+                        dataOut.writeInt(viajes.size());
+                        dataOut.flush();
+                        ldi = new LineaDAOImp(con);
+                        mdi = new MunicipioDAOImp(con);
+                        for (int i = 0; i < viajes.size(); i++) {
+                            String nombreLinea = ldi.getNombreLinea(viajes.get(i).getIdLinea());
+                            String nombreMunicipio = mdi.getNombreMunicipio(viajes.get(i).getIdMunicipio());
+                            dataOut.writeUTF(nombreLinea + "/" + nombreMunicipio + "/"
+                                    + viajes.get(i).getHoraSalida());
                             dataOut.flush();
                         }
                         break;
@@ -636,25 +652,44 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                     case "iviaje":
                         texto = dataIn.readUTF();
                         datos = texto.split("/");
-                        DateFormat sdf = new SimpleDateFormat("hh:mm");
-                        //DateFormat sdfSalida = new SimpleDateFormat("hh:mm:ss");
-                        /*java.util.Date dateSalida = (java.util.Date) sdf.parse(datos[4]);
-                        java.util.Date dateLlegada = (java.util.Date) sdf.parse(datos[5]);
-                        Time timeLlegada = new Time(dateLlegada.getTime());
-                        Time timeSalida = new Time(dateSalida.getTime());*/
-                        //System.out.println(timeSalida + " " + timeLlegada);
+                        //DateFormat sdf = new SimpleDateFormat("hh:mm");
                         java.util.Date d = new java.util.Date();
                         java.sql.Date date = new java.sql.Date(d.getTime());
                         Viaje viaje = new Viaje(Integer.parseInt(datos[0]), Integer.parseInt(datos[1]),
                                 Integer.parseInt(datos[2]), Double.parseDouble(datos[3]), datos[4], datos[5], date);
                         vdi = new ViajeDAOImp(con);
-                        vdi.insertarViaje(viaje);
-                        if(vdi.insertado){
-                            dataOut.writeUTF("correcto");
-                            dataOut.flush();
-                        }else{
-                            dataOut.writeUTF("incorrecto");
-                            dataOut.flush();
+                        viajes = vdi.getAllViajes();
+                        boolean existente = true;
+                        if (viajes.size() == 0) {
+                            vdi.insertarViaje(viaje);
+                            if (vdi.insertado) {
+                                existente = false;
+                                dataOut.writeUTF("correcto");
+                                dataOut.flush();
+                            } else {
+                                dataOut.writeUTF("incorrecto");
+                                dataOut.flush();
+                            }
+                        } else {
+                            for (int i = 0; i < viajes.size(); i++) {
+                                if (viajes.get(i).getIdLinea() != viaje.getIdLinea() && viajes.get(i).getIdMunicipio()
+                                        != viaje.getIdMunicipio() && !viajes.get(i).getHoraSalida().equalsIgnoreCase(viaje.getHoraSalida())) {
+                                    vdi.insertarViaje(viaje);
+                                    if (vdi.insertado) {
+                                        existente = false;
+                                        dataOut.writeUTF("correcto");
+                                        dataOut.flush();
+                                    } else {
+                                        dataOut.writeUTF("incorrecto");
+                                        dataOut.flush();
+                                    }
+                                    break;
+                                }
+                            }
+                            if (existente) {
+                                dataOut.writeUTF("correcto");
+                                dataOut.flush();
+                            }
                         }
                         break;
 
@@ -675,6 +710,15 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                                 dataOut.flush();
                             }
                         }
+                        break;
+
+                    case "direccion_parada":
+                        texto = dataIn.readUTF();
+                        System.out.println(texto);
+                        String direccion = pdi.getDireccion(texto);
+                        System.out.println(direccion);
+                        dataOut.writeUTF(direccion);
+                        dataOut.flush();
                         break;
 
                     case "exit":

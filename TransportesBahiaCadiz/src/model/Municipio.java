@@ -17,6 +17,11 @@ public class Municipio {
         
     }
 
+    public Municipio(int idMunicipio, String nombreMunicipio) {
+        this.idMunicipio = idMunicipio;
+        this.nombreMunicipio = nombreMunicipio;
+    }
+
     public int getIdMunicipio() {
         return idMunicipio;
     }

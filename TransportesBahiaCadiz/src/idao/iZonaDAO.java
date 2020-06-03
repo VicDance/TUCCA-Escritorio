@@ -14,9 +14,11 @@ import model.Zona;
  * @author Vicky
  */
 public interface iZonaDAO {
-    public void insertar(String idZona, String nombre); 
-    public void deleteId(Zona zona);
-    public void deleteNombre(Zona zona);
+    public void createTableAux();
+    public void insertar(Zona zona);
+    public void insertarAux(Zona zona);
+    public void dropTableAux();
     public List<Zona> getZona(String nombre);
     public List<Zona> getAll();
+    public List<Zona> getIntersection();
 }

@@ -11,7 +11,7 @@ package model;
  */
 public class Parada {
     private int idParada;
-    private char idZona;
+    private String idZona;
     private String nombreParada;
     private String latitud;
     private String longitud;
@@ -23,6 +23,14 @@ public class Parada {
     public Parada(String nombreParada){
         this.nombreParada = nombreParada;
     }
+    
+    public Parada(int idParada, String idZona, String nombreParada, String latitud, String longitud){
+        this.idParada = idParada;
+        this.idZona = idZona;
+        this.nombreParada = nombreParada;
+        this.latitud = latitud;
+        this.longitud = longitud;
+    }
 
     public int getIdParada() {
         return idParada;
@@ -32,11 +40,11 @@ public class Parada {
         this.idParada = idParada;
     }
 
-    public char getIdZona() {
+    public String getIdZona() {
         return idZona;
     }
 
-    public void setIdZona(char idZona) {
+    public void setIdZona(String idZona) {
         this.idZona = idZona;
     }
 

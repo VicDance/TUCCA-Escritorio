@@ -9,7 +9,12 @@ import connector.Conector;
 import idao.iViajeDAO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.Viaje;
 
 /**
@@ -45,6 +50,47 @@ public class ViajeDAOImp implements iViajeDAO{
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    @Override
+    public List<Viaje> getAllViajes() {
+        Connection connection = con.getConnection();
+        List<Viaje> viajes = null;
+        PreparedStatement buscar;
+        try {
+            String buscaViajes = "SELECT * FROM viaje";
+            buscar = connection.prepareStatement(buscaViajes);
+            ResultSet rs = buscar.executeQuery();
+            viajes = new ArrayList<Viaje>();
+            while (rs.next()) {
+                Viaje viaje = new Viaje();
+                viaje.setIdViaje(rs.getInt(1));
+                viaje.setIdUsuario(rs.getInt(2));
+                viaje.setIdLinea(rs.getInt(3));
+                viaje.setIdMunicipio(rs.getInt(4));
+                viaje.setTarifa(rs.getDouble(5));
+                viaje.setHoraSalida(rs.getString(6));
+                viaje.setHoraLlegada(rs.getString(7));
+                viaje.setFechaViaje(rs.getDate(8));
+                viajes.add(viaje);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return viajes;
+    }
+
+    @Override
+    public List<Viaje> getViajesId(int idUsuario) {
+        List<Viaje> viajes = getAllViajes();
+        List<Viaje> viajesId = new ArrayList<Viaje>();
+        for(int i = 0; i < viajes.size(); i++){
+            if(idUsuario == viajes.get(i).getIdUsuario()){
+                viajesId.add(viajes.get(i));
+            }
+        }
+        
+        return viajesId;
     }
     
 }

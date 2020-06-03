@@ -8,6 +8,7 @@ package dao;
 import connector.Conector;
 import idao.iParadaDAO;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,13 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Corresponde;
 import model.Parada;
+import utils.Utils;
 
 /**
  *
  * @author Vicky
  */
 public class ParadaDAOImp implements iParadaDAO {
+
     Conector con/* = new Conector()*/;
     public boolean insertado = false;
 
@@ -33,22 +37,91 @@ public class ParadaDAOImp implements iParadaDAO {
     }
 
     @Override
-    public void insertarCorresponde(int idLinea, int idParada) {
+    public void insertaTablaParadas() {
+        Connection connection = con.getConnection();
         try {
-            //con.connect();
-            Connection connection = con.getConnection();
+            DatabaseMetaData data = connection.getMetaData();
+            ResultSet rs = data.getTables(null, null, "parada", null);
             PreparedStatement insertar;
-            String insertaCorresponde = "INSERT INTO corresponde (id_linea, id_parada) VALUES (?, ?)";
-            insertar = connection.prepareStatement(insertaCorresponde);
-            insertar.setInt(1, idLinea);
-            insertar.setInt(2, idParada);
-            if(insertar.executeUpdate() != 0){
-                System.out.println("Insercción exitosa");
-                insertado = true;
+            if (rs.next()) {
+                //Table Exist
+                String insertaTabla = "CREATE TABLE IF NOT EXISTS `parada_aux` (\n"
+                        + "  `idparada` int NOT NULL AUTO_INCREMENT,\n"
+                        + "  `id_zona` varchar(1) NOT NULL,\n"
+                        + "  `nombre_parada` varchar(100) NOT NULL,\n"
+                        + "  `latitud` varchar(100) NOT NULL,\n"
+                        + "  `longitud` varchar(100) NOT NULL,\n"
+                        + "  PRIMARY KEY (`idparada`,`id_zona`),\n"
+                        + "  KEY `id_zona_parada_idx` (`id_zona`),\n"
+                        + "  CONSTRAINT `id_zona_parada_aux` FOREIGN KEY (`id_zona`) REFERENCES `zona` (`idzona`) ON DELETE CASCADE ON UPDATE CASCADE\n"
+                        + ")";
+                insertar = connection.prepareStatement(insertaTabla);
+                insertar.executeUpdate();
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
-            insertado = false;
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void insertaParadas(Parada parada) {
+        Connection connection = con.getConnection();
+        try {
+            DatabaseMetaData data = connection.getMetaData();
+            ResultSet rs = data.getTables(null, null, "parada_aux", null);
+            PreparedStatement insertar;
+            String insertaParadas = "INSERT INTO parada (idparada, id_zona, nombre_parada, latitud, longitud) "
+                    + "VALUES (?, ?, ?, ?, ?)";
+            if (rs.next()) {
+                //Table Exist
+                insertar = connection.prepareStatement(insertaParadas);
+                insertar.setInt(1, parada.getIdParada());
+                insertar.setString(2, parada.getIdZona());
+                insertar.setString(3, parada.getNombreParada());
+                insertar.setString(4, parada.getLatitud());
+                insertar.setString(5, parada.getLongitud());
+                insertar.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Override
+    public void insertaParadasAux(Parada parada) {
+        Connection connection = con.getConnection();
+        try {
+            DatabaseMetaData data = connection.getMetaData();
+            ResultSet rs = data.getTables(null, null, "parada_aux", null);
+            PreparedStatement insertar;
+            String insertaParadas = "INSERT INTO parada_aux (idparada, id_zona, nombre_parada, latitud, longitud) "
+                    + "VALUES (?, ?, ?, ?, ?)";
+            if (rs.next()) {
+                //Table Exist
+                insertar = connection.prepareStatement(insertaParadas);
+                insertar.setInt(1, parada.getIdParada());
+                insertar.setString(2, parada.getIdZona());
+                insertar.setString(3, parada.getNombreParada());
+                insertar.setString(4, parada.getLatitud());
+                insertar.setString(5, parada.getLongitud());
+                insertar.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void dropTablaParadas() {
+        Connection connection = con.getConnection();
+        try {
+            PreparedStatement borrar;
+            String borraTabla = "DROP TABLE IF EXISTS parada_aux";
+            borrar = connection.prepareStatement(borraTabla);
+            borrar.executeUpdate();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -58,8 +131,34 @@ public class ParadaDAOImp implements iParadaDAO {
     }
 
     @Override
+    public List<Parada> getIntersectParadas() {
+        Connection connection = con.getConnection();
+        PreparedStatement buscar;
+        List<Parada> paradas = null;
+        String buscaParadas = "SELECT * FROM parada_aux aux WHERE aux.idparada NOT IN (SELECT p.idparada "
+                + "FROM parada p)";
+        try {
+            buscar = connection.prepareStatement(buscaParadas);
+            ResultSet rs = buscar.executeQuery();
+            paradas = new ArrayList<Parada>();
+            while (rs.next()) {
+                Parada parada = new Parada();
+                parada.setIdParada(rs.getInt(1));
+                parada.setIdZona(rs.getString(2));
+                parada.setNombreParada(rs.getString(3));
+                parada.setLatitud(rs.getString(4));
+                parada.setLongitud(rs.getString(5));
+                paradas.add(parada);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return paradas;
+    }
+
+    @Override
     public List<Parada> getParada(String nombre) {
-        //con.connect();
         Connection connection = con.getConnection();
         List<Parada> paradas = null;
         PreparedStatement buscar;
@@ -71,7 +170,7 @@ public class ParadaDAOImp implements iParadaDAO {
             while (rs.next()) {
                 Parada parada = new Parada();
                 parada.setIdParada(rs.getInt(1));
-                parada.setIdZona(rs.getString(2).charAt(0));
+                parada.setIdZona(rs.getString(2));
                 parada.setNombreParada(rs.getString(3));
                 parada.setLatitud(rs.getString(4));
                 parada.setLongitud(rs.getString(5));
@@ -83,7 +182,7 @@ public class ParadaDAOImp implements iParadaDAO {
         //con.disconect();
         return paradas;
     }
-    
+
     @Override
     public List<Parada> getAllParadas() {
         //con.connect();
@@ -98,7 +197,7 @@ public class ParadaDAOImp implements iParadaDAO {
             while (rs.next()) {
                 Parada parada = new Parada();
                 parada.setIdParada(rs.getInt(1));
-                parada.setIdZona(rs.getString(2).charAt(0));
+                parada.setIdZona(rs.getString(2));
                 parada.setNombreParada(rs.getString(3));
                 parada.setLatitud(rs.getString(4));
                 parada.setLongitud(rs.getString(5));
@@ -134,7 +233,7 @@ public class ParadaDAOImp implements iParadaDAO {
             while (rs.next()) {
                 Parada parada = new Parada();
                 parada.setIdParada(rs.getInt(1));
-                parada.setIdZona(rs.getString(2).charAt(0));
+                parada.setIdZona(rs.getString(2));
                 parada.setNombreParada(rs.getString(3));
                 parada.setLatitud(rs.getString(4));
                 parada.setLongitud(rs.getString(5));
@@ -152,30 +251,97 @@ public class ParadaDAOImp implements iParadaDAO {
             while (rs.next()) {
                 Parada parada = new Parada();
                 parada.setIdParada(rs.getInt(1));
-                parada.setIdZona(rs.getString(2).charAt(0));
+                parada.setIdZona(rs.getString(2));
                 parada.setNombreParada(rs.getString(3));
                 parada.setLatitud(rs.getString(4));
                 parada.setLongitud(rs.getString(5));
                 paradasDestino.add(parada);
             }
             //int size = paradasOrigen.size() + paradasDestino.size();
-            for(int i = 0; i < paradasOrigen.size(); i++){
+            for (int i = 0; i < paradasOrigen.size(); i++) {
                 paradas.add(paradasOrigen.get(i));
             }
-            for(int i = 0; i < paradasDestino.size(); i++){
+            for (int i = 0; i < paradasDestino.size(); i++) {
                 paradas.add(paradasDestino.get(i));
             }
             /*System.out.println("IdLinea: " + idLinea);
-            System.out.println("IdNucleoOrigen: " + idNucleoOrigen);
-            System.out.println("IdNucleoDestino: " + idNucleoDestino);*/
+             System.out.println("IdNucleoOrigen: " + idNucleoOrigen);
+             System.out.println("IdNucleoDestino: " + idNucleoDestino);*/
             /*for(int i = 0; i < paradas.size(); i++){
-                System.out.println("IdLinea: " + idLinea + " " + paradas.get(i)
-                + " IdNucleo: " + idNucleo);
-            }*/
+             System.out.println("IdLinea: " + idLinea + " " + paradas.get(i)
+             + " IdNucleo: " + idNucleo);
+             }*/
         } catch (SQLException ex) {
             Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
         //con.disconect();
         return paradas;
-    } 
+    }
+
+    @Override
+    public String getDireccion(String nombre) {
+        List<Parada> paradas = getAllParadas();
+        String direccion = "";
+        String[] nombre_split;
+        Utils utils = new Utils();
+        //List<String> palabras = null;
+        for (int i = 0; i < paradas.size(); i++) {
+            //for (int j = 0; j < nombre_split.length; j++) {
+            if (nombre.startsWith("Pz") && !nombre.contains("-")) {
+                nombre_split = nombre.split(" ");
+                System.out.println(nombre_split[1]);
+                //System.out.println(paradas.get(i).getNombreParada());
+                break;
+                /*if(paradas.get(i).getNombreParada().contains(nombre_split[1].trim())){
+                 System.out.println(paradas.get(i).getNombreParada());
+                 }*/
+            } else if (nombre.startsWith("Pz") && nombre.contains("-")) {
+                nombre_split = nombre.split("-");
+                System.out.println(nombre_split[0]);
+                if (nombre_split[0].contains(".")) {
+                    System.out.println("entra punto 1");
+                    String[] nombre_split2 = nombre.split(".");
+                    if (nombre_split2 == null || nombre_split2.length == 0) {
+                        //System.out.println("null");
+                        System.out.println(nombre_split[0].substring(3));
+                    } else {
+                        System.out.println(nombre_split2.length);
+                    }
+                    //System.out.println(nombre_split[1]);
+                }
+                break;
+            } else if (!nombre.startsWith("Pz") && nombre.contains("-")) {
+                nombre_split = nombre.split("-");
+                //System.out.println(nombre_split[0]);
+                if (nombre_split[0].contains(".")) {
+                    System.out.println("entra punto 2");
+                    String[] nombre_split2 = nombre.split(".");
+                    if (nombre_split2 == null || nombre_split2.length == 0) {
+                        System.out.println("Split1 " + nombre_split[0].length());
+
+                        System.out.println(nombre_split[0].substring(0, 3));
+                    } else {
+                        System.out.println("Split 2 " + nombre_split2.length);
+                    }
+                    /*for(int x = 0; x < nombre_split.length; x++){
+                     System.out.println(nombre_split[x]);
+                     }*/
+                    //nombre_split = nombre.split(".");
+                    //System.out.println(nombre_split[1]);
+                    //System.out.println(nombre_split[0].split(".")[1]);
+                } else {
+                    System.out.println(nombre_split[0]);
+                }
+                break;
+            } else if (!nombre.startsWith("Pz") && !nombre.contains("-")) {
+                nombre_split = nombre.split(" ");
+                System.out.println(nombre_split[0]);
+                break;
+            }
+            //}
+            //palabras = utils.allLongestCommonSubstring(paradas.get(i).getNombreParada(), nombre);
+        }
+        //System.out.println("Palabras: " + palabras);
+        return direccion;
+    }
 }

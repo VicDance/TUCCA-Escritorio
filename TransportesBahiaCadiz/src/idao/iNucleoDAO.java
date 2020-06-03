@@ -13,8 +13,11 @@ import model.Nucleo;
  * @author Vicky
  */
 public interface iNucleoDAO {
-    public void insertar(int idMunicipio, char idZona, String nombreNucleo);
-    public void borrar(int idNucleo);
+    public void createTableAux();
+    public void insertar(Nucleo nucleo);
+    public void insertarAux(Nucleo nucleo);
+    public void dropTableAux();
     public List<Nucleo> getNucleo(String nombre);
     public List<Nucleo> getAllNucleos();
+    public List<Nucleo> getIntersection();
 }

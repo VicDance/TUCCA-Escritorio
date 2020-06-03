@@ -5,6 +5,7 @@
  */
 package idao;
 
+import java.util.List;
 import model.Viaje;
 
 /**
@@ -13,4 +14,6 @@ import model.Viaje;
  */
 public interface iViajeDAO {
     public void insertarViaje(Viaje viaje);
+    public List<Viaje> getAllViajes();
+    public List<Viaje> getViajesId(int idUsuario);
 }

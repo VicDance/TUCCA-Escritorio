@@ -8,6 +8,7 @@ package dao;
 import connector.Conector;
 import idao.iZonaDAO;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,39 +24,80 @@ import model.Zona;
  */
 public class ZonaDAOImp implements iZonaDAO {
 
-    Conector con/* = new Conector()*/;
-    public boolean insertado = false;
-    public boolean borrado = false;
-    
-    public ZonaDAOImp(){
-        
+    private Conector con;
+
+    public ZonaDAOImp() {
+
     }
-    
-    public ZonaDAOImp(Conector con){
+
+    public ZonaDAOImp(Conector con) {
         this.con = con;
     }
 
     @Override
-    public void insertar(String idZona, String nombre) {
+    public void createTableAux() {
+        Connection connection = con.getConnection();
+        PreparedStatement insertar;
+        String creaTabla = "CREATE TABLE IF NOT EXISTS `zona_aux` (\n"
+                + "  `idzona` varchar(1) NOT NULL,\n"
+                + "  `nombre_zona` varchar(45) NOT NULL,\n"
+                + "  PRIMARY KEY (`idzona`),\n"
+                + "  UNIQUE KEY `idzona_UNIQUE` (`idzona`)\n"
+                + ")";
         try {
-            //con.connect();
+            DatabaseMetaData data = connection.getMetaData();
+            ResultSet rs = data.getTables(null, null, "zona", null);
+            if (rs.next()) {
+                insertar = connection.prepareStatement(creaTabla);
+                insertar.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ZonaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void insertar(Zona zona) {
+        try {
             Connection connection = con.getConnection();
             PreparedStatement insertar;
-            //ResultSet rs;
             String sqlNuevaZona = "INSERT INTO zona (idZona, nombre_zona) "
                     + "VALUES (?, ?)";
             insertar = connection.prepareStatement(sqlNuevaZona);
-            insertar.setString(1, idZona);
-            insertar.setString(2, nombre);
-            if (insertar.executeUpdate() != 0) {
-                System.out.println("Insercción exitosa");
-                insertado = true;
-            }
+            insertar.setString(1, zona.getIdZona());
+            insertar.setString(2, zona.getNombreZona());
+            insertar.executeUpdate();
         } catch (SQLException ex) {
-            //Logger.getLogger(ClienteDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-            insertado = false;
-        } finally {
-            //con.disconect();
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void insertarAux(Zona zona) {
+        try {
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String sqlNuevaZona = "INSERT INTO zona_aux (idZona, nombre_zona) "
+                    + "VALUES (?, ?)";
+            insertar = connection.prepareStatement(sqlNuevaZona);
+            insertar.setString(1, zona.getIdZona());
+            insertar.setString(2, zona.getNombreZona());
+            insertar.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void dropTableAux(){
+        Connection connection = con.getConnection();
+        try {
+            PreparedStatement borrar;
+            String borraTabla = "DROP TABLE IF EXISTS zona_aux";
+            borrar = connection.prepareStatement(borraTabla);
+            borrar.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -91,8 +133,8 @@ public class ZonaDAOImp implements iZonaDAO {
         List<Zona> zonas = null;
         PreparedStatement buscar;
         try {
-            String buscaMunicipios = "SELECT * FROM zona";
-            buscar = connection.prepareStatement(buscaMunicipios);
+            String buscaZonas = "SELECT * FROM zona";
+            buscar = connection.prepareStatement(buscaZonas);
             ResultSet rs = buscar.executeQuery();
             zonas = new ArrayList<Zona>();
             while (rs.next()) {
@@ -103,57 +145,30 @@ public class ZonaDAOImp implements iZonaDAO {
             }
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            //con.disconect();
         }
         return zonas;
     }
 
     @Override
-    public void deleteId(Zona zona) {
-        //con.connect();
+    public List<Zona> getIntersection() {
         Connection connection = con.getConnection();
-        PreparedStatement borrar;
+        PreparedStatement buscar;
+        List<Zona> zonas = null;
+        String buscaParadas = "SELECT * FROM zona_aux aux WHERE aux.idzona NOT IN (SELECT z.idzona "
+                + "FROM zona z)";
         try {
-            String borraZona = "DELETE FROM zona WHERE idZona = ?";
-            borrar = connection.prepareStatement(borraZona);
-            borrar.setString(1, zona.getIdZona());
-            //borrar.setString(2, zona.getNombreZona());
-            if(borrar.executeUpdate() != 0){
-                System.out.println("borrado con exito");
-                borrado = true;
+            buscar = connection.prepareStatement(buscaParadas);
+            ResultSet rs = buscar.executeQuery();
+            zonas = new ArrayList<Zona>();
+            while (rs.next()) {
+                Zona zona = new Zona();
+                zona.setIdZona(rs.getString(1));
+                zona.setNombreZona(rs.getString(2));
+                zonas.add(zona);
             }
-            //borrar.executeUpdate();
         } catch (SQLException ex) {
-            //Logger.getLogger(ZonaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-            borrado = false;
-            ex.printStackTrace();
-        }finally{
-            //con.disconect();
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return zonas;
     }
-
-    @Override
-    public void deleteNombre(Zona zona) {
-        //con.connect();
-        Connection connection = con.getConnection();
-        PreparedStatement borrar;
-        try {
-            String borraZona = "DELETE FROM zona WHERE nombre_zona LIKE '%" + zona.getNombreZona() + "%'";
-            borrar = connection.prepareStatement(borraZona);
-            borrar.setString(2, zona.getNombreZona());
-            if(borrar.executeUpdate() != 0){
-                System.out.println("borrado con exito");
-                borrado = true;
-            }
-            //borrar.executeUpdate();
-        } catch (SQLException ex) {
-            //Logger.getLogger(ZonaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-            borrado = false;
-            ex.printStackTrace();
-        }finally{
-            //con.disconect();
-        }
-    }
-
 }

@@ -23,6 +23,8 @@ public class Viaje {
     String horaLlegada;
     String horaSalida;
     private Date fechaViaje;
+    
+    public Viaje(){}
 
     public Viaje(int idViaje, int idUsuario, int idLinea, int idMunicipio, double tarifa, String horaSalida, String horaLlegada, Date fechaViaje) {
         this.idViaje = idViaje;

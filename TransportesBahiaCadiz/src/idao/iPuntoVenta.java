@@ -13,6 +13,11 @@ import model.PuntoVenta;
  * @author Vicky
  */
 public interface iPuntoVenta {
+    public void createTableAux();
+    public void insertar(PuntoVenta punto);
+    public void insertarAux(PuntoVenta punto);
+    public void dropTableAux();
+    public List<PuntoVenta> getIntersection();
     public List<PuntoVenta> getAllPuntos();
     public List<PuntoVenta> getPuntoVentaId(int id);
     public List<PuntoVenta> getPuntosVentaNucleo(int idNucleo);

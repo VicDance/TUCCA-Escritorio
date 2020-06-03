@@ -12,11 +12,18 @@ package model;
 public class Nucleo {
     private int idNucleo;
     private int idMunicipio;
-    private char idZona;
+    private String idZona;
     private String nombreNucleo;
     
     public Nucleo(){
         
+    }
+
+    public Nucleo(int idNucleo, int idMunicipio, String idZona, String nombreNucleo) {
+        this.idNucleo = idNucleo;
+        this.idMunicipio = idMunicipio;
+        this.idZona = idZona;
+        this.nombreNucleo = nombreNucleo;
     }
 
     public int getIdNucleo() {
@@ -35,11 +42,11 @@ public class Nucleo {
         this.idMunicipio = idMunicipio;
     }
 
-    public char getIdZona() {
+    public String getIdZona() {
         return idZona;
     }
 
-    public void setIdZona(char idZona) {
+    public void setIdZona(String idZona) {
         this.idZona = idZona;
     }
 

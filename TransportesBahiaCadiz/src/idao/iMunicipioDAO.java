@@ -13,8 +13,12 @@ import model.Municipio;
  * @author Vicky
  */
 public interface iMunicipioDAO {
-    public void insertar(String nombreMunicipio);
-    public void borrar(int idMunicipio);
+    public void createTableAux();
+    public void insertar(Municipio muni);
+    public void insertarAux(Municipio muni);
+    public void dropTableAux();
     public List<Municipio> getMunicipio(String nombre);
     public List<Municipio> getAllMunicipios();
+    public List<Municipio> getIntersection();
+    public String getNombreMunicipio(int idMunicipio);
 }
