@@ -16,7 +16,7 @@ import model.Usuario;
  * @author Vicky
  */
 public interface iUsuarioDAO {
-    public void insertar(/*String nombre, String contraseña, String email, Date fecha_nac, int tfno*/Usuario usuario);    
+    public void insertar(Usuario usuario);    
     public void insertarCliente(int id);    
     public void insertarAdmin(int id);  
     public void borrar(int id);

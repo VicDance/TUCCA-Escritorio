@@ -46,13 +46,14 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
-            String sqlNuevaTarjeta = "INSERT INTO tarjeta (num_tarjeta, id_user, saldo, descuento) "
-                    + "VALUES (?, ?, ?, ?)";
+            String sqlNuevaTarjeta = "INSERT INTO tarjeta (num_tarjeta, id_user, saldo, descuento, id_codigo_qr) "
+                    + "VALUES (?, ?, ?, ?, ?)";
             insertar = connection.prepareStatement(sqlNuevaTarjeta);
             insertar.setLong(1, tarjeta.getNumTarjeta());
             insertar.setInt(2, tarjeta.getId());
             insertar.setDouble(3, tarjeta.getSaldo());
             insertar.setDouble(4, tarjeta.getDescuento());
+            insertar.setInt(5, tarjeta.getIdCodigo());
             if (insertar.executeUpdate() != 0) {
                 System.out.println("Insercción exitosa");
                 insertado = true;
@@ -60,9 +61,6 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         } catch (SQLException ex) {
             ex.printStackTrace();
             insertado = false;
-            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            //con.disconect();
         }
     }
 
@@ -151,8 +149,8 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
         List<TarjetaBus> tarjetas = null;
         PreparedStatement buscar;
         try {
-            String buscaMunicipios = "SELECT * FROM tarjeta";
-            buscar = connection.prepareStatement(buscaMunicipios);
+            String buscaTarjetas = "SELECT * FROM tarjeta";
+            buscar = connection.prepareStatement(buscaTarjetas);
             ResultSet rs = buscar.executeQuery();
             tarjetas = new ArrayList<TarjetaBus>();
             while (rs.next()) {
@@ -161,6 +159,7 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
                 tarjeta.setId(rs.getInt(2));
                 tarjeta.setSaldo(rs.getDouble(3));
                 tarjeta.setDescuento(rs.getDouble(4));
+                tarjeta.setIdCodigo(rs.getInt(5));
                 tarjetas.add(tarjeta);
             }
         } catch (SQLException ex) {
@@ -334,5 +333,17 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             ex.printStackTrace();
         }
         return recarga;
+    }
+    
+    @Override
+    public int getIdCodigo(long numTarjeta){
+        List<TarjetaBus> tarjetas = getAllTarjetas();
+        int idCodigo = 0;
+        for(int i = 0; i < tarjetas.size(); i++){
+            if(numTarjeta == tarjetas.get(i).getNumTarjeta()){
+                idCodigo = tarjetas.get(i).getIdCodigo();
+            }
+        }
+        return idCodigo;
     }
 }

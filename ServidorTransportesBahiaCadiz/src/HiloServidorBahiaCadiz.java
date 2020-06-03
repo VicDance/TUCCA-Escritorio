@@ -7,6 +7,7 @@
 import connector.Clave;
 import connector.Conector;
 import connector.Encriptar;
+import dao.CodigoDAOImp;
 import dao.UsuarioDAOImp;
 import dao.LineaDAOImp;
 import dao.MunicipioDAOImp;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Cliente;
+import model.CodigoQR;
 import model.Linea;
 import model.Municipio;
 import model.Nucleo;
@@ -78,19 +80,24 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private MunicipioDAOImp mdi;
     private NucleoDAOImp ndi;
     private ZonaDAOImp zdi;
-    //private ClienteDAOImp cdi;
     private TarjetaCreditoDAOImp tcdi;
     private TarjetaBusDAOImp tbdi;
     private TarjetasBusDAOImp tsbdi;
+    private CodigoDAOImp cdi;
     private ViajeDAOImp vdi;
     private String texto;
     private String[] datos;
     private Usuario usuario;
     private TarjetaBus tarjetaBus;
+    private CodigoQR qr;
     private long numAbsoluto;
     private String nombreUsuario;
     private String contraseña;
-    //private int cont = 1;
+    private int id;
+    private DateFormat dateFormat;
+    private java.util.Date horaActual;
+    private CodigoQR codigo;
+    private String horaCodigo;
 
     public HiloServidorBahiaCadiz(Socket cliente) {
         this.cliente = cliente;
@@ -451,6 +458,13 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         dataOut.flush();
                         break;
 
+                    case "nombre_municipio":
+                        id = dataIn.readInt();
+                        String nombre = mdi.getNombreMunicipio(id);
+                        dataOut.writeUTF(nombre);
+                        dataOut.flush();
+                        break;
+
                     case "puntos_venta_mapa":
                         int idNucleo = dataIn.readInt();
                         PuntoVentaDAOImp pvdi = new PuntoVentaDAOImp(con);
@@ -482,7 +496,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "busuario":
-                        int id = dataIn.readInt();
+                        id = dataIn.readInt();
                         udi.borrar(id);
                         if (udi.borrado) {
                             dataOut.writeUTF("correcto");
@@ -530,8 +544,15 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                     case "tarjeta_es":
                         texto = dataIn.readUTF();
                         datos = texto.split("/");
+                        dateFormat = new SimpleDateFormat("HH:mm:ss");
+                        horaActual = new java.util.Date();
+                        horaCodigo = dateFormat.format(horaActual);
+                        qr = new CodigoQR(horaCodigo);
+                        cdi = new CodigoDAOImp(con);
+                        cdi.insertar(qr);
+                        codigo = cdi.getCodigo(horaCodigo);
                         numAbsoluto = Math.abs(Long.parseLong(datos[0]));
-                        tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.1);
+                        tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.1, codigo.getIdCodigo());
                         tsbdi = new TarjetasBusDAOImp(con);
                         //tbdi = new TarjetaBusDAOImp();
                         tsbdi.insertarTarjeta(tarjetaBus);
@@ -552,8 +573,15 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         texto = dataIn.readUTF();
                         datos = texto.split("/");
                         if (compruebaFechaJubilado(Integer.parseInt(datos[1]))) {
+                            dateFormat = new SimpleDateFormat("HH:mm:ss");
+                            horaActual = new java.util.Date();
+                            horaCodigo = dateFormat.format(horaActual);
+                            qr = new CodigoQR(horaCodigo);
+                            cdi = new CodigoDAOImp(con);
+                            cdi.insertar(qr);
+                            codigo = cdi.getCodigo(horaCodigo);
                             numAbsoluto = Math.abs(Long.parseLong(datos[0]));
-                            tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.5);
+                            tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.5, codigo.getIdCodigo());
                             //tbdi = new TarjetaBusDAOImp();
                             tsbdi = new TarjetasBusDAOImp(con);
                             tsbdi.insertarTarjeta(tarjetaBus);
@@ -579,8 +607,15 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         texto = dataIn.readUTF();
                         datos = texto.split("/");
                         if (compruebaMes(Integer.parseInt(datos[1]))) {
+                            dateFormat = new SimpleDateFormat("HH:mm:ss");
+                            horaActual = new java.util.Date();
+                            horaCodigo = dateFormat.format(horaActual);
+                            qr = new CodigoQR(horaCodigo);
+                            cdi = new CodigoDAOImp(con);
+                            cdi.insertar(qr);
+                            codigo = cdi.getCodigo(horaCodigo);
                             numAbsoluto = Math.abs(Long.parseLong(datos[0]));
-                            tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.3);
+                            tarjetaBus = new TarjetaBus(numAbsoluto, Integer.parseInt(datos[1]), 0, 0.3, codigo.getIdCodigo());
                             //tbdi = new TarjetaBusDAOImp();
                             tsbdi = new TarjetasBusDAOImp(con);
                             tsbdi.insertarTarjeta(tarjetaBus);
@@ -661,10 +696,10 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         vdi = new ViajeDAOImp(con);
                         viajes = vdi.getAllViajes();
                         boolean existente = true;
-                        if (viajes.size() == 0) {
+                        if (viajes.isEmpty()) {
                             vdi.insertarViaje(viaje);
+                            existente = false;
                             if (vdi.insertado) {
-                                existente = false;
                                 dataOut.writeUTF("correcto");
                                 dataOut.flush();
                             } else {
@@ -673,25 +708,36 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             }
                         } else {
                             for (int i = 0; i < viajes.size(); i++) {
-                                if (viajes.get(i).getIdLinea() != viaje.getIdLinea() && viajes.get(i).getIdMunicipio()
-                                        != viaje.getIdMunicipio() && !viajes.get(i).getHoraSalida().equalsIgnoreCase(viaje.getHoraSalida())) {
-                                    vdi.insertarViaje(viaje);
-                                    if (vdi.insertado) {
-                                        existente = false;
-                                        dataOut.writeUTF("correcto");
-                                        dataOut.flush();
-                                    } else {
-                                        dataOut.writeUTF("incorrecto");
-                                        dataOut.flush();
-                                    }
+                                if (viajes.get(i).getIdLinea() == viaje.getIdLinea() && viajes.get(i).getIdMunicipio()
+                                        == viaje.getIdMunicipio() && viajes.get(i).getHoraSalida().equalsIgnoreCase(viaje.getHoraSalida())) {
+                                    existente = true;
                                     break;
                                 }
                             }
                             if (existente) {
                                 dataOut.writeUTF("correcto");
                                 dataOut.flush();
+                            } else {
+                                vdi.insertarViaje(viaje);
+                                existente = false;
+                                if (vdi.insertado) {
+                                    dataOut.writeUTF("correcto");
+                                    dataOut.flush();
+                                } else {
+                                    dataOut.writeUTF("incorrecto");
+                                    dataOut.flush();
+                                }
                             }
                         }
+                        break;
+
+                    case "actualiza_codigo":
+                        texto = dataIn.readUTF();
+                        datos = texto.split("/");
+                        id = tsbdi.getIdCodigo(Long.parseLong(datos[1]));
+                        qr = new CodigoQR(id, datos[0]);
+                        cdi = new CodigoDAOImp(con);
+                        cdi.updateHora(qr);
                         break;
 
                     case "actualiza_saldo":
@@ -721,7 +767,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         dataOut.writeUTF(direccion);
                         dataOut.flush();
                         break;
-                        
+
                     case "refrescar":
                         Inserts inserts = new Inserts(con);
                         inserts.insertaRegistros();

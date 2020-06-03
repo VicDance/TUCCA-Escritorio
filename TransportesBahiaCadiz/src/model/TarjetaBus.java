@@ -14,6 +14,7 @@ public class TarjetaBus {
     private int id;
     private double saldo;
     private double descuento;
+    private int idCodigo;
     
     public TarjetaBus(){}
     
@@ -22,6 +23,14 @@ public class TarjetaBus {
         this.id = id;
         this.saldo = saldo;
         this.descuento = descuento;
+    }
+    
+    public TarjetaBus(long numTarjeta, int id, double saldo, double descuento, int idCodigo){
+        this.numTarjeta = numTarjeta;
+        this.id = id;
+        this.saldo = saldo;
+        this.descuento = descuento;
+        this.idCodigo = idCodigo;
     }
 
     public long getNumTarjeta() {
@@ -56,8 +65,16 @@ public class TarjetaBus {
         this.descuento = descuento;
     }
 
+    public int getIdCodigo() {
+        return idCodigo;
+    }
+
+    public void setIdCodigo(int idCodigo) {
+        this.idCodigo = idCodigo;
+    }
+
     @Override
     public String toString() {
-        return "TarjetaBus{" + "numTarjeta=" + numTarjeta + ", id=" + id + ", saldo=" + saldo + ", descuento=" + descuento + '}';
+        return "TarjetaBus{" + "numTarjeta=" + numTarjeta + ", id=" + id + ", saldo=" + saldo + ", descuento=" + descuento + ", idCodigo=" + idCodigo + '}';
     }
 }

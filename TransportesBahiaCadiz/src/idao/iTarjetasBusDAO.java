@@ -29,4 +29,5 @@ public interface iTarjetasBusDAO {
     public void borrarTarjeta(int posicion);
     public boolean recargarTarjeta(long numTarjeta, double saldo);
     public boolean restaSaldo(long numTarjeta, double saldo);
+    public int getIdCodigo(long numTarjeta);
 }
