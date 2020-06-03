@@ -48,6 +48,7 @@ import model.TarjetaJubilado;
 import model.Usuario;
 import model.Viaje;
 import model.Zona;
+import scripts.Inserts;
 
 /**
  *
@@ -719,6 +720,11 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         System.out.println(direccion);
                         dataOut.writeUTF(direccion);
                         dataOut.flush();
+                        break;
+                        
+                    case "refrescar":
+                        Inserts inserts = new Inserts(con);
+                        inserts.insertaRegistros();
                         break;
 
                     case "exit":

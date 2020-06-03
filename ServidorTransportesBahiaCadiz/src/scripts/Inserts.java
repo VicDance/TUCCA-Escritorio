@@ -43,28 +43,46 @@ import org.json.JSONObject;
  */
 public class Inserts {
 
-    static ParadaDAOImp pdi;
-    static LineaDAOImp ldi;
-    static CorrespondeDAOImp cdi;
-    static Conector con;
-    static URL url;
+    //static ParadaDAOImp pdi;
+    private LineaDAOImp ldi;
+    //static CorrespondeDAOImp cdi;
+    private Conector con;
+    private URL url;
+    
+    public Inserts(){
+    }
+    
+    public Inserts(Conector con){
+        this.con = con;
+    }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
 
         con = new Conector();
         con.connect();
-        //ingresaParadas();
-        //ingresaLineas();
-        //ingresaCorresponde();
-        //ingresaMunicipios();
-        //ingresaLugaresInteres();
-        //ingresaZonas();
-        //ingresaNucleos();
+        ingresaParadas();
+        ingresaLineas();
+        ingresaCorresponde();
+        ingresaMunicipios();
+        ingresaLugaresInteres();
+        ingresaZonas();
+        ingresaNucleos();
+        ingresaPuntosVenta();
+    }*/
+    
+    public void insertaRegistros(){
+        ingresaParadas();
+        ingresaLineas();
+        ingresaCorresponde();
+        ingresaMunicipios();
+        ingresaLugaresInteres();
+        ingresaZonas();
+        ingresaNucleos();
         ingresaPuntosVenta();
     }
 
-    private static void ingresaCorresponde() {
-        cdi = new CorrespondeDAOImp(con);
+    /*private static*/private  void ingresaCorresponde() {
+        CorrespondeDAOImp cdi = new CorrespondeDAOImp(con);
         //pdi = new ParadaDAOImp(con);
         ldi = new LineaDAOImp(con);
         int idLinea = 0;
@@ -125,8 +143,8 @@ public class Inserts {
         }
     }
 
-    private static void ingresaParadas() {
-        pdi = new ParadaDAOImp(con);
+    /*private static*/private void ingresaParadas() {
+        ParadaDAOImp pdi = new ParadaDAOImp(con);
         JSONObject objetoJson = null;
         try {
             pdi.dropTablaParadas();
@@ -175,7 +193,7 @@ public class Inserts {
         }
     }
 
-    private static void ingresaLineas() {
+    /*private static*/private void ingresaLineas() {
         JSONObject objetoJson = null;
         /*LineaDAOImp */
         ldi = new LineaDAOImp(con);
@@ -228,7 +246,7 @@ public class Inserts {
         }
     }
 
-    private static void ingresaLugaresInteres() {
+    /*private static*/private void ingresaLugaresInteres() {
         LugarInteresDAOImp lidi = new LugarInteresDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -293,7 +311,7 @@ public class Inserts {
         }
     }
     
-    private static void ingresaMunicipios() {
+    /*private static*/private void ingresaMunicipios() {
         MunicipioDAOImp mdi = new MunicipioDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -343,7 +361,7 @@ public class Inserts {
         }
     }
     
-    private static void ingresaZonas(){
+    /*private static*/private void ingresaZonas(){
         ZonaDAOImp zdi = new ZonaDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -393,7 +411,7 @@ public class Inserts {
         }
     }
     
-    private static void ingresaNucleos(){
+    /*private static*/private void ingresaNucleos(){
         NucleoDAOImp ndi = new NucleoDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -444,7 +462,7 @@ public class Inserts {
         }
     }
     
-    private static void ingresaPuntosVenta(){
+    /*private static*/private void ingresaPuntosVenta(){
         PuntoVentaDAOImp pvdi = new PuntoVentaDAOImp(con);
         JSONObject objetoJson = null;
 

@@ -66,10 +66,7 @@ public class CorrespondeDAOImp implements iCorrespondeDAO{
             insertar = connection.prepareStatement(insertaCorresponde);
             insertar.setInt(1, idLinea);
             insertar.setInt(2, idParada);
-            if (insertar.executeUpdate() != 0) {
-                //System.out.println("Insercción exitosa");
-                //insertado = true;
-            }
+            insertar.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
             ex.getMessage();
@@ -88,10 +85,7 @@ public class CorrespondeDAOImp implements iCorrespondeDAO{
             insertar = connection.prepareStatement(insertaCorresponde);
             insertar.setInt(1, idLinea);
             insertar.setInt(2, idParada);
-            if (insertar.executeUpdate() != 0) {
-                //System.out.println("Insercción exitosa");
-                //insertado = true;
-            }
+            insertar.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
             ex.getMessage();

@@ -59,44 +59,30 @@ public class MunicipioDAOImp implements iMunicipioDAO {
     @Override
     public void insertar(Municipio muni) {
         try {
-            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String insertaMuni = "INSERT INTO municipio (idmunicipio, nombre_municipio) VALUES (?, ?)";
             insertar = connection.prepareStatement(insertaMuni);
             insertar.setInt(1, muni.getIdMunicipio());
             insertar.setString(2, muni.getNombreMunicipio());
-            if (insertar.executeUpdate() != 0) {
-                System.out.println("Insercción exitosa");
-                insertado = true;
-            }
+            insertar.executeUpdate();
         } catch (SQLException ex) {
-            //Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-            insertado = false;
-        } finally {
-            //con.disconect();
+            ex.printStackTrace();
         }
     }
     
     @Override
     public void insertarAux(Municipio muni) {
         try {
-            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             String insertaMuni = "INSERT INTO municipio_aux (idmunicipio, nombre_municipio) VALUES (?, ?)";
             insertar = connection.prepareStatement(insertaMuni);
             insertar.setInt(1, muni.getIdMunicipio());
             insertar.setString(2, muni.getNombreMunicipio());
-            if (insertar.executeUpdate() != 0) {
-                System.out.println("Insercción exitosa");
-                insertado = true;
-            }
-        } catch (SQLException ex) {
-            //Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-            insertado = false;
-        } finally {
-            //con.disconect();
+            insertar.executeUpdate();
+        }catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -108,7 +94,6 @@ public class MunicipioDAOImp implements iMunicipioDAO {
             String borraTabla = "DROP TABLE IF EXISTS municipio_aux";
             borrar = connection.prepareStatement(borraTabla);
             borrar.executeUpdate();
-
         } catch (SQLException ex) {
             Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -116,7 +101,6 @@ public class MunicipioDAOImp implements iMunicipioDAO {
 
     @Override
     public List<Municipio> getMunicipio(String nombre) {
-        //con.connect();
         Connection connection = con.getConnection();
         List<Municipio> municipios = null;
         PreparedStatement buscar;
@@ -134,13 +118,11 @@ public class MunicipioDAOImp implements iMunicipioDAO {
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //con.disconect();
         return municipios;
     }
 
     @Override
     public List<Municipio> getAllMunicipios() {
-        //con.connect();
         Connection connection = con.getConnection();
         List<Municipio> municipios = null;
         PreparedStatement buscar;
@@ -158,7 +140,6 @@ public class MunicipioDAOImp implements iMunicipioDAO {
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //con.disconect();
         return municipios;
     }
     

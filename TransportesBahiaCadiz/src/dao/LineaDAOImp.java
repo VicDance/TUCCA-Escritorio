@@ -61,7 +61,6 @@ public class LineaDAOImp implements iLineaDAO {
 
     @Override
     public void insertar(Linea linea) {
-        insertado = false;
         try {
             Connection connection = con.getConnection();
             PreparedStatement insertar;
@@ -70,13 +69,9 @@ public class LineaDAOImp implements iLineaDAO {
             insertar = connection.prepareStatement(insertaLinea);
             insertar.setInt(1, linea.getIdLinea());
             insertar.setString(2, linea.getNombreLinea());
-            if (insertar.executeUpdate() != 0) {
-                System.out.println("Insercción exitosa");
-                insertado = true;
-            }
+            insertar.executeUpdate();
         } catch (SQLException ex) {
-            //Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-            insertado = false;
+            ex.printStackTrace();
         }
     }
 
@@ -91,13 +86,9 @@ public class LineaDAOImp implements iLineaDAO {
             insertar = connection.prepareStatement(insertaLinea);
             insertar.setInt(1, linea.getIdLinea());
             insertar.setString(2, linea.getNombreLinea());
-            if (insertar.executeUpdate() != 0) {
-                System.out.println("Insercción exitosa");
-                insertado = true;
-            }
+            insertar.executeUpdate();
         } catch (SQLException ex) {
-            //Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-            insertado = false;
+            ex.printStackTrace();
         }
     }
 

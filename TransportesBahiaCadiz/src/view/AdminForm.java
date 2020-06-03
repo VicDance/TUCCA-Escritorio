@@ -5,6 +5,7 @@
  */
 package view;
 
+import connector.Conector;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import scripts.Inserts;
 import static view.LoginForm.dataIn;
 import static view.LoginForm.dataOut;
 
@@ -33,6 +35,7 @@ public class AdminForm extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         setColumnasUsuarios();
         setFilasUsuarios();
+        lblTitle.setText(lblUsuarios.getText());
     }
 
     private void setColumnasUsuarios() {
@@ -310,6 +313,7 @@ public class AdminForm extends javax.swing.JFrame {
         }
     }
 
+    //TODO Cambiar para que solo se pueda añadir revisor
     private void añade(String campo) {
         try {
             switch (campo) {
@@ -355,97 +359,6 @@ public class AdminForm extends javax.swing.JFrame {
         df.setLocationRelativeTo(null);
     }
 
-    private void muestraCamposLinea() {
-        inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" línea"));
-        inf.getLblUsuario().setAlignmentX(LEFT_ALIGNMENT);
-        inf.getLblUsuario().setHorizontalTextPosition((int) LEFT_ALIGNMENT);
-        inf.getLblUsuario().setText("Nombre línea");
-        inf.getLblContraseña().setVisible(false);
-        inf.getLblContraseña().setEnabled(false);
-        inf.getTxtPassword().setVisible(false);
-        inf.getTxtPassword().setEnabled(false);
-        inf.getLblRepetirContraseña().setVisible(false);
-        inf.getLblRepetirContraseña().setEnabled(false);
-        inf.getTxtRepetirContraseña().setVisible(false);
-        inf.getTxtRepetirContraseña().setEnabled(false);
-        inf.getLblCorreo().setVisible(false);
-        inf.getLblCorreo().setEnabled(false);
-        inf.getTxtCorreo().setVisible(false);
-        inf.getTxtCorreo().setEnabled(false);
-        inf.getLblTfno().setVisible(false);
-        inf.getLblTfno().setEnabled(false);
-        inf.getTxtTfno().setVisible(false);
-        inf.getTxtTfno().setEnabled(false);
-        inf.getLblFechaNac().setVisible(false);
-        inf.getLblFechaNac().setEnabled(false);
-        inf.getDateChooserNacimiento().setVisible(false);
-        inf.getDateChooserNacimiento().setEnabled(false);
-        inf.getBtnInsertar().setLocation(inf.getBtnInsertar().getX(), inf.getBtnInsertar().getY() + 200);
-        /*inf.getjPanel2().setSize(inf.getjPanel2().getWidth(), 400);*/
-        inf.setSize(inf.getjPanel2().getWidth(), 400);
-    }
-
-    private void muestraCamposMunicipio() {
-        inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" municipio"));
-        inf.getLblUsuario().setAlignmentX(LEFT_ALIGNMENT);
-        inf.getLblUsuario().setHorizontalTextPosition((int) LEFT_ALIGNMENT);
-        inf.getLblUsuario().setText("Nombre municipio");
-        inf.getLblContraseña().setVisible(false);
-        inf.getLblContraseña().setEnabled(false);
-        inf.getTxtPassword().setVisible(false);
-        inf.getTxtPassword().setEnabled(false);
-        inf.getLblRepetirContraseña().setVisible(false);
-        inf.getLblRepetirContraseña().setEnabled(false);
-        inf.getTxtRepetirContraseña().setVisible(false);
-        inf.getTxtRepetirContraseña().setEnabled(false);
-        inf.getLblCorreo().setVisible(false);
-        inf.getLblCorreo().setEnabled(false);
-        inf.getTxtCorreo().setVisible(false);
-        inf.getTxtCorreo().setEnabled(false);
-        inf.getLblTfno().setVisible(false);
-        inf.getLblTfno().setEnabled(false);
-        inf.getTxtTfno().setVisible(false);
-        inf.getTxtTfno().setEnabled(false);
-        inf.getLblFechaNac().setVisible(false);
-        inf.getLblFechaNac().setEnabled(false);
-        inf.getDateChooserNacimiento().setVisible(false);
-        inf.getDateChooserNacimiento().setEnabled(false);
-        inf.getBtnInsertar().setLocation(inf.getBtnInsertar().getX(), inf.getBtnInsertar().getY() + 200);
-        /*inf.getjPanel2().setSize(inf.getjPanel2().getWidth(), 400);*/
-        inf.setSize(inf.getjPanel2().getWidth(), 400);
-    }
-
-    private void muestraCamposZonas() {
-        inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" zonas"));
-        inf.getLblUsuario().setAlignmentX(LEFT_ALIGNMENT);
-        inf.getLblUsuario().setHorizontalTextPosition((int) LEFT_ALIGNMENT);
-        inf.getLblUsuario().setText("Id zona");
-        inf.getLblContraseña().setVisible(false);
-        inf.getLblContraseña().setEnabled(false);
-        inf.getTxtPassword().setVisible(false);
-        inf.getTxtPassword().setEnabled(false);
-        inf.getLblRepetirContraseña().setVisible(false);
-        inf.getLblRepetirContraseña().setEnabled(false);
-        inf.getTxtRepetirContraseña().setVisible(false);
-        inf.getTxtRepetirContraseña().setEnabled(false);
-        inf.getLblCorreo().setText("Nombre zona");
-        /*inf.getLblCorreo().setVisible(false);
-         inf.getLblCorreo().setEnabled(false);
-         inf.getTxtCorreo().setVisible(false);
-         inf.getTxtCorreo().setEnabled(false);*/
-        inf.getLblTfno().setVisible(false);
-        inf.getLblTfno().setEnabled(false);
-        inf.getTxtTfno().setVisible(false);
-        inf.getTxtTfno().setEnabled(false);
-        inf.getLblFechaNac().setVisible(false);
-        inf.getLblFechaNac().setEnabled(false);
-        inf.getDateChooserNacimiento().setVisible(false);
-        inf.getDateChooserNacimiento().setEnabled(false);
-        inf.getBtnInsertar().setLocation(inf.getBtnInsertar().getX(), inf.getBtnInsertar().getY() + 200);
-        /*inf.getjPanel2().setSize(inf.getjPanel2().getWidth(), 400);*/
-        inf.setSize(inf.getjPanel2().getWidth(), 400);
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -459,6 +372,7 @@ public class AdminForm extends javax.swing.JFrame {
         lblClose = new javax.swing.JLabel();
         lblMin = new javax.swing.JLabel();
         lblMenu = new javax.swing.JLabel();
+        lblTitle = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         pnlLateral = new javax.swing.JPanel();
         lblUsuarios = new javax.swing.JLabel();
@@ -477,6 +391,8 @@ public class AdminForm extends javax.swing.JFrame {
         btnBorrar = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         txtBusqueda = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        lblRefresh = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(44, 62, 80));
@@ -511,6 +427,9 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
+        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        lblTitle.setForeground(new java.awt.Color(255, 255, 255));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -518,6 +437,8 @@ public class AdminForm extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(83, 83, 83)
+                .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblMin)
                 .addGap(31, 31, 31)
@@ -532,7 +453,12 @@ public class AdminForm extends javax.swing.JFrame {
                     .addComponent(lblClose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(lblMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(10, 10, 10)))
                 .addGap(0, 15, Short.MAX_VALUE))
         );
 
@@ -728,7 +654,7 @@ public class AdminForm extends javax.swing.JFrame {
             .addComponent(lblCabecera, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(lblRegular, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(lblNucleos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(lblParadas, javax.swing.GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE)
+            .addComponent(lblParadas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(lblZonas, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         pnlLateralLayout.setVerticalGroup(
@@ -814,6 +740,16 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("Refrescar datos");
+
+        lblRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/refresh.png"))); // NOI18N
+        lblRefresh.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblRefreshMouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -821,32 +757,42 @@ public class AdminForm extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(pnlLateral, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 739, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(172, 172, 172)
-                                .addComponent(btnAñadir, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(145, 145, 145)
-                                .addComponent(btnBorrar, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(291, 291, 291)
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtBusqueda, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addGap(172, 172, 172)
+                        .addComponent(btnAñadir, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(145, 145, 145)
+                        .addComponent(btnBorrar, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtBusqueda, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(43, 43, 43))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 718, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlLateral, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(txtBusqueda, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtBusqueda, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel1))
+                            .addComponent(lblRefresh, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 403, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -859,16 +805,15 @@ public class AdminForm extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0))
+                .addGap(0, 0, 0)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -893,25 +838,23 @@ public class AdminForm extends javax.swing.JFrame {
         if (posicion > -1) {
             Animacion.Animacion.mover_izquierda(0, -188, 2, 2, pnlLateral);
             jPanel2.setSize(jPanel2.getWidth() + 142, jPanel2.getHeight());
-            jScrollPane1.setBounds(jScrollPane1.getX() - 142, jScrollPane1.getY(), jPanel2.getWidth(), jScrollPane1.getHeight());
-            table.setSize(jPanel2.getWidth(), table.getHeight());
+            jScrollPane1.setBounds(jScrollPane1.getX() - 142, jScrollPane1.getY(), jPanel2.getWidth() - 155, jScrollPane1.getHeight());
+            table.setSize(jScrollPane1.getWidth(), table.getHeight());
 
         } else {
             Animacion.Animacion.mover_derecha(-188, 0, 2, 2, pnlLateral);
             jPanel2.setSize(jPanel2.getWidth() - 142, jPanel2.getHeight());
-            jScrollPane1.setBounds(jScrollPane1.getX() + 142, jScrollPane1.getY(), jPanel2.getWidth() - 142, jScrollPane1.getHeight());
+            jScrollPane1.setBounds(jScrollPane1.getX() + 142, jScrollPane1.getY(), jPanel2.getWidth() - 155, jScrollPane1.getHeight());
             table.setSize(jPanel2.getWidth(), table.getHeight());
         }
     }//GEN-LAST:event_lblMenuMouseClicked
 
     private void lblUsuariosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUsuariosMouseEntered
-        lblUsuarios.setBackground(new Color(44, 62, 80));
-        //lblUsuarios.setForeground(new Color(255, 255, 255));
+        lblUsuarios.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblUsuariosMouseEntered
 
     private void lblUsuariosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUsuariosMouseExited
         lblUsuarios.setBackground(new Color(44, 62, 100));
-        //lblUsuarios.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblUsuariosMouseExited
 
     private void lblUsuariosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUsuariosMouseClicked
@@ -919,31 +862,29 @@ public class AdminForm extends javax.swing.JFrame {
         setFilasUsuarios();
         btnAñadir.setEnabled(true);
         btnBorrar.setEnabled(true);
+        lblTitle.setText(lblUsuarios.getText());
     }//GEN-LAST:event_lblUsuariosMouseClicked
 
     private void lblRevisorMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseEntered
-        lblRevisor.setBackground(new Color(44, 62, 80));
-        //lblRevisor.setForeground(new Color(255, 255, 255));
+        lblRevisor.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblRevisorMouseEntered
 
     private void lblRevisorMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseExited
         lblRevisor.setBackground(new Color(44, 62, 100));
-        //lblRevisor.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblRevisorMouseExited
 
     private void lblRevisorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseClicked
         btnAñadir.setEnabled(true);
         btnBorrar.setEnabled(true);
+        lblTitle.setText(lblUsuarios.getText());
     }//GEN-LAST:event_lblRevisorMouseClicked
 
     private void lblClienteMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseEntered
-        lblCliente.setBackground(new Color(44, 62, 80));
-        //lblCliente.setForeground(new Color(255, 255, 255));
+        lblCliente.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblClienteMouseEntered
 
     private void lblClienteMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseExited
         lblCliente.setBackground(new Color(44, 62, 100));
-        //lblCliente.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblClienteMouseExited
 
     private void lblLineasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLineasMouseClicked
@@ -951,16 +892,15 @@ public class AdminForm extends javax.swing.JFrame {
         setFilasLineas();
         btnAñadir.setEnabled(false);
         btnBorrar.setEnabled(false);
+        lblTitle.setText(lblLineas.getText());
     }//GEN-LAST:event_lblLineasMouseClicked
 
     private void lblLineasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLineasMouseEntered
-        lblLineas.setBackground(new Color(44, 62, 80));
-        //lblLineas.setForeground(new Color(255, 255, 255));
+        lblLineas.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblLineasMouseEntered
 
     private void lblLineasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLineasMouseExited
         lblLineas.setBackground(new Color(44, 62, 100));
-        //lblLineas.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblLineasMouseExited
 
     private void lblMunicipiosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMunicipiosMouseClicked
@@ -968,44 +908,39 @@ public class AdminForm extends javax.swing.JFrame {
         setFilasMunicipios();
         btnAñadir.setEnabled(false);
         btnBorrar.setEnabled(false);
+        lblTitle.setText(lblMunicipios.getText());
     }//GEN-LAST:event_lblMunicipiosMouseClicked
 
     private void lblMunicipiosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMunicipiosMouseEntered
-        lblMunicipios.setBackground(new Color(44, 62, 80));
-        //lblMunicipios.setForeground(new Color(255, 255, 255));
+        lblMunicipios.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblMunicipiosMouseEntered
 
     private void lblMunicipiosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMunicipiosMouseExited
         lblMunicipios.setBackground(new Color(44, 62, 100));
-        //lblMunicipios.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblMunicipiosMouseExited
 
     private void lblCabeceraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseClicked
-        // TODO add your handling code here:
+        lblTitle.setText(lblParadas.getText());
     }//GEN-LAST:event_lblCabeceraMouseClicked
 
     private void lblCabeceraMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseEntered
-        lblCabecera.setBackground(new Color(44, 62, 80));
-        //lblCabecera.setForeground(new Color(255, 255, 255));
+        lblCabecera.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblCabeceraMouseEntered
 
     private void lblCabeceraMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseExited
         lblCabecera.setBackground(new Color(44, 62, 100));
-        //lblCabecera.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblCabeceraMouseExited
 
     private void lblRegularMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseClicked
-        // TODO add your handling code here:
+        lblTitle.setText(lblParadas.getText());
     }//GEN-LAST:event_lblRegularMouseClicked
 
     private void lblRegularMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseEntered
-        lblRegular.setBackground(new Color(44, 62, 80));
-        //lblRegular.setForeground(new Color(255, 255, 255));
+        lblRegular.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblRegularMouseEntered
 
     private void lblRegularMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseExited
         lblRegular.setBackground(new Color(44, 62, 100));
-        //lblRegular.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblRegularMouseExited
 
     private void lblClienteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseClicked
@@ -1013,6 +948,7 @@ public class AdminForm extends javax.swing.JFrame {
         setFilasClienttes();
         btnAñadir.setEnabled(true);
         btnBorrar.setEnabled(true);
+        lblTitle.setText(lblUsuarios.getText());
     }//GEN-LAST:event_lblClienteMouseClicked
 
     private void lblParadasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseClicked
@@ -1020,16 +956,15 @@ public class AdminForm extends javax.swing.JFrame {
         setFilasParadas();
         btnAñadir.setEnabled(false);
         btnBorrar.setEnabled(false);
+        lblTitle.setText(lblParadas.getText());
     }//GEN-LAST:event_lblParadasMouseClicked
 
     private void lblParadasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseEntered
-        lblParadas.setBackground(new Color(44, 62, 80));
-        //lblParadas.setForeground(new Color(255, 255, 255));
+        lblParadas.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblParadasMouseEntered
 
     private void lblParadasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseExited
         lblParadas.setBackground(new Color(44, 62, 100));
-        //lblParadas.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblParadasMouseExited
 
     private void lblNucleosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblNucleosMouseClicked
@@ -1037,16 +972,15 @@ public class AdminForm extends javax.swing.JFrame {
         setFilasNucleos();
         btnAñadir.setEnabled(false);
         btnBorrar.setEnabled(false);
+        lblTitle.setText(lblNucleos.getText());
     }//GEN-LAST:event_lblNucleosMouseClicked
 
     private void lblNucleosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblNucleosMouseEntered
-        lblNucleos.setBackground(new Color(44, 62, 80));
-        //lblNucleos.setForeground(new Color(255, 255, 255));
+        lblNucleos.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblNucleosMouseEntered
 
     private void lblNucleosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblNucleosMouseExited
         lblNucleos.setBackground(new Color(44, 62, 100));
-        //lblNucleos.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblNucleosMouseExited
 
     private void txtBusquedaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBusquedaKeyPressed
@@ -1099,21 +1033,29 @@ public class AdminForm extends javax.swing.JFrame {
         setFilasZonas();
         btnAñadir.setEnabled(false);
         btnBorrar.setEnabled(false);
+        lblTitle.setText(lblZonas.getText());
     }//GEN-LAST:event_lblZonasMouseClicked
 
     private void lblZonasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblZonasMouseEntered
-        lblZonas.setBackground(new Color(44, 62, 80));
-        //lblZonas.setForeground(new Color(255, 255, 255));
+        lblZonas.setBackground(new Color(248,148,6));
     }//GEN-LAST:event_lblZonasMouseEntered
 
     private void lblZonasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblZonasMouseExited
         lblZonas.setBackground(new Color(44, 62, 100));
-        //lblZonas.setForeground(new Color(0, 0, 0));
     }//GEN-LAST:event_lblZonasMouseExited
 
     private void btnBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarActionPerformed
         mostrarBorrado();
     }//GEN-LAST:event_btnBorrarActionPerformed
+
+    private void lblRefreshMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRefreshMouseClicked
+        try {
+            dataOut.writeUTF("refrescar");
+            dataOut.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_lblRefreshMouseClicked
 
     /**
      * @param args the command line arguments
@@ -1154,6 +1096,7 @@ public class AdminForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAñadir;
     private javax.swing.JButton btnBorrar;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -1166,8 +1109,10 @@ public class AdminForm extends javax.swing.JFrame {
     private javax.swing.JLabel lblMunicipios;
     private javax.swing.JLabel lblNucleos;
     private javax.swing.JLabel lblParadas;
+    private javax.swing.JLabel lblRefresh;
     private javax.swing.JLabel lblRegular;
     private javax.swing.JLabel lblRevisor;
+    private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblUsuarios;
     private javax.swing.JLabel lblZonas;
     private javax.swing.JPanel pnlLateral;
