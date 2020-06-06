@@ -33,8 +33,18 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.swing.JOptionPane;
 import model.Cliente;
 import model.CodigoQR;
 import model.Linea;
@@ -51,6 +61,7 @@ import model.Usuario;
 import model.Viaje;
 import model.Zona;
 import scripts.Inserts;
+import view.InsertForm;
 
 /**
  *
@@ -70,7 +81,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private List<Nucleo> nucleos;
     private List<Zona> zonas;
     private List<TarjetaCredito> tarjetas;
-    private List<Usuario> clientes;
+    private List<Cliente> clientes;
     private List<TarjetaEstandar> estandares;
     private List<TarjetaEstudiante> estudiantes;
     private List<TarjetaJubilado> jubilados;
@@ -152,6 +163,22 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                                     dataOut.writeUTF("incorrecto");
                                     dataOut.flush();
                                 }
+                            } else {
+                                encriptada = encriptar.encriptar(datos[2], CLAVE);
+                                usuario = new Usuario(datos[1], encriptada, datos[3], new Date(Long.parseLong(datos[4])),
+                                        Integer.parseInt(datos[5]));
+                                udi.insertar(usuario);
+                                Usuario us = udi.getId(datos[1]);
+                                udi.insertarRevisor(us.getId());
+                                if (udi.insertado) {
+                                    dataOut.writeUTF("correcto");
+                                    dataOut.flush();
+                                } else {
+                                    dataOut.writeUTF("incorrecto");
+                                    dataOut.flush();
+                                }
+
+                                sendEmail(datos[3], datos[1], datos[2]);
                             }
                         }
                         break;
@@ -171,7 +198,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         usuarios = udi.getAll();
                         dataOut.writeInt(usuarios.size());
                         dataOut.flush();
-                        System.out.println(usuarios.size());
+                        //System.out.println(usuarios.size());
                         for (Usuario usuario1 : usuarios) {
                             dataOut.writeUTF(usuario1.getId() + "/" + usuario1.getNombre() + "/" + usuario1.getCorreo() + "/"
                                     + usuario1.getFecha_nac() + "/" + usuario1.getTfno());
@@ -180,11 +207,11 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "clientes":
-                        usuarios = udi.getAllClientes();
+                        clientes = udi.getAllClientes();
                         dataOut.writeInt(usuarios.size());
                         dataOut.flush();
                         //System.out.println(clientes.size());
-                        for (Usuario cli : usuarios) {
+                        for (Cliente cli : clientes) {
                             dataOut.writeUTF(cli.getId() + "/" + cli.getNombre() + "/" + cli.getCorreo() + "/"
                                     + cli.getFecha_nac() + "/" + cli.getTfno());
                             dataOut.flush();
@@ -315,7 +342,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             String nombreLinea = ldi.getNombreLinea(viajes.get(i).getIdLinea());
                             String nombreMunicipio = mdi.getNombreMunicipio(viajes.get(i).getIdMunicipio());
                             dataOut.writeUTF(nombreLinea + "/" + nombreMunicipio + "/"
-                                    + viajes.get(i).getHoraSalida());
+                                    + viajes.get(i).getHoraSalida() + "/" + viajes.get(i).getFechaViaje().getTime());
                             dataOut.flush();
                         }
                         break;
@@ -521,7 +548,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             dataOut.flush();
                         }
                         break;
-                        
+
                     case "btarjetaCredito":
                         int pos = dataIn.readInt();
                         System.out.println(pos);
@@ -699,12 +726,13 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         java.sql.Date date = new java.sql.Date(d.getTime());
                         Viaje viaje = new Viaje(Integer.parseInt(datos[0]), Integer.parseInt(datos[1]),
                                 Integer.parseInt(datos[2]), Double.parseDouble(datos[3]), datos[4], datos[5], date);
+                        System.out.println("viaje " + viaje);
                         vdi = new ViajeDAOImp(con);
                         viajes = vdi.getAllViajes();
-                        boolean existente = true;
+                        boolean existente = false;
                         if (viajes.isEmpty()) {
                             vdi.insertarViaje(viaje);
-                            existente = false;
+                            //existente = false;
                             if (vdi.insertado) {
                                 dataOut.writeUTF("correcto");
                                 dataOut.flush();
@@ -715,15 +743,17 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         } else {
                             for (int i = 0; i < viajes.size(); i++) {
                                 if (viajes.get(i).getIdLinea() == viaje.getIdLinea() && viajes.get(i).getIdMunicipio()
-                                        == viaje.getIdMunicipio() && viajes.get(i).getHoraSalida().equalsIgnoreCase(viaje.getHoraSalida())) {
+                                        == viaje.getIdMunicipio() && compruebaHora(viajes.get(i).getHoraSalida(), viaje.getHoraSalida())) {
                                     existente = true;
                                     break;
                                 }
                             }
                             if (existente) {
+                                System.out.println("existente");
                                 dataOut.writeUTF("correcto");
                                 dataOut.flush();
                             } else {
+                                System.out.println("no existente");
                                 vdi.insertarViaje(viaje);
                                 existente = false;
                                 if (vdi.insertado) {
@@ -741,7 +771,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         texto = dataIn.readUTF();
                         datos = texto.split("/");
                         id = tsbdi.getIdCodigo(Long.parseLong(datos[1]));
-                        qr = new CodigoQR(id, datos[0]);
+                        qr = new CodigoQR(id, datos[0], datos[2]);
                         cdi = new CodigoDAOImp(con);
                         cdi.updateHora(qr);
                         break;
@@ -762,6 +792,22 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                                 dataOut.writeUTF("incorrecto");
                                 dataOut.flush();
                             }
+                        }
+                        break;
+
+                    case "codigo":
+                        texto = dataIn.readUTF();
+                        cdi = new CodigoDAOImp(con);
+                        if (!cdi.getAllCodigos().isEmpty()) {
+                            id = tsbdi.getIdCodigo(Long.parseLong(texto));
+                            System.out.println(id);
+                            CodigoQR qr = cdi.getCodigoById(id);
+                            if (qr.getMensaje() == null) {
+                                dataOut.writeUTF("Sin uso");
+                            } else {
+                                dataOut.writeUTF(qr.getMensaje());
+                            }
+                            dataOut.flush();
                         }
                         break;
 
@@ -803,39 +849,50 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private boolean comprobarCredenciales(String cadena, String usuario, String contraseña) {
         boolean correcto = false;
         usuarios = udi.getAll();
-        //cdi = new ClienteDAOImp();
         clientes = udi.getAllClientes();
         encriptar = new Encriptar();
         List<Cliente> admins = udi.getAllAdmins();
-        for (int i = 0; i < usuarios.size(); i++) {
-            String convertida = encriptar.encriptar(contraseña, CLAVE);
-            if (cadena.contains("Admin")) {
-                for (int x = 0; x < admins.size(); x++) {
-                    if (usuario.equals(usuarios.get(i).getNombre()) && convertida.equals(usuarios.get(i).getContraseña())
-                            && admins.get(x).getIdCliente() == usuarios.get(i).getId()) {
-                        correcto = true;
-                        try {
-                            //System.out.println("entra");
-                            dataOut.writeUTF("correcto");
-                            dataOut.flush();
-                            break;
-                        } catch (IOException ex) {
-                            Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+        String convertida = encriptar.encriptar(contraseña, CLAVE);
+        if (cadena.contains("Admin")) {
+            for (int i = 0; i < admins.size(); i++) {
+                if (usuario.equals(admins.get(i).getNombre()) && convertida.equals(admins.get(i).getContraseña())
+                        && admins.get(i).getIdCliente() == admins.get(i).getId()) {
+                    correcto = true;
+                    try {
+                        dataOut.writeUTF("correcto");
+                        dataOut.flush();
+                        break;
+                    } catch (IOException ex) {
+                        Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                //break;
-            } else {
+            }
+        } else {
+            for (int j = 0; j < clientes.size(); j++) {
+                if (usuario.equals(clientes.get(j).getNombre()) && convertida.equals(clientes.get(j).getContraseña())
+                        && clientes.get(j).getIdCliente() == clientes.get(j).getId()) {
+                    correcto = true;
+                    try {
+                        dataOut.writeUTF("correcto cliente");
+                        dataOut.flush();
+                        dataOut.writeInt(clientes.get(j).getIdCliente());
+                        dataOut.flush();
+                        break;
+                    } catch (IOException ex) {
+                        Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+            if (!correcto) {
+                clientes = udi.getAllRevisores();
                 for (int j = 0; j < clientes.size(); j++) {
-                    if (usuario.equals(usuarios.get(i).getNombre()) && convertida.equals(usuarios.get(i).getContraseña())
-                            && clientes.get(j).getId() == usuarios.get(i).getId()) {
+                    if (usuario.equals(clientes.get(j).getNombre()) && convertida.equals(clientes.get(j).getContraseña())
+                            && clientes.get(j).getIdCliente() == clientes.get(j).getId()) {
                         correcto = true;
                         try {
-                            dataOut.writeUTF("correcto");
+                            dataOut.writeUTF("correcto revisor");
                             dataOut.flush();
-                            System.out.println("Cliente " + clientes.get(j).getId());
-                            System.out.println("Usuarios " + usuarios.get(i).getId());
-                            dataOut.writeInt(usuarios.get(i).getId());
+                            dataOut.writeInt(clientes.get(j).getIdCliente());
                             dataOut.flush();
                             break;
                         } catch (IOException ex) {
@@ -847,7 +904,6 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
         }
         if (!correcto) {
             try {
-                System.out.println("entra");
                 dataOut.writeUTF("incorrecto");
                 dataOut.flush();
             } catch (IOException ex) {
@@ -899,5 +955,53 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
             }
         }
         return correcto;
+    }
+
+    private boolean compruebaHora(String horaViaje, String nuevaHora) {
+        boolean iguales = false;
+        if (horaViaje.charAt(0) == nuevaHora.charAt(0) && horaViaje.charAt(1) == nuevaHora.charAt(1)
+                && horaViaje.charAt(3) == nuevaHora.charAt(3) && horaViaje.charAt(4) == nuevaHora.charAt(4)) {
+            iguales = true;
+        }
+
+        return iguales;
+    }
+
+    private void sendEmail(String correo, String usuario, String contraseña) {
+        try {
+            String email = "mvictoria.29397@gmail.com";
+            String password = "29397Vicky";
+
+            Properties props = new Properties();
+            props.put("mail.smtp.host", "smtp.gmail.com");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.port", "587");
+            props.put("mail.smtp.auth", "true");
+
+            Session mailSession = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(email, password);
+                }
+            });
+            //mailSession.setDebug(true);
+
+            MimeMessage message = new MimeMessage(mailSession);
+            message.setFrom(new InternetAddress(email));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(correo));
+            message.setSubject("Usuario y contraseña");
+            message.setContent("Usuario: " + usuario + "\n" + "Contraseña: " + contraseña, "text/html; charset=utf-8");
+
+            Transport transport = mailSession.getTransport("smtp");
+            transport.connect(email, password);
+            transport.sendMessage(message, message.getAllRecipients());
+            transport.close();
+
+            JOptionPane.showMessageDialog(null, "Correo enviado");
+        } catch (AddressException e) {
+            e.printStackTrace();
+        } catch (MessagingException ex) {
+            ex.printStackTrace();
+        }
+        //} 
     }
 }

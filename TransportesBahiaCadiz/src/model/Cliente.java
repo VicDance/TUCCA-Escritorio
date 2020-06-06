@@ -5,6 +5,8 @@
  */
 package model;
 
+import java.sql.Date;
+
 /**
  *
  * @author Vicky
@@ -13,9 +15,11 @@ public class Cliente extends Usuario{
     private int idCliente;
     
     public Cliente(){
+        super();
     }
     
     public Cliente(int idCliente){
+        super();
         this.idCliente = idCliente;
     }
 

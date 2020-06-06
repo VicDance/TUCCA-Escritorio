@@ -262,7 +262,6 @@ public class LoginForm extends javax.swing.JFrame{
                 dataOut.flush();
                 String respuesta = dataIn.readUTF();
                 if(respuesta.equalsIgnoreCase("correcto")){
-                    //String datos = dataIn.readUTF();
                     mostrarFormAdmin();
                 }else{
                     JOptionPane.showMessageDialog(this, "Usuarios o contraseña incorrectos");

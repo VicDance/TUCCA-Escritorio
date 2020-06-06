@@ -1016,16 +1016,8 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_txtBusquedaKeyReleased
 
     private void btnAñadirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAñadirActionPerformed
-        if (table.getColumnName(0).trim().toLowerCase().contains("usuario")) {
-            mostrarInsert();
-            inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" cliente"));
-        } else if (table.getColumnName(0).trim().toLowerCase().contains("cliente")) {
-            mostrarInsert();
-            inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" cliente"));
-        }else if (table.getColumnName(0).trim().toLowerCase().contains("revisor")) {
-            mostrarInsert();
-            inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" revisor"));
-        }
+        mostrarInsert();
+        inf.getLblTitulo().setText(inf.getLblTitulo().getText().concat(" revisor"));
     }//GEN-LAST:event_btnAñadirActionPerformed
 
     private void lblZonasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblZonasMouseClicked

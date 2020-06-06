@@ -7,8 +7,18 @@ package view;
 
 import com.toedter.calendar.JDateChooser;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -25,9 +35,9 @@ import static view.LoginForm.dataOut;
  */
 public class InsertForm extends javax.swing.JFrame {
 
-    /**
-     * Creates new form InsertForm
-     */
+    private String password;
+    //private Session session;
+
     public InsertForm() {
         initComponents();
         this.setLocationRelativeTo(null);
@@ -145,6 +155,44 @@ public class InsertForm extends javax.swing.JFrame {
     public void setBtnInsertar(JButton btnInsertar) {
         this.btnInsertar = btnInsertar;
     }
+
+    /*private void sendEmail() {
+        try {
+            String email = "mvictoria.29397@gmail.com";
+            String password = "29397Vicky";
+
+            Properties props = new Properties();
+            props.put("mail.smtp.host", "smtp.gmail.com");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.port", "587");
+            props.put("mail.smtp.auth", "true");
+
+            Session mailSession = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(email, password);
+                }
+            });
+            //mailSession.setDebug(true);
+
+            MimeMessage message = new MimeMessage(mailSession);
+            message.setFrom(new InternetAddress(email));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(txtCorreo.getText()));
+            message.setSubject("Usuario y contraseña");
+            message.setContent("Te amuchoo", "text/html; charset=utf-8");
+
+            Transport transport = mailSession.getTransport("smtp");
+            transport.connect(email, password);
+            transport.sendMessage(message, message.getAllRecipients());
+            transport.close();
+
+            JOptionPane.showMessageDialog(null, "Correo enviado");
+        } catch (AddressException e) {
+            e.printStackTrace();
+        } catch (MessagingException ex) {
+            ex.printStackTrace();
+        }
+        //} 
+    }*/
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -382,23 +430,20 @@ public class InsertForm extends javax.swing.JFrame {
 
     private void btnInsertarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertarActionPerformed
         try {
-            String estado;
-            if (lblTitulo.getText().contains("cliente")) {
-                dataOut.writeUTF("icliente");
+            if (compruebaContraseña(new String(txtPassword.getPassword()), new String(txtRepetirContraseña.getPassword()))) {
+                dataOut.writeUTF("encriptar");
                 dataOut.flush();
-            } else {
-                dataOut.writeUTF("irevisor");
+                dataOut.writeUTF("revisor" + "/" + txtUsuario.getText() + "/" + new String(txtPassword.getPassword())
+                        + "/" + txtCorreo.getText() + "/" + dateChooserNacimiento.getDate().getTime() + "/" + txtTfno.getText());
                 dataOut.flush();
-            }
-            dataOut.writeUTF(txtUsuario.getText() + "/" + new String(txtPassword.getPassword()) + "/" + txtCorreo.getText()
-                    + "/" + txtTfno.getText() + "/" + dateChooserNacimiento.getDate().getTime());
-            dataOut.flush();
-            estado = dataIn.readUTF();
-            if (estado.equalsIgnoreCase("correcto")) {
-                JOptionPane.showMessageDialog(this, "Inserción correcta");
-                this.dispose();
+                String estado = dataIn.readUTF();
+                if (estado.equalsIgnoreCase("correcto")) {
+                    JOptionPane.showMessageDialog(this, "Inserción correcta");
+                } else {
+                    JOptionPane.showMessageDialog(this, "No se pudo insertar");
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "No se pudo insertar el registro");
+                JOptionPane.showMessageDialog(this, "Contraseñas no coinciden");
             }
         } catch (IOException ex) {
             Logger.getLogger(InsertForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -442,6 +487,24 @@ public class InsertForm extends javax.swing.JFrame {
                 new InsertForm().setVisible(true);
             }
         });
+    }
+
+    static class MyAuthenticator extends Authenticator {
+
+        public PasswordAuthentication getPasswordAuthentication() {
+            String username = "mvictoria.29397@gmail.com";
+            String password = "29397Vicky";
+
+            return new PasswordAuthentication(username, password);
+        }
+    }
+
+    private boolean compruebaContraseña(String contraseña1, String contraseña2) {
+        if (contraseña1.equals(contraseña2)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

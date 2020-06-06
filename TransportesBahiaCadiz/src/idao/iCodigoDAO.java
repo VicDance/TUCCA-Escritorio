@@ -17,4 +17,5 @@ public interface iCodigoDAO {
     public List<CodigoQR> getAllCodigos();
     public void updateHora(CodigoQR codigo);
     public CodigoQR getCodigo(String hora);
+    public CodigoQR getCodigoById(int id);
 }

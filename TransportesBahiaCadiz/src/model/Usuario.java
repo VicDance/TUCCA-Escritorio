@@ -5,14 +5,13 @@
  */
 package model;
 
-import java.io.Serializable;
 import java.sql.Date;
 
 /**
  *
  * @author Vicky
  */
-public class Usuario implements Serializable{
+public class Usuario{
     private int id;
     private String nombre;
     private String contraseña;

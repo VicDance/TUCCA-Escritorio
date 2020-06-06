@@ -12,6 +12,7 @@ package model;
 public class CodigoQR {
     private int idCodigo;
     private String horaUso;
+    private String mensaje;
     
     public CodigoQR(){
         
@@ -24,6 +25,12 @@ public class CodigoQR {
     public CodigoQR(int idCodigo, String horaUso) {
         this.idCodigo = idCodigo;
         this.horaUso = horaUso;
+    }
+    
+    public CodigoQR(int idCodigo, String horaUso, String mensaje) {
+        this.idCodigo = idCodigo;
+        this.horaUso = horaUso;
+        this.mensaje = mensaje;
     }
 
     public int getIdCodigo() {
@@ -42,8 +49,16 @@ public class CodigoQR {
         this.horaUso = horaUso;
     }
 
+    public String getMensaje() {
+        return mensaje;
+    }
+
+    public void setMensaje(String mensaje) {
+        this.mensaje = mensaje;
+    }
+
     @Override
     public String toString() {
-        return "CodigoQR{" + "idCodigo=" + idCodigo + ", horaUso=" + horaUso + '}';
+        return "CodigoQR{" + "idCodigo=" + idCodigo + ", horaUso=" + horaUso + ", mensaje=" + mensaje + '}';
     }
 }

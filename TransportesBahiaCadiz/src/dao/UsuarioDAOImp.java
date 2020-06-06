@@ -118,8 +118,25 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
-            insertado = false;
-            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Override
+    public void insertarRevisor(int id) {
+        insertado = false;
+        try {
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String sqlNuevoUsuario = "INSERT INTO revisor (idrevisor) "
+                    + "VALUES (?)";
+            insertar = connection.prepareStatement(sqlNuevoUsuario);
+            insertar.setInt(1, id);
+            if (insertar.executeUpdate() != 0) {
+                System.out.println("Insercción exitosa");
+                insertado = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -266,49 +283,81 @@ public class UsuarioDAOImp implements iUsuarioDAO {
         List<Cliente> clientes = null;
         PreparedStatement buscar;
         try {
-            String buscaUsuarios = "SELECT * FROM administrador";
+            //String buscaUsuarios = "SELECT * FROM administrador";
+            String buscaUsuarios = "SELECT * FROM usuario JOIN administrador ON idusuario = idadministrador";
             buscar = connection.prepareStatement(buscaUsuarios);
             ResultSet rs = buscar.executeQuery();
             clientes = new ArrayList<Cliente>();
             while (rs.next()) {
-                Cliente cliente = new Cliente();
-                cliente.setIdCliente(rs.getInt(1));
-                clientes.add(cliente);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            //con.disconect();
-        }
-        return clientes;
-    }
-
-    @Override
-    public List<Usuario> getAllClientes() {
-        //con.connect();
-        Connection connection = con.getConnection();
-        List<Cliente> clientes = null;
-        List<Usuario> usuarios = null;
-        PreparedStatement buscar;
-        try {
-            String buscaUsuarios = "SELECT * FROM usuario JOIN cliente ON idusuario = id_user";
-            buscar = connection.prepareStatement(buscaUsuarios);
-            ResultSet rs = buscar.executeQuery();
-            usuarios = new ArrayList<Usuario>();
-            while (rs.next()) {
-                Usuario cli = new Cliente();
+                Cliente cli = new Cliente();
                 cli.setId(rs.getInt(1));
                 cli.setNombre(rs.getString(2));
                 cli.setContraseña(rs.getString(3));
                 cli.setCorreo(rs.getString(4));
                 cli.setFecha_nac(rs.getDate(5));
                 cli.setTfno(rs.getInt(6));
+                cli.setImagen(rs.getString(7));
+                cli.setIdCliente(rs.getInt(8));
+                clientes.add(cli);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return clientes;
+    }
+
+    @Override
+    public List<Cliente> getAllClientes() {
+        Connection connection = con.getConnection();
+        List<Cliente> usuarios = null;
+        PreparedStatement buscar;
+        try {
+            String buscaUsuarios = "SELECT * FROM usuario JOIN cliente ON idusuario = id_user";
+            buscar = connection.prepareStatement(buscaUsuarios);
+            ResultSet rs = buscar.executeQuery();
+            usuarios = new ArrayList<Cliente>();
+            while (rs.next()) {
+                Cliente cli = new Cliente();
+                cli.setId(rs.getInt(1));
+                cli.setNombre(rs.getString(2));
+                cli.setContraseña(rs.getString(3));
+                cli.setCorreo(rs.getString(4));
+                cli.setFecha_nac(rs.getDate(5));
+                cli.setTfno(rs.getInt(6));
+                cli.setImagen(rs.getString(7));
+                cli.setIdCliente(rs.getInt(8));
                 usuarios.add(cli);
             }
         } catch (SQLException ex) {
             Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            //con.disconect();
+        }
+        return usuarios;
+    }
+    
+    @Override
+    public List<Cliente> getAllRevisores() {
+        Connection connection = con.getConnection();
+        List<Cliente> usuarios = null;
+        PreparedStatement buscar;
+        try {
+            String buscaUsuarios = "SELECT * FROM usuario JOIN revisor ON idusuario = idrevisor";
+            buscar = connection.prepareStatement(buscaUsuarios);
+            ResultSet rs = buscar.executeQuery();
+            usuarios = new ArrayList<Cliente>();
+            while (rs.next()) {
+                Cliente cli = new Cliente();
+                cli.setId(rs.getInt(1));
+                cli.setNombre(rs.getString(2));
+                cli.setContraseña(rs.getString(3));
+                cli.setCorreo(rs.getString(4));
+                cli.setFecha_nac(rs.getDate(5));
+                cli.setTfno(rs.getInt(6));
+                cli.setImagen(rs.getString(7));
+                cli.setIdCliente(rs.getInt(8));
+                usuarios.add(cli);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
         return usuarios;
     }

@@ -63,6 +63,7 @@ public class CodigoDAOImp implements iCodigoDAO{
                 CodigoQR codigo = new CodigoQR();
                 codigo.setIdCodigo(rs.getInt(1));
                 codigo.setHoraUso(rs.getString(2));
+                codigo.setMensaje(rs.getString(3));
                 codigos.add(codigo);
             }
         } catch (SQLException ex) {
@@ -76,10 +77,11 @@ public class CodigoDAOImp implements iCodigoDAO{
         Connection connection = con.getConnection();
         PreparedStatement actualiza;
         try {
-            String actualizaHora = "UPDATE codigoqr SET hora_uso = ? WHERE idcodigoqr = ?";
+            String actualizaHora = "UPDATE codigoqr SET hora_uso = ?, mensaje = ? WHERE idcodigoqr = ?";
             actualiza = connection.prepareStatement(actualizaHora);
             actualiza.setString(1, codigo.getHoraUso());
-            actualiza.setInt(2, codigo.getIdCodigo());
+            actualiza.setString(2, codigo.getMensaje());
+            actualiza.setInt(3, codigo.getIdCodigo());
             actualiza.executeUpdate(); 
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
@@ -96,6 +98,18 @@ public class CodigoDAOImp implements iCodigoDAO{
             }
         }
         
+        return codigo;
+    }
+    
+    @Override
+    public CodigoQR getCodigoById(int id) {
+        List<CodigoQR> codigos = getAllCodigos();
+        CodigoQR codigo = null;
+        for(int i = 0; i < codigos.size(); i++){
+            if(id == codigos.get(i).getIdCodigo()){
+                codigo = new CodigoQR(id, codigos.get(i).getHoraUso(), codigos.get(i).getMensaje());
+            }
+        }    
         return codigo;
     }
 }
