@@ -1,20 +1,20 @@
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 import connector.Clave;
 import connector.Conector;
 import connector.Encriptar;
 import dao.CodigoDAOImp;
 import dao.UsuarioDAOImp;
 import dao.LineaDAOImp;
+import dao.LugarInteresDAOImp;
 import dao.MunicipioDAOImp;
 import dao.NucleoDAOImp;
 import dao.ParadaDAOImp;
 import dao.PuntoVentaDAOImp;
-import dao.TarjetaBusDAOImp;
 import dao.TarjetaCreditoDAOImp;
 import dao.TarjetasBusDAOImp;
 import dao.ViajeDAOImp;
@@ -23,6 +23,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.sql.Date;
 import java.sql.Time;
@@ -44,24 +45,25 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.Authenticator;
 import javax.swing.JOptionPane;
-import model.Cliente;
-import model.CodigoQR;
-import model.Linea;
-import model.Municipio;
-import model.Nucleo;
-import model.Parada;
-import model.PuntoVenta;
-import model.TarjetaBus;
-import model.TarjetaCredito;
-import model.TarjetaEstandar;
-import model.TarjetaEstudiante;
-import model.TarjetaJubilado;
-import model.Usuario;
-import model.Viaje;
-import model.Zona;
+import serializable.Cliente;
+import serializable.CodigoQR;
+import serializable.Linea;
+import serializable.LugarInteres;
+import serializable.Municipio;
+import serializable.Nucleo;
+import serializable.Parada;
+import serializable.PuntoVenta;
+import serializable.TarjetaBus;
+import serializable.TarjetaCredito;
+import serializable.TarjetaEstandar;
+import serializable.TarjetaEstudiante;
+import serializable.TarjetaJubilado;
+import serializable.Usuario;
+import serializable.Viaje;
+import serializable.Zona;
 import scripts.Inserts;
-import view.InsertForm;
 
 /**
  *
@@ -70,8 +72,8 @@ import view.InsertForm;
 public class HiloServidorBahiaCadiz extends Thread implements Clave {
 
     private final Socket cliente;
-    private DataInputStream dataIn;
-    private DataOutputStream dataOut;
+    private ObjectOutputStream outputStream;
+    private ObjectInputStream inputStream;
     private Conector con;
     private Encriptar encriptar;
     private List<Usuario> usuarios;
@@ -92,7 +94,6 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private NucleoDAOImp ndi;
     private ZonaDAOImp zdi;
     private TarjetaCreditoDAOImp tcdi;
-    private TarjetaBusDAOImp tbdi;
     private TarjetasBusDAOImp tsbdi;
     private CodigoDAOImp cdi;
     private ViajeDAOImp vdi;
@@ -109,6 +110,8 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private java.util.Date horaActual;
     private CodigoQR codigo;
     private String horaCodigo;
+    private String encriptada;
+    private int idUsuario;
 
     public HiloServidorBahiaCadiz(Socket cliente) {
         this.cliente = cliente;
@@ -117,258 +120,216 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     @Override
     public void run() {
         try {
-            dataOut = new DataOutputStream(cliente.getOutputStream());
-            dataIn = new DataInputStream(cliente.getInputStream());
+            outputStream = new ObjectOutputStream(cliente.getOutputStream());
+            inputStream = new ObjectInputStream(cliente.getInputStream());
+            /*dataOut = new DataOutputStream(cliente.getOutputStream());
+             dataIn = new DataInputStream(cliente.getInputStream());*/
             con = new Conector();
             con.connect();
             while (true) {
                 System.out.println("servidor escuchando");
-                String cadena = dataIn.readUTF();
+                //String cadena = dataIn.readUTF();
+                String cadena = inputStream.readUTF();
                 System.out.println("cadena: " + cadena);
-                udi = new UsuarioDAOImp(con);
                 switch (cadena) {
                     case "encriptar":
-                        texto = dataIn.readUTF();
+                        //lee si cliente, admin o revisor
+                        texto = inputStream.readUTF();
                         System.out.println(texto);
-                        datos = texto.split("/");
-                        String encriptada;
+                        usuario = (Usuario) inputStream.readObject();
                         encriptar = new Encriptar();
-                        if (datos.length == 5) {
-                            encriptada = encriptar.encriptar(datos[1], CLAVE);
-                            usuario = new Usuario(datos[0], encriptada, datos[2], new Date(Long.parseLong(datos[4])),
-                                    Integer.parseInt(datos[3]));
+                        encriptada = encriptar.encriptar(usuario.getContraseña(), CLAVE);
+                        udi = new UsuarioDAOImp(con);
+                        if (texto.equalsIgnoreCase("cliente")) {
+                            usuario.setContraseña(encriptada);
                             udi.insertar(usuario);
-                            Usuario us = udi.getId(datos[0]);
-                            udi.insertarAdmin(us.getId());
+                            Usuario us = udi.getId(usuario.getNombre());
+                            udi.insertarCliente(us.getId());
+                        } else if (texto.equalsIgnoreCase("revisor")) {
+                            sendEmail(usuario.getCorreo(), usuario.getNombre(), usuario.getContraseña());
+                            usuario.setContraseña(encriptada);
+                            udi.insertar(usuario);
+                            Usuario us = udi.getId(usuario.getNombre());
+                            udi.insertarRevisor(us.getId());
                             if (udi.insertado) {
-                                dataOut.writeUTF("correcto");
-                                dataOut.flush();
+                                envia("correcto");
                             } else {
-                                dataOut.writeUTF("incorrecto");
-                                dataOut.flush();
+                                envia("correcto");
                             }
                         } else {
-                            if (datos[0].equalsIgnoreCase("cliente")) {
-                                encriptada = encriptar.encriptar(datos[2], CLAVE);
-                                usuario = new Usuario(datos[1], encriptada, datos[3], new Date(Long.parseLong(datos[5])),
-                                        Integer.parseInt(datos[4]));
-                                udi.insertar(usuario);
-                                Usuario us = udi.getId(datos[1]);
-                                //cdi = new ClienteDAOImp();
-                                udi.insertarCliente(us.getId());
-                                if (udi.insertado) {
-                                    dataOut.writeUTF("correcto");
-                                    dataOut.flush();
-                                } else {
-                                    dataOut.writeUTF("incorrecto");
-                                    dataOut.flush();
-                                }
-                            } else {
-                                encriptada = encriptar.encriptar(datos[2], CLAVE);
-                                usuario = new Usuario(datos[1], encriptada, datos[3], new Date(Long.parseLong(datos[4])),
-                                        Integer.parseInt(datos[5]));
-                                udi.insertar(usuario);
-                                Usuario us = udi.getId(datos[1]);
-                                udi.insertarRevisor(us.getId());
-                                if (udi.insertado) {
-                                    dataOut.writeUTF("correcto");
-                                    dataOut.flush();
-                                } else {
-                                    dataOut.writeUTF("incorrecto");
-                                    dataOut.flush();
-                                }
-
-                                sendEmail(datos[3], datos[1], datos[2]);
-                            }
+                            usuario.setContraseña(encriptada);
+                            udi.insertar(usuario);
+                            Usuario us = udi.getId(usuario.getNombre());
+                            udi.insertarAdmin(us.getId());
                         }
                         break;
                     case "inicio":
-                        nombreUsuario = dataIn.readUTF();
-                        contraseña = dataIn.readUTF();
+                        nombreUsuario = inputStream.readUTF();
+                        contraseña = inputStream.readUTF();
                         comprobarCredenciales(cadena, nombreUsuario, contraseña);
                         break;
 
                     case "inicioAdmin":
-                        nombreUsuario = dataIn.readUTF();
-                        contraseña = dataIn.readUTF();
+                        nombreUsuario = inputStream.readUTF();
+                        contraseña = inputStream.readUTF();
                         comprobarCredenciales(cadena, nombreUsuario, contraseña);
                         break;
 
                     case "usuarios":
+                        udi = new UsuarioDAOImp(con);
                         usuarios = udi.getAll();
-                        dataOut.writeInt(usuarios.size());
-                        dataOut.flush();
+                        enviaInt(usuarios.size());
                         //System.out.println(usuarios.size());
                         for (Usuario usuario1 : usuarios) {
-                            dataOut.writeUTF(usuario1.getId() + "/" + usuario1.getNombre() + "/" + usuario1.getCorreo() + "/"
-                                    + usuario1.getFecha_nac() + "/" + usuario1.getTfno());
-                            dataOut.flush();
+                            enviaObject(usuario1);
                         }
                         break;
 
                     case "clientes":
+                        udi = new UsuarioDAOImp(con);
                         clientes = udi.getAllClientes();
-                        dataOut.writeInt(usuarios.size());
-                        dataOut.flush();
+                        enviaInt(clientes.size());
+                        for (Cliente cli : clientes) {
+                            enviaObject(cli);
+                        }
+                        break;
+
+                    case "revisores":
+                        udi = new UsuarioDAOImp(con);
+                        clientes = udi.getAllRevisores();
+                        enviaInt(clientes.size());
                         //System.out.println(clientes.size());
                         for (Cliente cli : clientes) {
-                            dataOut.writeUTF(cli.getId() + "/" + cli.getNombre() + "/" + cli.getCorreo() + "/"
-                                    + cli.getFecha_nac() + "/" + cli.getTfno());
-                            dataOut.flush();
+                            enviaObject(cli);
                         }
                         break;
 
                     case "lineas":
                         ldi = new LineaDAOImp(con);
                         lineas = ldi.getAllLineas();
-                        dataOut.writeInt(lineas.size());
-                        dataOut.flush();
+                        enviaInt(lineas.size());
                         for (Linea linea : lineas) {
-                            dataOut.writeUTF(linea.getIdLinea() + "/" + linea.getNombreLinea());
-                            dataOut.flush();
+                            enviaObject(linea);
                         }
                         break;
 
                     case "paradas":
                         pdi = new ParadaDAOImp(con);
                         paradas = pdi.getAllParadas();
-                        dataOut.writeInt(paradas.size());
-                        dataOut.flush();
+                        enviaInt(paradas.size());
                         for (Parada parada : paradas) {
-                            dataOut.writeUTF(parada.getIdParada() + "/" + parada.getIdZona()
-                                    + "/" + parada.getNombreParada() + "/" + parada.getLatitud() + "/"
-                                    + parada.getLongitud());
-                            dataOut.flush();
+                            enviaObject(parada);
                         }
                         break;
 
                     case "paradas_viaje":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         datos = texto.split("/");
                         pdi = new ParadaDAOImp(con);
                         ldi = new LineaDAOImp(con);
                         lineas = ldi.getLineasNucleo(Integer.parseInt(datos[1]), Integer.parseInt(datos[3]));
-                        dataOut.writeInt(lineas.size());
-                        dataOut.flush();
+                        enviaInt(lineas.size());
                         //int[] stringParadas;
                         for (Linea linea : lineas) {
                             String l = ldi.getNombreLinea(linea.getIdLinea());
-                            dataOut.writeUTF(l);
-                            dataOut.flush();
+                            envia(l);
                             paradas = pdi.getParadasViaje(linea.getIdLinea(), Integer.parseInt(datos[1]), Integer.parseInt(datos[3]));
                             System.out.println(l);
-                            dataOut.writeInt(paradas.size());
-                            dataOut.flush();
+                            enviaInt(paradas.size());
                             for (Parada parada : paradas) {
                                 System.out.println(parada);
-                                //System.out.println("sale bucle");
-                                //String idParada
-                                dataOut.writeUTF(parada.getIdParada() + "/" + parada.getIdZona()
-                                        + "/" + parada.getNombreParada() + "/" + parada.getLatitud() + "/"
-                                        + parada.getLongitud());
-                                dataOut.flush();
+                                enviaObject(parada);
                             }
-                            /*System.out.println("NombreLinea: " + l);
-                             for(Parada parada : paradas){
-                             System.out.println(parada);
-                             System.out.println("sale bucle");
-                             }*/
-                            //
-                            /*dataOut.writeUTF(parada.getIdParada() + "/" + parada.getIdZona()
-                             + "/" + parada.getNombreParada() + "/" + parada.getLatitud() + "/"
-                             + parada.getLongitud());
-                             dataOut.flush();*/
                         }
                         break;
 
                     case "municipios":
                         mdi = new MunicipioDAOImp(con);
                         municipios = mdi.getAllMunicipios();
-                        dataOut.writeInt(municipios.size());
-                        dataOut.flush();
+                        enviaInt(municipios.size());
                         for (Municipio muni : municipios) {
-                            dataOut.writeUTF(muni.getIdMunicipio() + "/" + muni.getNombreMunicipio());
-                            dataOut.flush();
+                            enviaObject(muni);
                         }
                         break;
 
                     case "nucleos":
                         ndi = new NucleoDAOImp(con);
                         nucleos = ndi.getAllNucleos();
-                        dataOut.writeInt(nucleos.size());
-                        dataOut.flush();
+                        enviaInt(nucleos.size());
                         for (Nucleo nucleo : nucleos) {
-                            dataOut.writeUTF(nucleo.getIdNucleo() + "/" + nucleo.getIdMunicipio() + "/"
-                                    + nucleo.getIdZona() + "/" + nucleo.getNombreNucleo());
-                            dataOut.flush();
+                            enviaObject(nucleo);
                         }
                         break;
 
                     case "zonas":
-                        //System.out.println("entra zonas");
                         zdi = new ZonaDAOImp(con);
                         zonas = zdi.getAll();
-                        dataOut.writeInt(zonas.size());
-                        dataOut.flush();
+                        enviaInt(zonas.size());
                         for (Zona zona : zonas) {
-                            dataOut.writeUTF(zona.getIdZona() + "/" + zona.getNombreZona());
-                            dataOut.flush();
+                            enviaObject(zona);
                         }
                         break;
 
                     case "tarjetas":
-                        //System.out.println("entra");
+                        idUsuario = inputStream.readInt();
+                        System.out.println("id: " + idUsuario);
                         tcdi = new TarjetaCreditoDAOImp(con);
-                        tarjetas = tcdi.getAllTarjetas();
+                        tarjetas = tcdi.getTarjetasUsuario(idUsuario);
                         System.out.println(tarjetas.size());
-                        dataOut.writeInt(tarjetas.size());
-                        dataOut.flush();
+                        enviaInt(tarjetas.size());
                         for (TarjetaCredito tarjeta : tarjetas) {
-                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "-" + tarjeta.getIdUser() + "-"
-                                    + tarjeta.getCaducidad() + "-" + tarjeta.getTitular());
-                            dataOut.flush();
+                            enviaObject(tarjeta);
                         }
                         break;
 
                     case "viajes":
-                        int idUsuario = dataIn.readInt();
+                        idUsuario = inputStream.readInt();
                         vdi = new ViajeDAOImp(con);
                         List<Viaje> viajes = vdi.getViajesId(idUsuario);
-                        dataOut.writeInt(viajes.size());
-                        dataOut.flush();
+                        enviaInt(viajes.size());
                         ldi = new LineaDAOImp(con);
                         mdi = new MunicipioDAOImp(con);
                         for (int i = 0; i < viajes.size(); i++) {
                             String nombreLinea = ldi.getNombreLinea(viajes.get(i).getIdLinea());
                             String nombreMunicipio = mdi.getNombreMunicipio(viajes.get(i).getIdMunicipio());
-                            dataOut.writeUTF(nombreLinea + "/" + nombreMunicipio + "/"
+                            envia(nombreLinea + "/" + nombreMunicipio + "/"
                                     + viajes.get(i).getHoraSalida() + "/" + viajes.get(i).getFechaViaje().getTime());
-                            dataOut.flush();
                         }
                         break;
 
                     case "tarjetasb":
+                        idUsuario = inputStream.readInt();
                         tsbdi = new TarjetasBusDAOImp(con);
+                        List<TarjetaBus> tarjetasBus = tsbdi.getTarjetasUsuario(idUsuario);
+                        enviaInt(tarjetasBus.size());
                         estandares = tsbdi.getAllTarjetasEstandar();
                         estudiantes = tsbdi.getAllTarjetasEstudiante();
                         jubilados = tsbdi.getAllTarjetasJubilado();
-                        System.out.println(estandares.size() + estudiantes.size() + jubilados.size());
-                        dataOut.writeInt(estandares.size() + estudiantes.size() + jubilados.size());
-                        dataOut.flush();
-                        for (TarjetaEstandar tarjeta : estandares) {
-                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "/" + tarjeta.getFecha_expedicion()
-                                    + "/" + "estandar");
-                            dataOut.flush();
-                        }
-                        for (TarjetaEstudiante tarjeta : estudiantes) {
-                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "/" + tarjeta.getFecha_ini()
-                                    + "/" + tarjeta.getFecha_fin() + "/" + "estudiante");
-                            dataOut.flush();
-                        }
-                        for (TarjetaJubilado tarjeta : jubilados) {
-                            dataOut.writeUTF(tarjeta.getNumTarjeta() + "/" + tarjeta.getAñoValidez()
-                                    + "/" + "jubilado");
-                            dataOut.flush();
+                        for (int i = 0; i < tarjetasBus.size(); i++) {
+                            if (tarjetasBus.get(i).getDescuento() == 0.1) {
+                                //System.out.println("estandar");
+                                for (TarjetaEstandar tarjeta : estandares) {
+                                    if (tarjetasBus.get(i).getNumTarjeta() == tarjeta.getNumTarjeta()) {
+                                        envia(tarjeta.getNumTarjeta() + "/" + tarjeta.getFecha_expedicion()
+                                                + "/" + "estandar");
+                                    }
+                                }
+                            } else if (tarjetasBus.get(i).getDescuento() == 0.3) {
+                                //System.out.println("estundar");
+                                for (TarjetaEstudiante tarjeta : estudiantes) {
+                                    if (tarjetasBus.get(i).getNumTarjeta() == tarjeta.getNumTarjeta()) {
+                                        envia(tarjeta.getNumTarjeta() + "/" + tarjeta.getFecha_ini()
+                                                + "/" + tarjeta.getFecha_fin() + "/" + "estudiante");
+                                    }
+                                }
+                            } else {
+                                for (TarjetaJubilado tarjeta : jubilados) {
+                                    if (tarjetasBus.get(i).getNumTarjeta() == tarjeta.getNumTarjeta()) {
+                                        envia(tarjeta.getNumTarjeta() + "/" + tarjeta.getAñoValidez()
+                                                + "/" + "jubilado");
+                                    }
+                                }
+                            }
                         }
                         break;
 
@@ -376,206 +337,201 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         ndi = new NucleoDAOImp(con);
                         nucleos = ndi.getAllNucleos();
                         //System.out.println(nucleos.size());
-                        dataOut.writeInt(nucleos.size());
-                        dataOut.flush();
+                        enviaInt(nucleos.size());
                         for (int i = 0; i < nucleos.size(); i++) {
-                            dataOut.writeUTF(nucleos.get(i).getNombreNucleo() + "/" + nucleos.get(i).getIdNucleo());
-                            dataOut.flush();
+                            enviaObject(nucleos.get(i));
+                        }
+                        break;
+
+                    case "lugares_interes":
+                        LugarInteresDAOImp ludi = new LugarInteresDAOImp(con);
+                        List<LugarInteres> lugares = ludi.getAllLugares();
+                        enviaInt(lugares.size());
+                        for (int i = 0; i < lugares.size(); i++) {
+                            enviaObject(lugares.get(i));
                         }
                         break;
 
                     case "usuario":
-                        texto = dataIn.readUTF();
+                        udi = new UsuarioDAOImp(con);
+                        texto = inputStream.readUTF();
                         usuarios = udi.getUsuario(texto);
-                        dataOut.writeInt(usuarios.size());
-                        dataOut.flush();
+                        enviaInt(usuarios.size());
                         for (Usuario usuario1 : usuarios) {
-                            dataOut.writeUTF(usuario1.getId() + "/" + usuario1.getNombre() + "/" + usuario1.getCorreo()
-                                    + "/" + usuario1.getFecha_nac() + "/" + usuario1.getTfno());
-                            dataOut.flush();
+                            enviaObject(usuario1);
                         }
                         break;
 
                     case "linea":
-                        texto = dataIn.readUTF();
+                        ldi = new LineaDAOImp(con);
+                        texto = inputStream.readUTF();
                         lineas = ldi.getLinea(texto);
-                        dataOut.writeInt(lineas.size());
-                        dataOut.flush();
+                        enviaInt(lineas.size());
                         for (Linea linea : lineas) {
-                            dataOut.writeUTF(linea.getIdLinea() + "/" + linea.getNombreLinea());
-                            dataOut.flush();
+                            enviaObject(linea);
                         }
                         break;
 
                     case "id_linea":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
+                        ldi = new LineaDAOImp(con);
                         int idLinea = ldi.getIdLinea(texto);
-                        dataOut.writeInt(idLinea);
-                        dataOut.flush();
+                        enviaInt(idLinea);
                         break;
 
                     case "parada":
-                        texto = dataIn.readUTF();
+                        pdi = new ParadaDAOImp(con);
+                        texto = inputStream.readUTF();
                         paradas = pdi.getParada(texto);
-                        dataOut.writeInt(paradas.size());
-                        dataOut.flush();
+                        enviaInt(paradas.size());
                         for (Parada parada : paradas) {
-                            dataOut.writeUTF(parada.getIdParada() + "/" + parada.getIdZona() + "/"
-                                    + parada.getNombreParada() + "/" + parada.getLatitud() + "/" + parada.getLongitud());
-                            dataOut.flush();
+                            enviaObject(parada);
                         }
                         break;
 
                     case "municipio":
-                        texto = dataIn.readUTF();
+                        mdi = new MunicipioDAOImp(con);
+                        texto = inputStream.readUTF();
                         municipios = mdi.getMunicipio(texto);
-                        dataOut.writeInt(municipios.size());
-                        dataOut.flush();
+                        enviaInt(municipios.size());
                         for (Municipio muni : municipios) {
-                            dataOut.writeUTF(muni.getIdMunicipio() + "/" + muni.getNombreMunicipio());
-                            dataOut.flush();
+                            enviaObject(muni);
                         }
                         break;
 
                     case "nucleo":
-                        texto = dataIn.readUTF();
+                        ndi = new NucleoDAOImp(con);
+                        texto = inputStream.readUTF();
                         nucleos = ndi.getNucleo(texto);
-                        dataOut.writeInt(nucleos.size());
-                        dataOut.flush();
+                        enviaInt(nucleos.size());
                         for (Nucleo nucleo : nucleos) {
-                            dataOut.writeUTF(nucleo.getIdNucleo() + "/" + nucleo.getIdMunicipio() + "/"
-                                    + nucleo.getIdZona() + "/" + nucleo.getNombreNucleo());
-                            dataOut.flush();
+                            enviaObject(nucleo);
                         }
                         break;
 
                     case "zona":
-                        texto = dataIn.readUTF();
+                        zdi = new ZonaDAOImp(con);
+                        texto = inputStream.readUTF();
                         zonas = zdi.getZona(texto);
-                        dataOut.writeInt(zonas.size());
-                        dataOut.flush();
+                        enviaInt(zonas.size());
                         for (Zona zona : zonas) {
-                            dataOut.writeUTF(zona.getIdZona() + "/" + zona.getNombreZona());
-                            dataOut.flush();
+                            enviaObject(zona);
                         }
                         break;
 
                     case "cliente":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
+                        udi = new UsuarioDAOImp(con);
                         Usuario user = udi.getId(texto);
-                        //System.out.println(user);
+                        //System.out.println(user.getImagen());
                         if (user.getImagen() == null) {
-                            dataOut.writeUTF(user.getId() + "¬" + user.getNombre() + "¬" + user.getContraseña() + "¬" + user.getCorreo() + "¬"
-                                    + user.getFecha_nac() + "¬" + user.getTfno());
-                            //dataOut.flush();
-                        } else {
-                            dataOut.writeUTF(user.getId() + "¬" + user.getNombre() + "¬" + user.getContraseña() + "¬" + user.getCorreo() + "¬"
-                                    + user.getFecha_nac() + "¬" + user.getTfno() + "¬" + user.getImagen());
+                            user.setImagen(new byte[0]);
                         }
-                        dataOut.flush();
+                        System.out.println(user.getImagen());
+                        enviaObject(user);
+                        break;
+
+                    case "clientes_busqueda":
+                        texto = inputStream.readUTF();
+                        udi = new UsuarioDAOImp(con);
+                        usuarios = udi.getCliente(texto);
+                        enviaInt(usuarios.size());
+                        for (Usuario usuario1 : usuarios) {
+                            enviaObject(usuario1);
+                        }
+                        break;
+
+                    case "revisor":
+                        texto = inputStream.readUTF();
+                        udi = new UsuarioDAOImp(con);
+                        usuarios = udi.getRevisor(texto);
+                        enviaInt(usuarios.size());
+                        for (Usuario usuario1 : usuarios) {
+                            enviaObject(usuario1);
+                        }
                         break;
 
                     case "tarjeta":
-                        texto = dataIn.readUTF();
-                        //System.out.println(texto);
+                        texto = inputStream.readUTF();
+                        tsbdi = new TarjetasBusDAOImp(con);
                         TarjetaBus bus = tsbdi.getTarjeta(Long.parseLong(texto));
-                        dataOut.writeUTF(texto);
-                        dataOut.flush();
-                        dataOut.writeUTF(bus.getSaldo() + "/" + bus.getDescuento());
-                        dataOut.flush();
+                        envia(texto);
+                        System.out.println("Num tarjeta: " + texto);
+                        envia(bus.getSaldo() + "/" + bus.getDescuento());
+                        System.out.println("Saldo y descuento: " + bus.getSaldo() + "/" + bus.getDescuento());
                         break;
 
                     case "nombre_municipio":
-                        id = dataIn.readInt();
+                        id = inputStream.readInt();
+                        mdi = new MunicipioDAOImp(con);
                         String nombre = mdi.getNombreMunicipio(id);
-                        dataOut.writeUTF(nombre);
-                        dataOut.flush();
+                        envia(nombre);
                         break;
 
                     case "puntos_venta_mapa":
-                        int idNucleo = dataIn.readInt();
+                        int idNucleo = inputStream.readInt();
                         PuntoVentaDAOImp pvdi = new PuntoVentaDAOImp(con);
-                        //System.out.println(idNucleo);
                         List<PuntoVenta> puntos = pvdi.getPuntosVentaNucleo(idNucleo);
-                        dataOut.writeInt(puntos.size());
-                        dataOut.flush();
+                        enviaInt(puntos.size());
                         for (int i = 0; i < puntos.size(); i++) {
-                            //System.out.println(puntos.get(i).getLatitud() + "/" + puntos.get(i).getLongitud());
-                            dataOut.writeUTF(puntos.get(i).getLatitud() + "/" + puntos.get(i).getLongitud());
-                            dataOut.flush();
+                            envia(puntos.get(i).getLatitud() + "/" + puntos.get(i).getLongitud());
                         }
                         break;
 
                     case "rtarjeta":
-                        double saldo = dataIn.readDouble();
-                        //System.out.println(saldo);
-                        texto = dataIn.readUTF();
-                        //System.out.println(texto);
+                        double saldo = inputStream.readDouble();
+                        texto = inputStream.readUTF();
+                        tsbdi = new TarjetasBusDAOImp(con);
                         tsbdi.recargarTarjeta(Long.parseLong(texto), saldo);
                         System.out.println(tsbdi.recarga);
                         if (tsbdi.recarga) {
-                            dataOut.writeUTF("correcto");
-                            dataOut.flush();
+                            envia("correcto");
                         } else {
-                            dataOut.writeUTF("incorrecto");
-                            dataOut.flush();
+                            envia("incorrecto");
                         }
                         break;
 
                     case "busuario":
-                        id = dataIn.readInt();
+                        id = inputStream.readInt();
                         udi.borrar(id);
                         if (udi.borrado) {
-                            dataOut.writeUTF("correcto");
-                            dataOut.flush();
+                            envia("correcto");
                         } else {
-                            dataOut.writeUTF("incorrecto");
-                            dataOut.flush();
+                            envia("incorrecto");
                         }
                         break;
 
                     case "btarjetaBus":
-                        int posicion = dataIn.readInt();
+                        int posicion = inputStream.readInt();
                         tsbdi = new TarjetasBusDAOImp(con);
                         tsbdi.borrarTarjeta(posicion);
-                        /*tbdi = new TarjetaBusDAOImp(con);
-                         tbdi.borrar(posicion);*/
-                        if (tsbdi.borrado) {
-                            dataOut.writeUTF("correcto");
-                            dataOut.flush();
-                        } else {
-                            dataOut.writeUTF("incorrecto");
-                            dataOut.flush();
-                        }
                         break;
 
                     case "btarjetaCredito":
-                        int pos = dataIn.readInt();
+                        int pos = inputStream.readInt();
                         System.out.println(pos);
+                        tcdi = new TarjetaCreditoDAOImp(con);
                         tcdi.borrar(pos);
                         break;
 
                     case "ntarjeta":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         datos = texto.split("-");
                         TarjetaCredito tarjeta = new TarjetaCredito(datos[0], Integer.parseInt(datos[1]),
                                 datos[2], datos[3]);
-                        //tcdi = new TarjetaCreditoDAOImp();
+                        tcdi = new TarjetaCreditoDAOImp(con);
                         tcdi.insertar(tarjeta);
                         //System.out.println(tcdi.insertado);
                         if (tcdi.insertado) {
                             System.out.println("entra");
-                            dataOut.writeUTF("correcto");
-                            dataOut.flush();
+                            envia("correcto");
                         } else {
-                            System.out.println("entra tb");
-                            dataOut.writeUTF("incorrecto");
-                            dataOut.flush();
+                            envia("incorrecto");
                         }
                         break;
 
                     case "tarjeta_es":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         datos = texto.split("/");
                         dateFormat = new SimpleDateFormat("HH:mm:ss");
                         horaActual = new java.util.Date();
@@ -593,17 +549,14 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         tsbdi.insertarEstandar(es.getNumTarjeta());
                         if (tsbdi.insertado) {
                             //System.out.println("entra");
-                            dataOut.writeUTF("correcto");
-                            dataOut.flush();
+                            envia("correcto");
                         } else {
-                            //System.out.println("entra tb");
-                            dataOut.writeUTF("incorrecto");
-                            dataOut.flush();
+                            envia("incorrecto");
                         }
                         break;
 
                     case "tarjeta_ju":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         datos = texto.split("/");
                         if (compruebaFechaJubilado(Integer.parseInt(datos[1]))) {
                             dateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -623,21 +576,17 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             tsbdi.insertarJubilado(jubilado.getNumTarjeta(), getAñoValidez());
                             if (tsbdi.insertado) {
                                 //System.out.println("entra");
-                                dataOut.writeUTF("correcto");
-                                dataOut.flush();
+                                envia("correcto");
                             } else {
-                                //System.out.println("entra tb");
-                                dataOut.writeUTF("incorrecto");
-                                dataOut.flush();
+                                envia("incorrecto");
                             }
                         } else {
-                            dataOut.writeUTF("invalido");
-                            dataOut.flush();
+                            envia("invalido");
                         }
                         break;
 
                     case "tarjeta_estu":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         datos = texto.split("/");
                         if (compruebaMes(Integer.parseInt(datos[1]))) {
                             dateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -669,57 +618,17 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             //System.out.println(calendarFin.get(Calendar.YEAR));
                             tsbdi.insertarEstudiante(estudiante.getNumTarjeta(), estudiante.getFecha_ini(), estudiante.getFecha_fin());
                             if (tsbdi.insertado) {
-                                //System.out.println("entra");
-                                dataOut.writeUTF("correcto");
-                                dataOut.flush();
+                                envia("correcto");
                             } else {
-                                //System.out.println("entra tb");
-                                dataOut.writeUTF("incorrecto");
-                                dataOut.flush();
+                                envia("incorrecto");
                             }
                         } else {
-                            dataOut.writeUTF("invalido");
-                            dataOut.flush();
-                        }
-                        break;
-
-                    case "icliente":
-                        texto = dataIn.readUTF();
-                        datos = texto.split("/");
-                        encriptar = new Encriptar();
-                        String nuevaContraseña = encriptar.encriptar(datos[1], CLAVE);
-                        Usuario us = new Usuario(datos[0], nuevaContraseña, datos[2], new Date(Long.parseLong(datos[4])),
-                                Integer.parseInt(datos[3]));
-                        udi.insertar(us);
-                        if (udi.insertado) {
-                            us = udi.getId(datos[0]);
-                            udi.insertarCliente(us.getId());
-                            if (udi.insertado) {
-                                dataOut.writeUTF("correcto");
-                                dataOut.flush();
-                            }
-                        } else {
-                            dataOut.writeUTF("incorrecto");
-                            dataOut.flush();
-                        }
-                        break;
-
-                    case "i_imagen":
-                        texto = dataIn.readUTF();
-                        System.out.println(texto);
-                        datos = texto.split("¬");
-                        udi.insertarImagen(datos[0], datos[1]);
-                        if (udi.insertado) {
-                            dataOut.writeUTF("correcto");
-                            dataOut.flush();
-                        } else {
-                            dataOut.writeUTF("incorrecto");
-                            dataOut.flush();
+                            envia("invalido");
                         }
                         break;
 
                     case "iviaje":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         datos = texto.split("/");
                         //DateFormat sdf = new SimpleDateFormat("hh:mm");
                         java.util.Date d = new java.util.Date();
@@ -733,13 +642,6 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         if (viajes.isEmpty()) {
                             vdi.insertarViaje(viaje);
                             //existente = false;
-                            if (vdi.insertado) {
-                                dataOut.writeUTF("correcto");
-                                dataOut.flush();
-                            } else {
-                                dataOut.writeUTF("incorrecto");
-                                dataOut.flush();
-                            }
                         } else {
                             for (int i = 0; i < viajes.size(); i++) {
                                 if (viajes.get(i).getIdLinea() == viaje.getIdLinea() && viajes.get(i).getIdMunicipio()
@@ -750,26 +652,18 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             }
                             if (existente) {
                                 System.out.println("existente");
-                                dataOut.writeUTF("correcto");
-                                dataOut.flush();
                             } else {
                                 System.out.println("no existente");
                                 vdi.insertarViaje(viaje);
                                 existente = false;
-                                if (vdi.insertado) {
-                                    dataOut.writeUTF("correcto");
-                                    dataOut.flush();
-                                } else {
-                                    dataOut.writeUTF("incorrecto");
-                                    dataOut.flush();
-                                }
                             }
                         }
                         break;
 
                     case "actualiza_codigo":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         datos = texto.split("/");
+                        tsbdi = new TarjetasBusDAOImp(con);
                         id = tsbdi.getIdCodigo(Long.parseLong(datos[1]));
                         qr = new CodigoQR(id, datos[0], datos[2]);
                         cdi = new CodigoDAOImp(con);
@@ -777,52 +671,61 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         break;
 
                     case "actualiza_saldo":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         datos = texto.split("/");
-                        //if (Integer.parseInt(datos[2]) == cont) {
+                        tsbdi = new TarjetasBusDAOImp(con);
                         for (int i = 0; i < 1; i++) {
-                            //double nuevoSaldo = Double.parseDouble(datos[0]) - (Double.parseDouble(datos[2]) * Double.parseDouble(datos[3]));
-                            //System.out.println("Nuevo saldo: " + nuevoSaldo);
-                            tsbdi.restaSaldo(Long.parseLong(datos[1]), /*nuevoSaldo*/ Double.parseDouble(datos[0]));
-                            if (tsbdi.recarga) {
-                                //cont++;
-                                dataOut.writeUTF("correcto");
-                                dataOut.flush();
-                            } else {
-                                dataOut.writeUTF("incorrecto");
-                                dataOut.flush();
-                            }
+                            tsbdi.restaSaldo(Long.parseLong(datos[1]), Double.parseDouble(datos[0]));
                         }
                         break;
 
+                    case "actualiza_usuario":
+                        udi = new UsuarioDAOImp(con);
+                        Usuario nuevoUsuario = (Usuario) inputStream.readObject();
+                        encriptar = new Encriptar();
+                        encriptada = encriptar.encriptar(nuevoUsuario.getContraseña(), CLAVE);
+                        System.out.println(nuevoUsuario);
+                        nuevoUsuario.setContraseña(encriptada);
+                        udi.updateUsuario(nuevoUsuario);
+                        break;
+
                     case "codigo":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         cdi = new CodigoDAOImp(con);
                         if (!cdi.getAllCodigos().isEmpty()) {
+                            tsbdi = new TarjetasBusDAOImp(con);
                             id = tsbdi.getIdCodigo(Long.parseLong(texto));
                             System.out.println(id);
                             CodigoQR qr = cdi.getCodigoById(id);
                             if (qr.getMensaje() == null) {
-                                dataOut.writeUTF("Sin uso");
+                                outputStream.writeUTF("Sin uso");
                             } else {
-                                dataOut.writeUTF(qr.getMensaje());
+                                outputStream.writeUTF(qr.getMensaje());
                             }
-                            dataOut.flush();
+                            outputStream.flush();
                         }
                         break;
 
                     case "direccion_parada":
-                        texto = dataIn.readUTF();
+                        texto = inputStream.readUTF();
                         System.out.println(texto);
+                        pdi = new ParadaDAOImp(con);
                         String direccion = pdi.getDireccion(texto);
-                        System.out.println(direccion);
-                        dataOut.writeUTF(direccion);
-                        dataOut.flush();
+                        System.out.println("direccion: " + direccion);
+                        outputStream.writeUTF(direccion);
+                        outputStream.flush();
                         break;
 
                     case "refrescar":
                         Inserts inserts = new Inserts(con);
                         inserts.insertaRegistros();
+                        while (true) {
+                            if (Inserts.fin) {
+                                outputStream.writeUTF("fin");
+                                outputStream.flush();
+                                break;
+                            }
+                        }
                         break;
 
                     case "exit":
@@ -833,13 +736,15 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                 }
             }
         } catch (IOException ex) {
+            //Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
             Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 con.disconect();
                 cliente.close();
-                dataIn.close();
-                dataOut.close();
+                outputStream.close();
+                inputStream.close();
             } catch (IOException ex) {
                 Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -848,6 +753,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
 
     private boolean comprobarCredenciales(String cadena, String usuario, String contraseña) {
         boolean correcto = false;
+        udi = new UsuarioDAOImp(con);
         usuarios = udi.getAll();
         clientes = udi.getAllClientes();
         encriptar = new Encriptar();
@@ -858,13 +764,8 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                 if (usuario.equals(admins.get(i).getNombre()) && convertida.equals(admins.get(i).getContraseña())
                         && admins.get(i).getIdCliente() == admins.get(i).getId()) {
                     correcto = true;
-                    try {
-                        dataOut.writeUTF("correcto");
-                        dataOut.flush();
-                        break;
-                    } catch (IOException ex) {
-                        Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    envia("correcto");
+                    break;
                 }
             }
         } else {
@@ -872,15 +773,9 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                 if (usuario.equals(clientes.get(j).getNombre()) && convertida.equals(clientes.get(j).getContraseña())
                         && clientes.get(j).getIdCliente() == clientes.get(j).getId()) {
                     correcto = true;
-                    try {
-                        dataOut.writeUTF("correcto cliente");
-                        dataOut.flush();
-                        dataOut.writeInt(clientes.get(j).getIdCliente());
-                        dataOut.flush();
-                        break;
-                    } catch (IOException ex) {
-                        Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    envia("correcto cliente");
+                    enviaInt(clientes.get(j).getIdCliente());
+                    break;
                 }
             }
             if (!correcto) {
@@ -889,28 +784,47 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                     if (usuario.equals(clientes.get(j).getNombre()) && convertida.equals(clientes.get(j).getContraseña())
                             && clientes.get(j).getIdCliente() == clientes.get(j).getId()) {
                         correcto = true;
-                        try {
-                            dataOut.writeUTF("correcto revisor");
-                            dataOut.flush();
-                            dataOut.writeInt(clientes.get(j).getIdCliente());
-                            dataOut.flush();
-                            break;
-                        } catch (IOException ex) {
-                            Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                        envia("correcto revisor");
+                        enviaInt(clientes.get(j).getIdCliente());
+                        break;
                     }
                 }
             }
         }
         if (!correcto) {
-            try {
-                dataOut.writeUTF("incorrecto");
-                dataOut.flush();
-            } catch (IOException ex) {
-                Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            envia("incorrecto");
         }
         return correcto;
+    }
+
+    private void envia(String mensaje) {
+        try {
+            outputStream.writeUTF(mensaje);
+            outputStream.flush();
+            outputStream.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void enviaInt(int mensaje) {
+        try {
+            outputStream.writeInt(mensaje);
+            outputStream.flush();
+            outputStream.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void enviaObject(Object object) {
+        try {
+            outputStream.writeObject(object);
+            outputStream.flush();
+            outputStream.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(HiloServidorBahiaCadiz.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private boolean compruebaFechaJubilado(int idCliente) {
@@ -921,10 +835,12 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
         java.sql.Date date2 = new java.sql.Date(d.getTime());
         calendar2.setTime(date2);
         int anioActual = calendar2.get(Calendar.YEAR);
-        for (int i = 0; i < usuarios.size(); i++) {
-            calendar.setTime(usuarios.get(i).getFecha_nac());
+        udi = new UsuarioDAOImp(con);
+        List<Cliente> clientes = udi.getAllClientes();
+        for (int i = 0; i < clientes.size(); i++) {
+            calendar.setTime(clientes.get(i).getFecha_nac());
             int anioCliente = calendar.get(Calendar.YEAR);
-            if ((anioActual - anioCliente >= 65) && idCliente == usuarios.get(i).getId()) {
+            if ((anioActual - anioCliente >= 65) && idCliente == clientes.get(i).getId()) {
                 correcto = true;
             }
         }
@@ -949,8 +865,10 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
         java.sql.Date date2 = new java.sql.Date(d.getTime());
         calendar.setTime(date2);
         int mesActual = calendar.get(Calendar.MONTH);
-        for (int i = 0; i < usuarios.size(); i++) {
-            if ((mesActual >= 9 || mesActual <= 6) && idCliente == usuarios.get(i).getId()) {
+        udi = new UsuarioDAOImp(con);
+        List<Cliente> clientes = udi.getAllClientes();
+        for (int i = 0; i < clientes.size(); i++) {
+            if ((mesActual >= 9 || mesActual <= 6) && idCliente == clientes.get(i).getId()) {
                 correcto = true;
             }
         }
@@ -977,13 +895,15 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.port", "587");
             props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
 
-            Session mailSession = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+            Session mailSession = Session.getDefaultInstance(props, new Authenticator() {
+                @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(email, password);
                 }
             });
-            //mailSession.setDebug(true);
+            mailSession.setDebug(true);
 
             MimeMessage message = new MimeMessage(mailSession);
             message.setFrom(new InternetAddress(email));
@@ -996,12 +916,11 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
             transport.sendMessage(message, message.getAllRecipients());
             transport.close();
 
-            JOptionPane.showMessageDialog(null, "Correo enviado");
+            //JOptionPane.showMessageDialog(null, "Correo enviado");
         } catch (AddressException e) {
             e.printStackTrace();
         } catch (MessagingException ex) {
             ex.printStackTrace();
         }
-        //} 
     }
 }

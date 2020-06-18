@@ -2,8 +2,8 @@ package idao;
 
 import java.sql.Date;
 import java.util.List;
-import model.Cliente;
-import model.Usuario;
+import serializable.Cliente;
+import serializable.Usuario;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -21,11 +21,13 @@ public interface iUsuarioDAO {
     public void insertarAdmin(int id);
     public void insertarRevisor(int id);
     public void borrar(int id);
-    public void insertarImagen(String nombre, String ruta);
+    public void updateUsuario(Usuario usuario);
     public List<Usuario> getUsuario(String nombre);
     public List<Usuario> getAll();
     public List<Cliente> getAllAdmins();
     public List<Cliente> getAllClientes();
     public List<Cliente> getAllRevisores();
+    public List<Usuario> getCliente(String nombre);
+    public List<Usuario> getRevisor(String nombre);
     public Usuario getId(String nombre);
 }

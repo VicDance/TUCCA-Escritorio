@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -23,8 +25,8 @@ import javax.swing.JOptionPane;
 public class LoginForm extends javax.swing.JFrame{
 
     public static Socket cliente;
-    public static DataOutputStream dataOut;
-    public static DataInputStream dataIn;
+    public static ObjectOutputStream objectOut;
+    public static ObjectInputStream objectIn;
 
     public LoginForm() {
         initComponents();
@@ -42,8 +44,8 @@ public class LoginForm extends javax.swing.JFrame{
             HOST = configuracion.getProperty("server");
             PUERTO = Integer.valueOf(configuracion.getProperty("port"));
             cliente = new Socket(HOST, PUERTO);
-            dataOut = new DataOutputStream(cliente.getOutputStream());
-            dataIn = new DataInputStream(cliente.getInputStream());
+            objectOut = new ObjectOutputStream(cliente.getOutputStream());
+            objectIn = new ObjectInputStream(cliente.getInputStream());
         } catch (IOException ex) {
             Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -57,6 +59,15 @@ public class LoginForm extends javax.swing.JFrame{
         this.dispose();
     }
 
+    private void enviaTexto(String texto){
+        try {
+            objectOut.writeUTF(texto);
+            objectOut.flush();
+            objectOut.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -230,8 +241,9 @@ public class LoginForm extends javax.swing.JFrame{
 
     private void lblCloseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCloseMouseClicked
         try {
-            dataOut.writeUTF("exit");
-            dataOut.flush();
+            objectOut.writeUTF("exit");
+            objectOut.flush();
+            objectOut.reset();
             System.exit(0);
         } catch (IOException ex) {
             Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -254,13 +266,10 @@ public class LoginForm extends javax.swing.JFrame{
     private void btnIniciarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarSesionActionPerformed
         try {
             if (txtUsuario.getText().length() != 0 && txtPassword.getPassword().length != 0) {
-                dataOut.writeUTF("inicioAdmin");
-                dataOut.flush();
-                dataOut.writeUTF(txtUsuario.getText());
-                dataOut.flush();
-                dataOut.writeUTF(new String(txtPassword.getPassword()));
-                dataOut.flush();
-                String respuesta = dataIn.readUTF();
+                enviaTexto("inicioAdmin");
+                enviaTexto(txtUsuario.getText());
+                enviaTexto(new String(txtPassword.getPassword()));
+                String respuesta = objectIn.readUTF();
                 if(respuesta.equalsIgnoreCase("correcto")){
                     mostrarFormAdmin();
                 }else{

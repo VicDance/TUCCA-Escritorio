@@ -6,7 +6,7 @@
 package idao;
 
 import java.util.List;
-import model.Nucleo;
+import serializable.Nucleo;
 
 /**
  *

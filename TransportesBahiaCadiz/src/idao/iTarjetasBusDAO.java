@@ -7,10 +7,10 @@ package idao;
 
 import java.sql.Date;
 import java.util.List;
-import model.TarjetaBus;
-import model.TarjetaEstandar;
-import model.TarjetaEstudiante;
-import model.TarjetaJubilado;
+import serializable.TarjetaBus;
+import serializable.TarjetaEstandar;
+import serializable.TarjetaEstudiante;
+import serializable.TarjetaJubilado;
 
 /**
  *
@@ -25,6 +25,7 @@ public interface iTarjetasBusDAO {
     public List<TarjetaEstandar> getAllTarjetasEstandar();
     public List<TarjetaEstudiante> getAllTarjetasEstudiante();
     public List<TarjetaJubilado> getAllTarjetasJubilado();
+    public List<TarjetaBus> getTarjetasUsuario(int id);
     public TarjetaBus getTarjeta(long numTarjeta);
     public void borrarTarjeta(int posicion);
     public boolean recargarTarjeta(long numTarjeta, double saldo);

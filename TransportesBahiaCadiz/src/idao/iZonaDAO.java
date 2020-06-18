@@ -7,7 +7,7 @@ package idao;
 
 import java.sql.Date;
 import java.util.List;
-import model.Zona;
+import serializable.Zona;
 
 /**
  *

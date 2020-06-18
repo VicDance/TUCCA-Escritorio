@@ -6,8 +6,8 @@
 package idao;
 
 import java.util.List;
-import model.Corresponde;
-import model.Parada;
+import serializable.Corresponde;
+import serializable.Parada;
 
 /**
  *

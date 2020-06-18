@@ -8,14 +8,27 @@ package view;
 import connector.Conector;
 import java.awt.Color;
 import java.io.IOException;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import scripts.Inserts;
-import static view.LoginForm.dataIn;
-import static view.LoginForm.dataOut;
+import serializable.Cliente;
+import serializable.Linea;
+import serializable.Municipio;
+import serializable.Nucleo;
+import serializable.Parada;
+import serializable.Usuario;
+import serializable.Zona;
+import static view.LoginForm.objectIn;
+import static view.LoginForm.objectOut;
 
 /**
  *
@@ -38,16 +51,30 @@ public class AdminForm extends javax.swing.JFrame {
         lblTitle.setText(lblUsuarios.getText());
     }
 
-    private void setColumnasUsuarios() {
-        columnas = new Object[]{"Id usuario", "Nombre", "Email", "Fecha nacimiento", "Teléfono"};
+    private void enviaTexto(String texto) {
         try {
-            dataOut.writeUTF("usuarios");
-            dataOut.flush();
-            size = dataIn.readInt();
+            objectOut.writeUTF(texto);
+            objectOut.flush();
+            objectOut.reset();
         } catch (IOException ex) {
             Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        model = new DefaultTableModel(columnas, size);
+    }
+
+    private void setColumnasUsuarios() {
+        columnas = new Object[]{"Id usuario", "Nombre", "Email", "Fecha nacimiento", "Teléfono"};
+        try {
+            enviaTexto("usuarios");
+            size = objectIn.readInt();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+        //model = new DefaultTableModel(columnas, size);
     }
 
     private void setFilasUsuarios() {
@@ -55,148 +82,173 @@ public class AdminForm extends javax.swing.JFrame {
         model.setRowCount(0);
         for (int i = 0; i < size; i++) {
             try {
-                String datos = dataIn.readUTF();
-                newDatos = datos.split("/");
-                filas = new Object[]{newDatos[0], newDatos[1], newDatos[2],
-                    newDatos[3], newDatos[4]};
+                Usuario usuario = (Usuario) objectIn.readObject();
+                filas = new Object[]{usuario.getId(), usuario.getNombre(), usuario.getCorreo(),
+                    usuario.getFecha_nac(), usuario.getTfno()};
 
                 model.addRow(filas);
-                //System.out.println(newDatos[0]);
             } catch (IOException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        table.setModel(model);
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+
+        //table.setModel(model);
     }
 
     private void setColumnasLineas() {
         columnas = new Object[]{"Id linea", "Nombre linea"};
         try {
-            dataOut.writeUTF("lineas");
-            dataOut.flush();
-            size = dataIn.readInt();
+            enviaTexto("lineas");
+            size = objectIn.readInt();
         } catch (IOException ex) {
             Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        model = new DefaultTableModel(columnas, size);
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
     }
 
     private void setFilasLineas() {
         Object[] filas;
         model.setRowCount(0);
         for (int i = 0; i < size; i++) {
-            String datos;
             try {
-                datos = dataIn.readUTF();
-                newDatos = datos.split("/");
-                filas = new Object[]{newDatos[0], newDatos[1]};
+                Linea linea = (Linea) objectIn.readObject();
+                filas = new Object[]{linea.getIdLinea(), linea.getNombreLinea()};
                 model.addRow(filas);
             } catch (IOException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        table.setModel(model);
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+        //table.setModel(model);
     }
 
     private void setColumnasParadas() {
         columnas = new Object[]{"Id parada", "Id zona", "Nombre parada", "Latitud", "Longitud"};
         try {
-            dataOut.writeUTF("paradas");
-            dataOut.flush();
-            size = dataIn.readInt();
+            enviaTexto("paradas");
+            size = objectIn.readInt();
         } catch (IOException ex) {
             Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        model = new DefaultTableModel(columnas, size);
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+        //model = new DefaultTableModel(columnas, size);
     }
 
     private void setFilasParadas() {
         Object[] filas;
         model.setRowCount(0);
         for (int i = 0; i < size; i++) {
-            String datos;
             try {
-                datos = dataIn.readUTF();
-                newDatos = datos.split("/");
-                filas = new Object[]{newDatos[0], newDatos[1], newDatos[2],
-                    newDatos[3], newDatos[4]};
+                Parada parada = (Parada) objectIn.readObject();
+                filas = new Object[]{parada.getIdParada(), parada.getIdZona(), parada.getNombreParada()
+                , parada.getLatitud(), parada.getLongitud()};
 
                 model.addRow(filas);
             } catch (IOException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        table.setModel(model);
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+        //table.setModel(model);
     }
 
     private void setColumnasMunicipios() {
         columnas = new Object[]{"Id municipio", "Nombre municipio"};
         try {
-            dataOut.writeUTF("municipios");
-            dataOut.flush();
-            size = dataIn.readInt();
+            enviaTexto("municipios");
+            size = objectIn.readInt();
         } catch (IOException ex) {
             Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        model = new DefaultTableModel(columnas, size);
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+        //model = new DefaultTableModel(columnas, size);
     }
 
     private void setFilasMunicipios() {
         Object[] filas;
         model.setRowCount(0);
         for (int i = 0; i < size; i++) {
-            String datos;
             try {
-                datos = dataIn.readUTF();
-                newDatos = datos.split("/");
-                filas = new Object[]{newDatos[0], newDatos[1]};
+                Municipio mun = (Municipio) objectIn.readObject();
+                filas = new Object[]{mun.getIdMunicipio(), mun.getNombreMunicipio()};
                 model.addRow(filas);
             } catch (IOException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        table.setModel(model);
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+        //table.setModel(model);
     }
 
     private void setColumnasNucleos() {
         columnas = new Object[]{"Id nucleo", "Id municipio", "Id zona", "Nombre nucleo"};
         try {
-            dataOut.writeUTF("nucleos");
-            dataOut.flush();
-            size = dataIn.readInt();
+            enviaTexto("nucleos");
+            size = objectIn.readInt();
         } catch (IOException ex) {
             Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        model = new DefaultTableModel(columnas, size);
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+        //model = new DefaultTableModel(columnas, size);
     }
 
     private void setFilasNucleos() {
         Object[] filas;
         model.setRowCount(0);
         for (int i = 0; i < size; i++) {
-            String datos;
             try {
-                datos = dataIn.readUTF();
-                newDatos = datos.split("/");
-                filas = new Object[]{newDatos[0], newDatos[1], newDatos[2], newDatos[3]};
+                Nucleo nucleo = (Nucleo) objectIn.readObject();
+                filas = new Object[]{nucleo.getIdNucleo(), nucleo.getIdMunicipio(), nucleo.getIdZona(), nucleo.getNombreNucleo()};
                 model.addRow(filas);
             } catch (IOException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        table.setModel(model);
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+        //table.setModel(model);
     }
 
     private void setColumnasZonas() {
         columnas = new Object[]{"Id zona", "Nombre zona"};
         try {
-            dataOut.writeUTF("zonas");
-            dataOut.flush();
-            size = dataIn.readInt();
+            enviaTexto("zonas");
+            size = objectIn.readInt();
         } catch (IOException ex) {
             Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        model = new DefaultTableModel(columnas, size);
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+        //model = new DefaultTableModel(columnas, size);
     }
 
     private void setFilasZonas() {
@@ -205,141 +257,152 @@ public class AdminForm extends javax.swing.JFrame {
         for (int i = 0; i < size; i++) {
             String datos;
             try {
-                datos = dataIn.readUTF();
-                newDatos = datos.split("/");
-                filas = new Object[]{newDatos[0], newDatos[1]};
+                Zona zona = (Zona) objectIn.readObject();
+                filas = new Object[]{zona.getIdZona(), zona.getNombreZona()};
                 model.addRow(filas);
             } catch (IOException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        table.setModel(model);
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+        //table.setModel(model);
     }
 
     private void setColumnasClientes() {
         columnas = new Object[]{"Id cliente", "Nombre", "Email", "Fecha nacimiento", "Teléfono"};
         try {
-            dataOut.writeUTF("clientes");
-            dataOut.flush();
-            size = dataIn.readInt();
+            enviaTexto("clientes");
+            size = objectIn.readInt();
         } catch (IOException ex) {
             Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        model = new DefaultTableModel(columnas, size);
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+        //model = new DefaultTableModel(columnas, size);
     }
 
-    private void setFilasClienttes() {
+    private void setFilasClientes() {
         Object[] filas;
         model.setRowCount(0);
         for (int i = 0; i < size; i++) {
-            String datos;
             try {
-                datos = dataIn.readUTF();
-                newDatos = datos.split("/");
-                filas = new Object[]{newDatos[0], newDatos[1], newDatos[2], newDatos[3], newDatos[4]};
+                Cliente cli = (Cliente) objectIn.readObject();
+                filas = new Object[]{cli.getIdCliente(), cli.getNombre(), cli.getCorreo(), cli.getFecha_nac(), cli.getTfno()};
                 model.addRow(filas);
             } catch (IOException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        table.setModel(model);
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+        //table.setModel(model);
+    }
+
+    private void setColumnasRevisores() {
+        columnas = new Object[]{"Id revisor", "Nombre", "Email", "Fecha nacimiento", "Teléfono"};
+        try {
+            enviaTexto("revisores");
+            size = objectIn.readInt();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+        //model = new DefaultTableModel(columnas, size);
+    }
+
+    private void setFilasRevisores() {
+        Object[] filas;
+        model.setRowCount(0);
+        for (int i = 0; i < size; i++) {
+            try {
+                Cliente cli = (Cliente) objectIn.readObject();
+                filas = new Object[]{cli.getIdCliente(), cli.getNombre(), cli.getCorreo(), cli.getFecha_nac(), cli.getTfno()};
+                model.addRow(filas);
+            } catch (IOException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+        //table.setModel(model);
     }
 
     private void buscar(String campoBusqueda, String texto) {
         try {
             switch (campoBusqueda) {
                 case "usuario":
-                    dataOut.writeUTF(campoBusqueda);
-                    dataOut.flush();
-                    dataOut.writeUTF(texto);
-                    dataOut.flush();
+                    enviaTexto(campoBusqueda);
+                    enviaTexto(texto);
                     //recibe tamaño array
-                    size = dataIn.readInt();
+                    size = objectIn.readInt();
                     setFilasUsuarios();
                     break;
 
-                case "linea":
-                    dataOut.writeUTF(campoBusqueda);
-                    dataOut.flush();
-                    dataOut.writeUTF(texto);
-                    dataOut.flush();
+                case "clientes_busqueda":
+                    enviaTexto(campoBusqueda);
+                    enviaTexto(texto);
                     //recibe tamaño array
-                    size = dataIn.readInt();
+                    size = objectIn.readInt();
+                    setFilasClientes();
+                    break;
+
+                case "revisor":
+                    enviaTexto(campoBusqueda);
+                    enviaTexto(texto);
+                    //recibe tamaño array
+                    size = objectIn.readInt();
+                    setFilasRevisores();
+                    break;
+
+                case "linea":
+                    enviaTexto(campoBusqueda);
+                    enviaTexto(texto);
+                    //recibe tamaño array
+                    size = objectIn.readInt();
                     setFilasLineas();
                     break;
 
                 case "municipio":
-                    dataOut.writeUTF(campoBusqueda);
-                    dataOut.flush();
-                    dataOut.writeUTF(texto);
-                    dataOut.flush();
+                    enviaTexto(campoBusqueda);
+                    enviaTexto(texto);
                     //recibe tamaño array
-                    size = dataIn.readInt();
+                    size = objectIn.readInt();
                     setFilasMunicipios();
                     break;
 
                 case "nucleo":
-                    dataOut.writeUTF(campoBusqueda);
-                    dataOut.flush();
-                    dataOut.writeUTF(texto);
-                    dataOut.flush();
+                    enviaTexto(campoBusqueda);
+                    enviaTexto(texto);
                     //recibe tamaño array
-                    size = dataIn.readInt();
+                    size = objectIn.readInt();
                     setFilasNucleos();
                     break;
 
                 case "parada":
-                    dataOut.writeUTF(campoBusqueda);
-                    dataOut.flush();
-                    dataOut.writeUTF(texto);
-                    dataOut.flush();
+                    enviaTexto(campoBusqueda);
+                    enviaTexto(texto);
                     //recibe tamaño array
-                    size = dataIn.readInt();
+                    size = objectIn.readInt();
                     setFilasParadas();
                     break;
 
                 case "zona":
-                    dataOut.writeUTF(campoBusqueda);
-                    dataOut.flush();
-                    dataOut.writeUTF(texto);
-                    dataOut.flush();
+                    enviaTexto(campoBusqueda);
+                    enviaTexto(texto);
                     //recibe tamaño array
-                    size = dataIn.readInt();
+                    size = objectIn.readInt();
                     setFilasZonas();
-                    break;
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    //TODO Cambiar para que solo se pueda añadir revisor
-    private void añade(String campo) {
-        try {
-            switch (campo) {
-                case "usuario":
-                    dataOut.writeUTF(campo);
-                    dataOut.flush();
-                    break;
-
-                case "linea":
-                    dataOut.writeUTF(campo);
-                    dataOut.flush();
-                    break;
-
-                case "municipio":
-                    dataOut.writeUTF(campo);
-                    dataOut.flush();
-                    break;
-
-                case "nucleo":
-                    dataOut.writeUTF(campo);
-                    dataOut.flush();
-                    break;
-
-                case "parada":
-                    dataOut.writeUTF(campo);
-                    dataOut.flush();
                     break;
             }
         } catch (IOException ex) {
@@ -427,8 +490,9 @@ public class AdminForm extends javax.swing.JFrame {
             }
         });
 
-        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        lblTitle.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
         lblTitle.setForeground(new java.awt.Color(255, 255, 255));
+        lblTitle.setText("Usuarios");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -470,7 +534,7 @@ public class AdminForm extends javax.swing.JFrame {
         lblUsuarios.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblUsuarios.setForeground(new java.awt.Color(255, 255, 255));
         lblUsuarios.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblUsuarios.setText("USUARIOS");
+        lblUsuarios.setText("Usuarios");
         lblUsuarios.setOpaque(true);
         lblUsuarios.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -688,13 +752,10 @@ public class AdminForm extends javax.swing.JFrame {
 
         table.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+
             }
         ));
         table.setAlignmentX(0.0F);
@@ -702,6 +763,7 @@ public class AdminForm extends javax.swing.JFrame {
         table.setColumnSelectionAllowed(true);
         table.setGridColor(new java.awt.Color(248, 148, 6));
         jScrollPane1.setViewportView(table);
+        table.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 
         btnAñadir.setBackground(new java.awt.Color(34, 167, 240));
         btnAñadir.setFont(new java.awt.Font("Tahoma", 1, 15)); // NOI18N
@@ -820,13 +882,8 @@ public class AdminForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblCloseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCloseMouseClicked
-        try {
-            dataOut.writeUTF("exit");
-            dataOut.flush();
-            System.exit(0);
-        } catch (IOException ex) {
-            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        enviaTexto("exit");
+        System.exit(0);
     }//GEN-LAST:event_lblCloseMouseClicked
 
     private void lblMinMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMinMouseClicked
@@ -850,7 +907,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblMenuMouseClicked
 
     private void lblUsuariosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUsuariosMouseEntered
-        lblUsuarios.setBackground(new Color(248,148,6));
+        lblUsuarios.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblUsuariosMouseEntered
 
     private void lblUsuariosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUsuariosMouseExited
@@ -866,7 +923,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblUsuariosMouseClicked
 
     private void lblRevisorMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseEntered
-        lblRevisor.setBackground(new Color(248,148,6));
+        lblRevisor.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblRevisorMouseEntered
 
     private void lblRevisorMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseExited
@@ -876,11 +933,13 @@ public class AdminForm extends javax.swing.JFrame {
     private void lblRevisorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRevisorMouseClicked
         btnAñadir.setEnabled(true);
         btnBorrar.setEnabled(true);
-        lblTitle.setText(lblUsuarios.getText());
+        lblTitle.setText(lblRevisor.getText());
+        setColumnasRevisores();
+        setFilasRevisores();
     }//GEN-LAST:event_lblRevisorMouseClicked
 
     private void lblClienteMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseEntered
-        lblCliente.setBackground(new Color(248,148,6));
+        lblCliente.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblClienteMouseEntered
 
     private void lblClienteMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseExited
@@ -896,7 +955,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblLineasMouseClicked
 
     private void lblLineasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLineasMouseEntered
-        lblLineas.setBackground(new Color(248,148,6));
+        lblLineas.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblLineasMouseEntered
 
     private void lblLineasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLineasMouseExited
@@ -912,7 +971,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblMunicipiosMouseClicked
 
     private void lblMunicipiosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMunicipiosMouseEntered
-        lblMunicipios.setBackground(new Color(248,148,6));
+        lblMunicipios.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblMunicipiosMouseEntered
 
     private void lblMunicipiosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMunicipiosMouseExited
@@ -924,7 +983,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblCabeceraMouseClicked
 
     private void lblCabeceraMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseEntered
-        lblCabecera.setBackground(new Color(248,148,6));
+        lblCabecera.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblCabeceraMouseEntered
 
     private void lblCabeceraMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseExited
@@ -936,7 +995,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblRegularMouseClicked
 
     private void lblRegularMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseEntered
-        lblRegular.setBackground(new Color(248,148,6));
+        lblRegular.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblRegularMouseEntered
 
     private void lblRegularMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseExited
@@ -944,11 +1003,12 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblRegularMouseExited
 
     private void lblClienteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseClicked
+        System.out.println("click");
         setColumnasClientes();
-        setFilasClienttes();
-        btnAñadir.setEnabled(true);
-        btnBorrar.setEnabled(true);
-        lblTitle.setText(lblUsuarios.getText());
+        setFilasClientes();
+        btnAñadir.setEnabled(false);
+        btnBorrar.setEnabled(false);
+        lblTitle.setText(lblCliente.getText());
     }//GEN-LAST:event_lblClienteMouseClicked
 
     private void lblParadasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseClicked
@@ -960,7 +1020,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblParadasMouseClicked
 
     private void lblParadasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseEntered
-        lblParadas.setBackground(new Color(248,148,6));
+        lblParadas.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblParadasMouseEntered
 
     private void lblParadasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblParadasMouseExited
@@ -976,7 +1036,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblNucleosMouseClicked
 
     private void lblNucleosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblNucleosMouseEntered
-        lblNucleos.setBackground(new Color(248,148,6));
+        lblNucleos.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblNucleosMouseEntered
 
     private void lblNucleosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblNucleosMouseExited
@@ -996,6 +1056,12 @@ public class AdminForm extends javax.swing.JFrame {
         String campo;
         if (table.getColumnName(0).trim().toLowerCase().contains("usuario")) {
             campo = "usuario";
+            buscar(campo, texto);
+        } else if (table.getColumnName(0).trim().toLowerCase().contains("cliente")) {
+            campo = "cliente";
+            buscar(campo, texto);
+        } else if (table.getColumnName(0).trim().toLowerCase().contains("revisor")) {
+            campo = "revisor";
             buscar(campo, texto);
         } else if (table.getColumnName(0).trim().toLowerCase().contains("linea")) {
             campo = "linea";
@@ -1029,7 +1095,7 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblZonasMouseClicked
 
     private void lblZonasMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblZonasMouseEntered
-        lblZonas.setBackground(new Color(248,148,6));
+        lblZonas.setBackground(new Color(248, 148, 6));
     }//GEN-LAST:event_lblZonasMouseEntered
 
     private void lblZonasMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblZonasMouseExited
@@ -1041,12 +1107,24 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBorrarActionPerformed
 
     private void lblRefreshMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRefreshMouseClicked
-        try {
-            dataOut.writeUTF("refrescar");
-            dataOut.flush();
-        } catch (IOException ex) {
-            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        enviaTexto("refrescar");
+        GifForm gif = new GifForm();
+        gif.setVisible(true);
+        gif.setLocationRelativeTo(null);
+        gif.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String fin = objectIn.readUTF();
+                    System.out.println(fin);
+                    gif.dispose();
+                } catch (IOException ex) {
+                    Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        };
+        new Thread(r).start();
     }//GEN-LAST:event_lblRefreshMouseClicked
 
     /**

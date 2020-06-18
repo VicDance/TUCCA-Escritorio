@@ -10,8 +10,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import static view.LoginForm.dataIn;
-import static view.LoginForm.dataOut;
+import static view.LoginForm.objectIn;
+import static view.LoginForm.objectOut;
 
 /**
  *
@@ -25,7 +25,16 @@ public class DeleteForm extends javax.swing.JFrame {
     public DeleteForm() {
         initComponents();
     }
-
+    
+    private void enviaTexto(String texto) {
+        try {
+            objectOut.writeUTF(texto);
+            objectOut.flush();
+            objectOut.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -173,10 +182,9 @@ public class DeleteForm extends javax.swing.JFrame {
 
     private void btnBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarActionPerformed
         try {
-            dataOut.writeUTF("busuario");
-            dataOut.flush();
-            dataOut.writeInt(Integer.parseInt(txtId.getText()));
-            if(dataIn.readUTF().equalsIgnoreCase("correcto")){
+            enviaTexto("busuario");
+            objectOut.writeInt(Integer.parseInt(txtId.getText()));
+            if(objectIn.readUTF().equalsIgnoreCase("correcto")){
                 JOptionPane.showMessageDialog(this, "Borrado correcto");
                 this.dispose();
             }else{

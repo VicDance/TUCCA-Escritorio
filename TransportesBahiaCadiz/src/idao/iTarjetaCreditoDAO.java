@@ -6,7 +6,7 @@
 package idao;
 
 import java.util.List;
-import model.TarjetaCredito;
+import serializable.TarjetaCredito;
 
 /**
  *
@@ -14,6 +14,7 @@ import model.TarjetaCredito;
  */
 public interface iTarjetaCreditoDAO {
     public List<TarjetaCredito> getAllTarjetas();
+    public List<TarjetaCredito> getTarjetasUsuario(int id);
     public void insertar(TarjetaCredito tarjeta);
     public void borrar(int posicion);
 }

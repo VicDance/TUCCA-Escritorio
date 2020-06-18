@@ -29,24 +29,13 @@ public class ServidorBahiaCadiz {
             servidor = new ServerSocket(PUERTO);
             System.out.println("Conectado al servidor: " + servidor);
         } catch (IOException ex) {
+            ex.printStackTrace();
+            System.out.println("Mensaje: " + ex.getMessage());
             System.out.println("IMPOSIBLE CONECTAR CON EL SERVIDOR " + servidor);
             System.exit(-1);
         }
     }
     private void listen() {
-        /*Properties configuracion = new Properties();
-        ServerSocket servidor = null;
-        final int PUERTO; 
-        try {
-            configuracion.load(new FileInputStream("config.props"));
-            PUERTO = Integer.valueOf(configuracion.getProperty("port"));
-            servidor = new ServerSocket(PUERTO);
-            System.out.println("Conectado al servidor: " + servidor);
-        } catch (IOException ex) {
-            System.out.println("IMPOSIBLE CONECTAR CON EL SERVIDOR " + servidor);
-            System.exit(-1);
-        }*/
-
         Socket cliente = null;
 
         System.out.println("Servidor prestando servicio...");

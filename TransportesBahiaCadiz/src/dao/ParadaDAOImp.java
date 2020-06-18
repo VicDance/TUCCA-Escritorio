@@ -16,9 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.Corresponde;
-import model.Parada;
-import utils.Utils;
+import serializable.Corresponde;
+import serializable.Parada;
 
 /**
  *
@@ -86,7 +85,7 @@ public class ParadaDAOImp implements iParadaDAO {
             Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @Override
     public void insertaParadasAux(Parada parada) {
         Connection connection = con.getConnection();
@@ -283,18 +282,13 @@ public class ParadaDAOImp implements iParadaDAO {
         List<Parada> paradas = getAllParadas();
         String direccion = "";
         String[] nombre_split;
-        Utils utils = new Utils();
         //List<String> palabras = null;
         for (int i = 0; i < paradas.size(); i++) {
-            //for (int j = 0; j < nombre_split.length; j++) {
             if (nombre.startsWith("Pz") && !nombre.contains("-")) {
                 nombre_split = nombre.split(" ");
                 System.out.println(nombre_split[1]);
-                //System.out.println(paradas.get(i).getNombreParada());
+                direccion = comparaNombre(nombre_split[1]);
                 break;
-                /*if(paradas.get(i).getNombreParada().contains(nombre_split[1].trim())){
-                 System.out.println(paradas.get(i).getNombreParada());
-                 }*/
             } else if (nombre.startsWith("Pz") && nombre.contains("-")) {
                 nombre_split = nombre.split("-");
                 System.out.println(nombre_split[0]);
@@ -302,40 +296,42 @@ public class ParadaDAOImp implements iParadaDAO {
                     System.out.println("entra punto 1");
                     String[] nombre_split2 = nombre.split(".");
                     if (nombre_split2 == null || nombre_split2.length == 0) {
-                        //System.out.println("null");
+                        System.out.println("entra nulo");
                         System.out.println(nombre_split[0].substring(3));
+                        direccion = comparaNombre(nombre_split[0].substring(3));
                     } else {
+                        System.out.println("entra no nulo");
                         System.out.println(nombre_split2.length);
                     }
-                    //System.out.println(nombre_split[1]);
                 }
                 break;
             } else if (!nombre.startsWith("Pz") && nombre.contains("-")) {
                 nombre_split = nombre.split("-");
-                //System.out.println(nombre_split[0]);
+                System.out.println(nombre_split[0]);
                 if (nombre_split[0].contains(".")) {
                     System.out.println("entra punto 2");
-                    String[] nombre_split2 = nombre.split(".");
-                    if (nombre_split2 == null || nombre_split2.length == 0) {
-                        System.out.println("Split1 " + nombre_split[0].length());
-
-                        System.out.println(nombre_split[0].substring(0, 3));
+                    if (nombre_split[0].contains("SF") && nombre_split[0].contains("Est")) {
+                        direccion = comparaNombre("Estación FC-Bahía Sur");
                     } else {
-                        System.out.println("Split 2 " + nombre_split2.length);
+                        System.out.println(nombre_split[0].substring(2));
+                        direccion = comparaNombre(nombre_split[0].substring(2));
                     }
-                    /*for(int x = 0; x < nombre_split.length; x++){
-                     System.out.println(nombre_split[x]);
-                     }*/
-                    //nombre_split = nombre.split(".");
-                    //System.out.println(nombre_split[1]);
-                    //System.out.println(nombre_split[0].split(".")[1]);
                 } else {
                     System.out.println(nombre_split[0]);
+                    direccion = comparaNombre(nombre_split[0]);
                 }
                 break;
-            } else if (!nombre.startsWith("Pz") && !nombre.contains("-")) {
+            } else if (!nombre.startsWith("Pz") && !nombre.contains("-") && !nombre.contains("/")) {
                 nombre_split = nombre.split(" ");
                 System.out.println(nombre_split[0]);
+                if (nombre_split[0].length() <= 3) {
+                    direccion = comparaNombre(nombre_split[1]);
+                }
+                direccion = comparaNombre(nombre_split[0]);
+                break;
+            } else if (nombre.contains("/")) {
+                nombre_split = nombre.split("/");
+                direccion = comparaNombre(nombre_split[1]);
                 break;
             }
             //}
@@ -343,5 +339,16 @@ public class ParadaDAOImp implements iParadaDAO {
         }
         //System.out.println("Palabras: " + palabras);
         return direccion;
+    }
+
+    private String comparaNombre(String nombre) {
+        String cadena = "";
+        List<Parada> paradas = getAllParadas();
+        for (int i = 0; i < paradas.size(); i++) {
+            if (paradas.get(i).getNombreParada().contains(nombre)) {
+                cadena = paradas.get(i).getLatitud() + "/" + paradas.get(i).getLongitud();
+            }
+        }
+        return cadena;
     }
 }

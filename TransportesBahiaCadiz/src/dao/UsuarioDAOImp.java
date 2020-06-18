@@ -25,8 +25,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import model.Cliente;
-import model.Usuario;
+import javax.sql.rowset.serial.SerialBlob;
+import serializable.Cliente;
+import serializable.Usuario;
 
 /**
  *
@@ -34,12 +35,11 @@ import model.Usuario;
  */
 public class UsuarioDAOImp implements iUsuarioDAO {
 
-    Conector con/* = new Conector()*/;
+    Conector con;
     public boolean insertado;
     public boolean borrado;
 
     public UsuarioDAOImp() {
-        //con.connect();
     }
 
     public UsuarioDAOImp(Conector con) {
@@ -120,7 +120,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void insertarRevisor(int id) {
         insertado = false;
@@ -165,39 +165,22 @@ public class UsuarioDAOImp implements iUsuarioDAO {
     }
 
     @Override
-    public void insertarImagen(String nombre, String ruta) {
-        insertado = false;
-        byte[] imageByte;
-        BufferedImage image = null;
+    public void updateUsuario(Usuario usuario) {
         try {
             Connection connection = con.getConnection();
             PreparedStatement insertar;
-            String sqlNuevoUsuario = "UPDATE usuario SET imagen_perfil = ? WHERE username = ?";
+            String sqlNuevoUsuario = "UPDATE usuario SET username = ?, password = ?, email = ?, imagen_perfil = ? "
+                    + "WHERE idusuario = ?";
             insertar = connection.prepareStatement(sqlNuevoUsuario);
-            Usuario usuario = getId(nombre);
-            usuario.setImagen(ruta);
-            if (usuario.getImagen() == null || usuario.getImagen().equals("null")) {
-                usuario.setImagen("");
-            }
-            /*imageByte = Base64.getDecoder().decode(usuario.getImagen());
-            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
-            image = ImageIO.read(bis);
-            ImageIO.write(image, "jpg", new File("media/" + usuario.getId() + "_profile.jpg"));
-            bis.close();
-            usuario.setImagen("media/" + usuario.getId() + "_profile.jpg");*/
-            //String path = ruta + "/" + usuario.getNombre();
 
-            insertar.setString(2, usuario.getNombre());
-            insertar.setString(1, usuario.getImagen());
-            /*usuario.setFoto(ruta.getBytes());
-             //usuario.setImagen("media/" + usuario.getId() + "_profile.jpg");
-             insertar.setBytes(1, usuario.getFoto());
-             
-             //insertar.setString(2, usuario.getNombre());*/
-            if (insertar.executeUpdate() != 0) {
-                System.out.println("Insercción exitosa");
-                insertado = true;
-            }
+            Blob blob = new SerialBlob(usuario.getImagen());
+            insertar.setString(1, usuario.getNombre());
+            insertar.setString(2, usuario.getContraseña());
+            insertar.setString(3, usuario.getCorreo());
+            insertar.setBlob(4, blob);
+            insertar.setInt(5, usuario.getId());
+
+            insertar.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
@@ -206,6 +189,61 @@ public class UsuarioDAOImp implements iUsuarioDAO {
     @Override
     public List<Usuario> getUsuario(String nombre) {
         //con.connect();
+        Connection connection = con.getConnection();
+        List<Usuario> usuarios = null;
+        PreparedStatement buscar;
+        try {
+            String buscaUsuario = "SELECT * FROM usuario WHERE username LIKE '%" + nombre + "%'";
+            buscar = connection.prepareStatement(buscaUsuario);
+            ResultSet rs = buscar.executeQuery();
+            usuarios = new ArrayList<Usuario>();
+            while (rs.next()) {
+                Usuario usuario = new Usuario();
+                usuario.setId(rs.getInt(1));
+                usuario.setNombre(rs.getString(2));
+                usuario.setContraseña(rs.getString(3));
+                usuario.setCorreo(rs.getString(4));
+                usuario.setFecha_nac(rs.getDate(5));
+                usuario.setTfno(rs.getInt(6));
+                usuarios.add(usuario);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //con.disconect();
+        return usuarios;
+    }
+
+    @Override
+    public List<Usuario> getCliente(String nombre) {
+        //con.connect();
+        Connection connection = con.getConnection();
+        List<Usuario> usuarios = null;
+        PreparedStatement buscar;
+        try {
+            String buscaUsuario = "SELECT * FROM usuario WHERE username LIKE '%" + nombre + "%'";
+            buscar = connection.prepareStatement(buscaUsuario);
+            ResultSet rs = buscar.executeQuery();
+            usuarios = new ArrayList<Usuario>();
+            while (rs.next()) {
+                Usuario usuario = new Usuario();
+                usuario.setId(rs.getInt(1));
+                usuario.setNombre(rs.getString(2));
+                usuario.setContraseña(rs.getString(3));
+                usuario.setCorreo(rs.getString(4));
+                usuario.setFecha_nac(rs.getDate(5));
+                usuario.setTfno(rs.getInt(6));
+                usuarios.add(usuario);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //con.disconect();
+        return usuarios;
+    }
+
+    @Override
+    public List<Usuario> getRevisor(String nombre) {
         Connection connection = con.getConnection();
         List<Usuario> usuarios = null;
         PreparedStatement buscar;
@@ -250,8 +288,9 @@ public class UsuarioDAOImp implements iUsuarioDAO {
                 usuario.setCorreo(rs.getString(4));
                 usuario.setFecha_nac(rs.getDate(5));
                 usuario.setTfno(rs.getInt(6));
-                String imagen = rs.getString(7);
-                if (imagen != null) {
+                Blob blob = rs.getBlob(7);
+                if (blob != null) {
+                    byte[] imagen = blob.getBytes(1l, (int) blob.length());
                     System.out.println("imagen no nula");
                     usuario.setImagen(imagen);
                 }
@@ -296,7 +335,11 @@ public class UsuarioDAOImp implements iUsuarioDAO {
                 cli.setCorreo(rs.getString(4));
                 cli.setFecha_nac(rs.getDate(5));
                 cli.setTfno(rs.getInt(6));
-                cli.setImagen(rs.getString(7));
+                Blob blob = rs.getBlob(7);
+                if (blob != null) {
+                    byte[] imagen = blob.getBytes(1l, (int) blob.length());
+                    cli.setImagen(imagen);
+                }
                 cli.setIdCliente(rs.getInt(8));
                 clientes.add(cli);
             }
@@ -324,7 +367,11 @@ public class UsuarioDAOImp implements iUsuarioDAO {
                 cli.setCorreo(rs.getString(4));
                 cli.setFecha_nac(rs.getDate(5));
                 cli.setTfno(rs.getInt(6));
-                cli.setImagen(rs.getString(7));
+                Blob blob = rs.getBlob(7);
+                if (blob != null) {
+                    byte[] imagen = blob.getBytes(1l, (int) blob.length());
+                    cli.setImagen(imagen);
+                }
                 cli.setIdCliente(rs.getInt(8));
                 usuarios.add(cli);
             }
@@ -333,7 +380,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
         }
         return usuarios;
     }
-    
+
     @Override
     public List<Cliente> getAllRevisores() {
         Connection connection = con.getConnection();
@@ -352,7 +399,11 @@ public class UsuarioDAOImp implements iUsuarioDAO {
                 cli.setCorreo(rs.getString(4));
                 cli.setFecha_nac(rs.getDate(5));
                 cli.setTfno(rs.getInt(6));
-                cli.setImagen(rs.getString(7));
+                Blob blob = rs.getBlob(7);
+                if (blob != null) {
+                    byte[] imagen = blob.getBytes(1l, (int) blob.length());
+                    cli.setImagen(imagen);
+                }
                 cli.setIdCliente(rs.getInt(8));
                 usuarios.add(cli);
             }

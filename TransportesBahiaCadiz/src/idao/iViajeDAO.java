@@ -6,7 +6,7 @@
 package idao;
 
 import java.util.List;
-import model.Viaje;
+import serializable.Viaje;
 
 /**
  *

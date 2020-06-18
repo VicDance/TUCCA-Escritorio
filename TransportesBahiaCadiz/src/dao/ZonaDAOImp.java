@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.Zona;
+import serializable.Zona;
 
 /**
  *
@@ -41,6 +41,7 @@ public class ZonaDAOImp implements iZonaDAO {
         String creaTabla = "CREATE TABLE IF NOT EXISTS `zona_aux` (\n"
                 + "  `idzona` varchar(1) NOT NULL,\n"
                 + "  `nombre_zona` varchar(45) NOT NULL,\n"
+                + "  `color` varchar(45) NOT NULL,\n"
                 + "  PRIMARY KEY (`idzona`),\n"
                 + "  UNIQUE KEY `idzona_UNIQUE` (`idzona`)\n"
                 + ")";
@@ -61,11 +62,12 @@ public class ZonaDAOImp implements iZonaDAO {
         try {
             Connection connection = con.getConnection();
             PreparedStatement insertar;
-            String sqlNuevaZona = "INSERT INTO zona (idZona, nombre_zona) "
-                    + "VALUES (?, ?)";
+            String sqlNuevaZona = "INSERT INTO zona (idZona, nombre_zona, color) "
+                    + "VALUES (?, ?, ?)";
             insertar = connection.prepareStatement(sqlNuevaZona);
             insertar.setString(1, zona.getIdZona());
             insertar.setString(2, zona.getNombreZona());
+            insertar.setString(3, zona.getColor());
             insertar.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -77,11 +79,12 @@ public class ZonaDAOImp implements iZonaDAO {
         try {
             Connection connection = con.getConnection();
             PreparedStatement insertar;
-            String sqlNuevaZona = "INSERT INTO zona_aux (idZona, nombre_zona) "
-                    + "VALUES (?, ?)";
+            String sqlNuevaZona = "INSERT INTO zona_aux (idZona, nombre_zona, color) "
+                    + "VALUES (?, ?, ?)";
             insertar = connection.prepareStatement(sqlNuevaZona);
             insertar.setString(1, zona.getIdZona());
             insertar.setString(2, zona.getNombreZona());
+            insertar.setString(3, zona.getColor());
             insertar.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -116,6 +119,7 @@ public class ZonaDAOImp implements iZonaDAO {
                 Zona zona = new Zona();
                 zona.setIdZona(rs.getString(1));
                 zona.setNombreZona(rs.getString(2));
+                zona.setColor(rs.getString(3));
                 zonas.add(zona);
             }
         } catch (SQLException ex) {
@@ -128,7 +132,6 @@ public class ZonaDAOImp implements iZonaDAO {
 
     @Override
     public List<Zona> getAll() {
-        //con.connect();
         Connection connection = con.getConnection();
         List<Zona> zonas = null;
         PreparedStatement buscar;
@@ -141,6 +144,7 @@ public class ZonaDAOImp implements iZonaDAO {
                 Zona zona = new Zona();
                 zona.setIdZona(rs.getString(1));
                 zona.setNombreZona(rs.getString(2));
+                zona.setColor(rs.getString(3));
                 zonas.add(zona);
             }
         } catch (SQLException ex) {
@@ -164,6 +168,7 @@ public class ZonaDAOImp implements iZonaDAO {
                 Zona zona = new Zona();
                 zona.setIdZona(rs.getString(1));
                 zona.setNombreZona(rs.getString(2));
+                zona.setColor(rs.getString(3));
                 zonas.add(zona);
             }
         } catch (SQLException ex) {

@@ -3,14 +3,16 @@ package view;
 import connector.Clave;
 import connector.Encriptar;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import static view.LoginForm.dataIn;
-import static view.LoginForm.dataOut;
+import serializable.Usuario;
+import static view.LoginForm.objectIn;
+import static view.LoginForm.objectOut;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -90,6 +92,26 @@ public class RegisterForm extends javax.swing.JFrame implements Clave {
         }
 
         return correcta;
+    }
+    
+    private void enviaTexto(String texto) {
+        try {
+            objectOut.writeUTF(texto);
+            objectOut.flush();
+            objectOut.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void enviaObject(Object object){
+        try {
+            objectOut.writeObject(object);
+            objectOut.flush();
+            objectOut.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -328,13 +350,8 @@ public class RegisterForm extends javax.swing.JFrame implements Clave {
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblCloseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCloseMouseClicked
-        try {
-            dataOut.writeUTF("exit");
-            dataOut.flush();
-            System.exit(0);
-        } catch (IOException ex) {
-            Logger.getLogger(RegisterForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        enviaTexto("exit");
+        System.exit(0);
     }//GEN-LAST:event_lblCloseMouseClicked
 
     private void lblMinMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMinMouseClicked
@@ -353,12 +370,12 @@ public class RegisterForm extends javax.swing.JFrame implements Clave {
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
         if (compruebaCampos() && compruebaTfno(txtTfno.getText()) && compruebaEmail(txtCorreo.getText())) {
             try {
-                dataOut.writeUTF("encriptar");
-                dataOut.flush();
-                dataOut.writeUTF(txtUsuario.getText() + "/" + new String(txtContraseña.getPassword()) + "/"
-                        + txtCorreo.getText() + "/" + txtTfno.getText() + "/" + dateChooserNacimiento.getDate().getTime());
-                dataOut.flush();
-                String estado = dataIn.readUTF();
+                enviaTexto("encriptar");
+                enviaTexto("admin");
+                Usuario usuario = new Usuario(txtUsuario.getText(), new String(txtContraseña.getPassword()), 
+                        txtCorreo.getText(), new Date(dateChooserNacimiento.getDate().getTime()), Integer.parseInt(txtTfno.getText()));
+                enviaObject(usuario);
+                String estado = objectIn.readUTF();
                 if(estado.equalsIgnoreCase("correcto")){
                     JOptionPane.showMessageDialog(this, "Inserción correcta");
                 }else{

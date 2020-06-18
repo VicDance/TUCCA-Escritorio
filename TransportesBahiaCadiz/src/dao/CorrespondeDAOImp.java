@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.Corresponde;
+import serializable.Corresponde;
 
 /**
  *
@@ -68,8 +68,8 @@ public class CorrespondeDAOImp implements iCorrespondeDAO{
             insertar.setInt(2, idParada);
             insertar.executeUpdate();
         } catch (SQLException ex) {
-            ex.printStackTrace();
-            ex.getMessage();
+            //ex.printStackTrace();
+            //ex.getMessage();
             //insertado = false;
         }
     }
@@ -87,8 +87,8 @@ public class CorrespondeDAOImp implements iCorrespondeDAO{
             insertar.setInt(2, idParada);
             insertar.executeUpdate();
         } catch (SQLException ex) {
-            ex.printStackTrace();
-            ex.getMessage();
+            //ex.printStackTrace();
+            //ex.getMessage();
             //insertado = false;
         }
     }

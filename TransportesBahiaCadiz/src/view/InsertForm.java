@@ -7,6 +7,7 @@ package view;
 
 import com.toedter.calendar.JDateChooser;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,8 +27,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import static view.LoginForm.dataIn;
-import static view.LoginForm.dataOut;
+import serializable.Usuario;
+import static view.LoginForm.objectIn;
+import static view.LoginForm.objectOut;
 
 /**
  *
@@ -156,44 +158,64 @@ public class InsertForm extends javax.swing.JFrame {
         this.btnInsertar = btnInsertar;
     }
 
-    /*private void sendEmail() {
+    private void enviaTexto(String texto) {
         try {
-            String email = "mvictoria.29397@gmail.com";
-            String password = "29397Vicky";
-
-            Properties props = new Properties();
-            props.put("mail.smtp.host", "smtp.gmail.com");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.port", "587");
-            props.put("mail.smtp.auth", "true");
-
-            Session mailSession = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(email, password);
-                }
-            });
-            //mailSession.setDebug(true);
-
-            MimeMessage message = new MimeMessage(mailSession);
-            message.setFrom(new InternetAddress(email));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(txtCorreo.getText()));
-            message.setSubject("Usuario y contraseña");
-            message.setContent("Te amuchoo", "text/html; charset=utf-8");
-
-            Transport transport = mailSession.getTransport("smtp");
-            transport.connect(email, password);
-            transport.sendMessage(message, message.getAllRecipients());
-            transport.close();
-
-            JOptionPane.showMessageDialog(null, "Correo enviado");
-        } catch (AddressException e) {
-            e.printStackTrace();
-        } catch (MessagingException ex) {
-            ex.printStackTrace();
+            objectOut.writeUTF(texto);
+            objectOut.flush();
+            objectOut.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //} 
-    }*/
+    }
+    
+    private void enviaObject(Object object){
+        try {
+            objectOut.writeObject(object);
+            objectOut.flush();
+            objectOut.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /*private void sendEmail() {
+     try {
+     String email = "mvictoria.29397@gmail.com";
+     String password = "29397Vicky";
 
+     Properties props = new Properties();
+     props.put("mail.smtp.host", "smtp.gmail.com");
+     props.put("mail.smtp.starttls.enable", "true");
+     props.put("mail.smtp.port", "587");
+     props.put("mail.smtp.auth", "true");
+     props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+
+     Session mailSession = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+     protected PasswordAuthentication getPasswordAuthentication() {
+     return new PasswordAuthentication(email, password);
+     }
+     });
+     mailSession.setDebug(true);
+
+     MimeMessage message = new MimeMessage(mailSession);
+     message.setFrom(new InternetAddress(email));
+     message.addRecipient(Message.RecipientType.TO, new InternetAddress(txtCorreo.getText()));
+     message.setSubject("Usuario y contraseña");
+     message.setContent("Hola", "text/html; charset=utf-8");
+
+     Transport transport = mailSession.getTransport("smtp");
+     transport.connect(email, password);
+     transport.sendMessage(message, message.getAllRecipients());
+     transport.close();
+
+     JOptionPane.showMessageDialog(null, "Correo enviado");
+     } catch (AddressException e) {
+     e.printStackTrace();
+     } catch (MessagingException ex) {
+     ex.printStackTrace();
+     }
+     //} 
+     }*/
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -431,12 +453,12 @@ public class InsertForm extends javax.swing.JFrame {
     private void btnInsertarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertarActionPerformed
         try {
             if (compruebaContraseña(new String(txtPassword.getPassword()), new String(txtRepetirContraseña.getPassword()))) {
-                dataOut.writeUTF("encriptar");
-                dataOut.flush();
-                dataOut.writeUTF("revisor" + "/" + txtUsuario.getText() + "/" + new String(txtPassword.getPassword())
-                        + "/" + txtCorreo.getText() + "/" + dateChooserNacimiento.getDate().getTime() + "/" + txtTfno.getText());
-                dataOut.flush();
-                String estado = dataIn.readUTF();
+                enviaTexto("encriptar");
+                objectOut.writeUTF("revisor");
+                Usuario usuario = new Usuario(txtUsuario.getText(), new String(txtPassword.getPassword()), 
+                        txtCorreo.getText(), new Date(dateChooserNacimiento.getDate().getTime()), Integer.parseInt(txtTfno.getText()));
+                enviaObject(usuario);
+                String estado = objectIn.readUTF();
                 if (estado.equalsIgnoreCase("correcto")) {
                     JOptionPane.showMessageDialog(this, "Inserción correcta");
                 } else {
@@ -448,6 +470,7 @@ public class InsertForm extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(InsertForm.class.getName()).log(Level.SEVERE, null, ex);
         }
+        //sendEmail();
     }//GEN-LAST:event_btnInsertarActionPerformed
 
     private void txtCorreoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCorreoActionPerformed
@@ -506,6 +529,14 @@ public class InsertForm extends javax.swing.JFrame {
             return false;
         }
     }
+    
+    /*public boolean compruebaCampos() {
+        boolean llenos = false;
+        if (this.txtUsuario != null && this.txtPassword != null && this.txtRepetirContraseña != null
+                && this.txtCorreo != null && this.txtTfno != null && this.dateChooserNacimiento != null) {
+        }
+        return llenos;
+    }*/
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnInsertar;

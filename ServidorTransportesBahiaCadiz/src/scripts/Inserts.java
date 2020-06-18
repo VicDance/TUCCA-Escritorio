@@ -15,6 +15,7 @@ import dao.ParadaDAOImp;
 import dao.PuntoVentaDAOImp;
 import dao.ZonaDAOImp;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,14 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.Linea;
-import model.Corresponde;
-import model.LugarInteres;
-import model.Municipio;
-import model.Nucleo;
-import model.Parada;
-import model.PuntoVenta;
-import model.Zona;
+import serializable.Linea;
+import serializable.Corresponde;
+import serializable.LugarInteres;
+import serializable.Municipio;
+import serializable.Nucleo;
+import serializable.Parada;
+import serializable.PuntoVenta;
+import serializable.Zona;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -42,46 +43,32 @@ import org.json.JSONObject;
  * @author Vicky
  */
 public class Inserts {
-
-    //static ParadaDAOImp pdi;
     private LineaDAOImp ldi;
-    //static CorrespondeDAOImp cdi;
     private Conector con;
     private URL url;
+    
+    public static boolean fin;
     
     public Inserts(){
     }
     
     public Inserts(Conector con){
         this.con = con;
+        fin = false;
     }
-
-    /*public static void main(String[] args) {
-
-        con = new Conector();
-        con.connect();
-        ingresaParadas();
-        ingresaLineas();
-        ingresaCorresponde();
-        ingresaMunicipios();
-        ingresaLugaresInteres();
-        ingresaZonas();
-        ingresaNucleos();
-        ingresaPuntosVenta();
-    }*/
     
     public void insertaRegistros(){
+        ingresaMunicipios();
+        ingresaZonas();
+        ingresaNucleos();
         ingresaParadas();
         ingresaLineas();
         ingresaCorresponde();
-        ingresaMunicipios();
         ingresaLugaresInteres();
-        ingresaZonas();
-        ingresaNucleos();
         ingresaPuntosVenta();
     }
 
-    /*private static*/private  void ingresaCorresponde() {
+    private  void ingresaCorresponde() {
         CorrespondeDAOImp cdi = new CorrespondeDAOImp(con);
         //pdi = new ParadaDAOImp(con);
         ldi = new LineaDAOImp(con);
@@ -143,7 +130,7 @@ public class Inserts {
         }
     }
 
-    /*private static*/private void ingresaParadas() {
+    private void ingresaParadas() {
         ParadaDAOImp pdi = new ParadaDAOImp(con);
         JSONObject objetoJson = null;
         try {
@@ -193,9 +180,8 @@ public class Inserts {
         }
     }
 
-    /*private static*/private void ingresaLineas() {
+    private void ingresaLineas() {
         JSONObject objetoJson = null;
-        /*LineaDAOImp */
         ldi = new LineaDAOImp(con);
 
         ldi.dropTablaAux();
@@ -246,7 +232,7 @@ public class Inserts {
         }
     }
 
-    /*private static*/private void ingresaLugaresInteres() {
+    private void ingresaLugaresInteres() {
         LugarInteresDAOImp lidi = new LugarInteresDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -311,7 +297,7 @@ public class Inserts {
         }
     }
     
-    /*private static*/private void ingresaMunicipios() {
+    private void ingresaMunicipios() {
         MunicipioDAOImp mdi = new MunicipioDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -361,7 +347,7 @@ public class Inserts {
         }
     }
     
-    /*private static*/private void ingresaZonas(){
+    private void ingresaZonas(){
         ZonaDAOImp zdi = new ZonaDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -382,9 +368,10 @@ public class Inserts {
                 JSONArray array = objetoJson.getJSONArray("zonas");
                 for (int i = 0; i < array.length(); i++) {
                     Zona zona = new Zona(array.getJSONObject(i).getString("idZona"), 
-                            array.getJSONObject(i).getString("nombre"));
+                            array.getJSONObject(i).getString("nombre"), array.getJSONObject(i).getString("color"));
                     
                     list.add(zona);
+                    //System.out.println(zona);
                 }
                 if (zdi.getAll().isEmpty()) {
                     for (int y = 0; y < list.size(); y++) {
@@ -411,7 +398,7 @@ public class Inserts {
         }
     }
     
-    /*private static*/private void ingresaNucleos(){
+    private void ingresaNucleos(){
         NucleoDAOImp ndi = new NucleoDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -462,7 +449,7 @@ public class Inserts {
         }
     }
     
-    /*private static*/private void ingresaPuntosVenta(){
+    private void ingresaPuntosVenta(){
         PuntoVentaDAOImp pvdi = new PuntoVentaDAOImp(con);
         JSONObject objetoJson = null;
 
@@ -504,6 +491,8 @@ public class Inserts {
                     }
                 }
                 pvdi.dropTableAux();
+                
+                fin = true;
             }
         } catch (MalformedURLException ex) {
             Logger.getLogger(Inserts.class.getName()).log(Level.SEVERE, null, ex);

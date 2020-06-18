@@ -15,15 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.Cliente;
-import model.Usuario;
+import serializable.Cliente;
+import serializable.Usuario;
 
 /**
  *
  * @author Vicky
  */
 public class ClienteDAOImp implements iClienteDAO{
-    Conector con/* = new Conector()*/;
+    Conector con;
     public boolean insertado;
     
     public ClienteDAOImp(){
@@ -50,17 +50,12 @@ public class ClienteDAOImp implements iClienteDAO{
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
-            insertado = false;
-            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
-            //con.disconect();
         }
     }
     
     @Override
     public void insertarAdmin(int id) {
         try {
-            //con.connect();
             Connection connection = con.getConnection();
             PreparedStatement insertar;
             //ResultSet rs;
@@ -74,10 +69,6 @@ public class ClienteDAOImp implements iClienteDAO{
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
-            insertado = false;
-            //Logger.getLogger(UsuarioDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
-            //con.disconect();
         }
     }
 

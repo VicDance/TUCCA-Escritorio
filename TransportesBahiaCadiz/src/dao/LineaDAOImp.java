@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import model.Linea;
+import serializable.Linea;
 
 /**
  *
@@ -25,7 +25,7 @@ import model.Linea;
  */
 public class LineaDAOImp implements iLineaDAO {
 
-    Conector con/* = new Conector()*/;
+    Conector con;
     public boolean insertado = false;
 
     public LineaDAOImp() {
@@ -105,7 +105,7 @@ public class LineaDAOImp implements iLineaDAO {
             Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @Override
     public List<Linea> getIntersectLinea() {
         Connection connection = con.getConnection();
@@ -216,6 +216,15 @@ public class LineaDAOImp implements iLineaDAO {
                 lineasDestino.add(linea);
             }
 
+            /*for (int i = 0; i < lineasOrigen.size(); i++) {
+                //System.out.println("Origen: " + lineasOrigen.get(i));
+                lineas.add(lineasOrigen.get(i));
+            }*/
+
+            /*for (int j = 0; j < lineasDestino.size(); j++) {
+                //System.out.println("Destino: " + lineasDestino.get(j));
+                lineas.add(lineasDestino.get(j));
+            }*/
             for (int i = 0; i < lineasOrigen.size(); i++) {
                 //System.out.println("Origen: " + lineasOrigen.get(i));
                 //lineas.add(lineasDestino.get(i));
@@ -229,9 +238,9 @@ public class LineaDAOImp implements iLineaDAO {
             }
 
             /*for (int i = 0; i < lineas.size(); i++) {
-             System.out.println("Lineas: " + lineas.get(i));
-             //lineas.add(lineasDestino.get(i));
-             }*/
+                System.out.println("Lineas en comun: " + lineas.get(i).getIdLinea());
+                //lineas.add(lineasDestino.get(i));
+            }*/
             //lineas = lineas.stream().distinct().collect(Collectors.toList());
         } catch (SQLException ex) {
             Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);

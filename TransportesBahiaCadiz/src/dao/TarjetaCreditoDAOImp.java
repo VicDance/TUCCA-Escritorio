@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.TarjetaCredito;
+import serializable.TarjetaCredito;
 
 /**
  *
@@ -80,6 +80,19 @@ public class TarjetaCreditoDAOImp implements iTarjetaCreditoDAO {
             //con.disconect();
         }
         return tarjetas;
+    }
+    
+    @Override
+    public List<TarjetaCredito> getTarjetasUsuario(int id) {
+        List<TarjetaCredito> tarjetas = getAllTarjetas();
+        List<TarjetaCredito> tarjetasUsuario = new ArrayList<TarjetaCredito>();
+        for(int i = 0; i < tarjetas.size(); i++){
+            if(id == tarjetas.get(i).getIdUser()){
+                tarjetasUsuario.add(tarjetas.get(i));
+            }
+        }
+        
+        return tarjetasUsuario;
     }
 
     @Override

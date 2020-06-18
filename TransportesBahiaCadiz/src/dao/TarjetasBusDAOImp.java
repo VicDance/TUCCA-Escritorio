@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.TarjetaBus;
-import model.TarjetaEstandar;
-import model.TarjetaEstudiante;
-import model.TarjetaJubilado;
+import serializable.TarjetaBus;
+import serializable.TarjetaEstandar;
+import serializable.TarjetaEstudiante;
+import serializable.TarjetaJubilado;
 
 /**
  *
@@ -244,6 +244,18 @@ public class TarjetasBusDAOImp implements iTarjetasBusDAO {
             //con.disconect();
         }
         return tarjetas;
+    }
+    
+    @Override
+    public List<TarjetaBus> getTarjetasUsuario(int id) {
+        List<TarjetaBus> tarjetas = getAllTarjetas();
+        List<TarjetaBus> tarjetasUsuario = new ArrayList<TarjetaBus>();
+        for(int i = 0; i < tarjetas.size(); i++){
+            if(id == tarjetas.get(i).getId()){
+                tarjetasUsuario.add(tarjetas.get(i));
+            }
+        }
+        return tarjetasUsuario;
     }
 
     @Override
