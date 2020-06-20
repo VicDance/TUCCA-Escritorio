@@ -19,18 +19,12 @@ import dao.TarjetaCreditoDAOImp;
 import dao.TarjetasBusDAOImp;
 import dao.ViajeDAOImp;
 import dao.ZonaDAOImp;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.sql.Date;
-import java.sql.Time;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -46,7 +40,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.Authenticator;
-import javax.swing.JOptionPane;
 import serializable.Cliente;
 import serializable.CodigoQR;
 import serializable.Linea;
@@ -64,6 +57,7 @@ import serializable.Usuario;
 import serializable.Viaje;
 import serializable.Zona;
 import scripts.Inserts;
+import serializable.Cabecera;
 
 /**
  *
@@ -87,6 +81,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
     private List<TarjetaEstandar> estandares;
     private List<TarjetaEstudiante> estudiantes;
     private List<TarjetaJubilado> jubilados;
+    private List<Cabecera> cabeceras;
     private UsuarioDAOImp udi;
     private LineaDAOImp ldi;
     private ParadaDAOImp pdi;
@@ -122,15 +117,13 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
         try {
             outputStream = new ObjectOutputStream(cliente.getOutputStream());
             inputStream = new ObjectInputStream(cliente.getInputStream());
-            /*dataOut = new DataOutputStream(cliente.getOutputStream());
-             dataIn = new DataInputStream(cliente.getInputStream());*/
             con = new Conector();
             con.connect();
             while (true) {
                 System.out.println("servidor escuchando");
                 //String cadena = dataIn.readUTF();
                 String cadena = inputStream.readUTF();
-                System.out.println("cadena: " + cadena);
+                //System.out.println("cadena: " + cadena);
                 switch (cadena) {
                     case "encriptar":
                         //lee si cliente, admin o revisor
@@ -161,6 +154,11 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                             udi.insertar(usuario);
                             Usuario us = udi.getId(usuario.getNombre());
                             udi.insertarAdmin(us.getId());
+                            if(udi.insertado){
+                                envia("correcto");
+                            }else{
+                                envia("incorrecto");
+                            }
                         }
                         break;
                     case "inicio":
@@ -218,6 +216,24 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                         paradas = pdi.getAllParadas();
                         enviaInt(paradas.size());
                         for (Parada parada : paradas) {
+                            enviaObject(parada);
+                        }
+                        break;
+                        
+                    case "cabeceras":
+                        pdi = new ParadaDAOImp(con);
+                        cabeceras = pdi.getAllCabecera();
+                        enviaInt(cabeceras.size());
+                        for (Cabecera parada : cabeceras) {
+                            enviaObject(parada);
+                        }
+                        break;
+                        
+                    case "regulares":
+                        pdi = new ParadaDAOImp(con);
+                        cabeceras = pdi.getAllRegular();
+                        enviaInt(cabeceras.size());
+                        for (Cabecera parada : cabeceras) {
                             enviaObject(parada);
                         }
                         break;
@@ -493,6 +509,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
 
                     case "busuario":
                         id = inputStream.readInt();
+                        udi = new UsuarioDAOImp(con);
                         udi.borrar(id);
                         if (udi.borrado) {
                             envia("correcto");
@@ -903,7 +920,7 @@ public class HiloServidorBahiaCadiz extends Thread implements Clave {
                     return new PasswordAuthentication(email, password);
                 }
             });
-            mailSession.setDebug(true);
+            //mailSession.setDebug(true);
 
             MimeMessage message = new MimeMessage(mailSession);
             message.setFrom(new InternetAddress(email));

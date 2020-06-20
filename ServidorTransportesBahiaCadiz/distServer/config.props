@@ -1,0 +1,4 @@
+server=jdbc:mysql://localhost:3306/transportes_cadiz?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+port=6000
+user=root
+password=ItsMeVicky

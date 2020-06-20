@@ -70,7 +70,7 @@ public class Inserts {
 
     private  void ingresaCorresponde() {
         CorrespondeDAOImp cdi = new CorrespondeDAOImp(con);
-        //pdi = new ParadaDAOImp(con);
+        ParadaDAOImp pdi = new ParadaDAOImp(con);
         ldi = new LineaDAOImp(con);
         int idLinea = 0;
         //List<Parada> paradas = pdi.getAllParadas();
@@ -119,6 +119,13 @@ public class Inserts {
                         for (int y = 0; y < list.size(); y++) {
                             cdi.insertarCorresponde(list.get(y).getIdLinea(), list.get(y).getIdParada());
                         }
+                    }
+                    //insertar primera y ultima parada en cabecera
+                    pdi.insertaCabecera(array.getJSONObject(0).getInt("idParada"));
+                    pdi.insertaCabecera(array.getJSONObject(array.length()/2).getInt("idParada"));
+                    //comprobacion paradas cabecera y regulares
+                    for(int x = 1; x < (array.length()/2)-1; x++){
+                        pdi.insertaRegular(array.getJSONObject(x).getInt("idParada"));
                     }
                 }
             }
