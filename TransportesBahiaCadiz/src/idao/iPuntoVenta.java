@@ -21,5 +21,4 @@ public interface iPuntoVenta {
     public List<PuntoVenta> getAllPuntos();
     public List<PuntoVenta> getPuntoVentaId(int id);
     public List<PuntoVenta> getPuntosVentaNucleo(int idNucleo);
-    public PuntoVenta getPuntoVenta(int idNucleo);
 }

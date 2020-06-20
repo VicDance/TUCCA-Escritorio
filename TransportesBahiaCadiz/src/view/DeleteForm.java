@@ -35,6 +35,16 @@ public class DeleteForm extends javax.swing.JFrame {
             Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    private void enviaInt(int texto) {
+        try {
+            objectOut.writeInt(texto);
+            objectOut.flush();
+            objectOut.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -183,7 +193,7 @@ public class DeleteForm extends javax.swing.JFrame {
     private void btnBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarActionPerformed
         try {
             enviaTexto("busuario");
-            objectOut.writeInt(Integer.parseInt(txtId.getText()));
+            enviaInt(Integer.parseInt(txtId.getText()));
             if(objectIn.readUTF().equalsIgnoreCase("correcto")){
                 JOptionPane.showMessageDialog(this, "Borrado correcto");
                 this.dispose();

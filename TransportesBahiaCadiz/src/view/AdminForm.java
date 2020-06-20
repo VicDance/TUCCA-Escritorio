@@ -20,6 +20,7 @@ import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import scripts.Inserts;
+import serializable.Cabecera;
 import serializable.Cliente;
 import serializable.Linea;
 import serializable.Municipio;
@@ -144,7 +145,6 @@ public class AdminForm extends javax.swing.JFrame {
         for (int i = 0; i < columnas.length; i++) {
             model.addColumn(columnas[i], columnas);
         }
-        //model = new DefaultTableModel(columnas, size);
     }
 
     private void setFilasParadas() {
@@ -155,7 +155,6 @@ public class AdminForm extends javax.swing.JFrame {
                 Parada parada = (Parada) objectIn.readObject();
                 filas = new Object[]{parada.getIdParada(), parada.getIdZona(), parada.getNombreParada()
                 , parada.getLatitud(), parada.getLongitud()};
-
                 model.addRow(filas);
             } catch (IOException ex) {
                 Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -164,7 +163,72 @@ public class AdminForm extends javax.swing.JFrame {
             }
         }
         table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
-        //table.setModel(model);
+    }
+    
+    private void setColumnasCabecera() {
+        columnas = new Object[]{"Id parada", "Id zona", "Nombre parada", "Latitud", "Longitud"};
+        try {
+            enviaTexto("cabeceras");
+            size = objectIn.readInt();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+    }
+    
+    private void setFilasCabeceras() {
+        Object[] filas;
+        model.setRowCount(0);
+        for (int i = 0; i < size; i++) {
+            try {
+                Cabecera parada = (Cabecera) objectIn.readObject();
+                filas = new Object[]{parada.getIdParada(), parada.getIdZona(), parada.getNombreParada()
+                , parada.getLatitud(), parada.getLongitud()};
+                model.addRow(filas);
+            } catch (IOException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
+    }
+    
+    private void setColumnasRegular() {
+        columnas = new Object[]{"Id parada", "Id zona", "Nombre parada", "Latitud", "Longitud"};
+        try {
+            enviaTexto("regulares");
+            size = objectIn.readInt();
+        } catch (IOException ex) {
+            Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        for (int i = 0; i < columnas.length; i++) {
+            model.addColumn(columnas[i], columnas);
+        }
+    }
+    
+    private void setFilasRegulares() {
+        Object[] filas;
+        model.setRowCount(0);
+        for (int i = 0; i < size; i++) {
+            try {
+                Cabecera parada = (Cabecera) objectIn.readObject();
+                filas = new Object[]{parada.getIdParada(), parada.getIdZona(), parada.getNombreParada()
+                , parada.getLatitud(), parada.getLongitud()};
+                model.addRow(filas);
+            } catch (IOException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        table.setRowSorter(new TableRowSorter<DefaultTableModel>(model));
     }
 
     private void setColumnasMunicipios() {
@@ -502,7 +566,7 @@ public class AdminForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(lblMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(83, 83, 83)
-                .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblMin)
                 .addGap(31, 31, 31)
@@ -517,13 +581,9 @@ public class AdminForm extends javax.swing.JFrame {
                     .addComponent(lblClose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(10, 10, 10)))
+                .addComponent(lblMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 15, Short.MAX_VALUE))
+            .addComponent(lblTitle, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         jPanel2.setBackground(new java.awt.Color(44, 62, 80));
@@ -979,7 +1039,9 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblMunicipiosMouseExited
 
     private void lblCabeceraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseClicked
-        lblTitle.setText(lblParadas.getText());
+        lblTitle.setText(lblCabecera.getText());
+        setColumnasCabecera();
+        setFilasCabeceras();
     }//GEN-LAST:event_lblCabeceraMouseClicked
 
     private void lblCabeceraMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCabeceraMouseEntered
@@ -991,7 +1053,9 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblCabeceraMouseExited
 
     private void lblRegularMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseClicked
-        lblTitle.setText(lblParadas.getText());
+        lblTitle.setText(lblRegular.getText());
+        setColumnasRegular();
+        setFilasRegulares();
     }//GEN-LAST:event_lblRegularMouseClicked
 
     private void lblRegularMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblRegularMouseEntered
@@ -1003,7 +1067,6 @@ public class AdminForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblRegularMouseExited
 
     private void lblClienteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblClienteMouseClicked
-        System.out.println("click");
         setColumnasClientes();
         setFilasClientes();
         btnAñadir.setEnabled(false);

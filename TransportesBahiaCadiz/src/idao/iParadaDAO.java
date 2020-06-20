@@ -6,7 +6,7 @@
 package idao;
 
 import java.util.List;
-import serializable.Corresponde;
+import serializable.Cabecera;
 import serializable.Parada;
 
 /**
@@ -17,11 +17,15 @@ public interface iParadaDAO {
     public void insertaTablaParadas();
     public void insertaParadas(Parada parada);
     public void insertaParadasAux(Parada parada);
+    public void insertaCabecera(int id);
+    public void insertaRegular(int id);
     public void dropTablaParadas();
     public void borrar(int idParada);
     public List<Parada> getIntersectParadas();
     public List<Parada> getParada(String nombre);
     public List<Parada> getAllParadas();
+    public List<Cabecera> getAllCabecera();
+    public List<Cabecera> getAllRegular();
     public List<Parada> getParadasViaje(int idLinea, int idNucleoOrigen, int idNucleoDestino);
     public String getDireccion(String nombre);
 }

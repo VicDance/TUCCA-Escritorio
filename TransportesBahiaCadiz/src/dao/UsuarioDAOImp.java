@@ -154,9 +154,7 @@ public class UsuarioDAOImp implements iUsuarioDAO {
                 System.out.println("borrado con exito");
                 borrado = true;
             }
-            //borrar.executeUpdate();
         } catch (SQLException ex) {
-            //Logger.getLogger(ZonaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
             borrado = false;
             ex.printStackTrace();
         } finally {

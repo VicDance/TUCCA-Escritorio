@@ -76,7 +76,7 @@ public class PuntoVentaDAOImp implements iPuntoVenta {
             insertar.setString(6, punto.getLongitud());
             insertar.executeUpdate();
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
         }
     }
 
@@ -197,33 +197,5 @@ public class PuntoVentaDAOImp implements iPuntoVenta {
         }
 
         return puntos;
-    }
-
-    @Override
-    public PuntoVenta getPuntoVenta(int idNucleo) {
-        PuntoVenta punto = null;
-        /*Connection connection = con.getConnection();
-         PreparedStatement buscar;
-         PuntoVenta punto = null;
-         try {
-         String buscaPuntos = "SELECT * FROM puntos_venta WHERE idpuntos_venta = ?";
-         buscar = connection.prepareStatement(buscaPuntos);
-         buscar.setInt(1, idNucleo);
-         ResultSet rs = buscar.executeQuery();
-         while (rs.next()) {
-         punto = new PuntoVenta();
-         punto.setIdPunto(rs.getInt(1));
-         punto.setIdNucleo(rs.getInt(2));
-         punto.setTipo(rs.getString(3));
-         punto.setLatitud(rs.getString(4));
-         punto.setLongitud(rs.getString(5));
-         //puntos.add(punto);
-         }
-         } catch (SQLException ex) {
-         Logger.getLogger(LineaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
-         }
-
-         return punto;*/
-        return punto;
     }
 }

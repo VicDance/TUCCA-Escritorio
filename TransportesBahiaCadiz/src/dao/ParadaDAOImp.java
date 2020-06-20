@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import serializable.Cabecera;
 import serializable.Corresponde;
 import serializable.Parada;
 
@@ -111,6 +112,37 @@ public class ParadaDAOImp implements iParadaDAO {
     }
 
     @Override
+    public void insertaCabecera(int id) {
+        try {
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String insertaParadas = "INSERT INTO cabecera (idcabecera) "
+                    + "VALUES (?)";
+            insertar = connection.prepareStatement(insertaParadas);
+            insertar.setInt(1, id);
+            insertar.executeUpdate();
+        } catch (SQLException ex) {
+            //Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    @Override
+    public void insertaRegular(int id) {
+        try {
+            Connection connection = con.getConnection();
+            PreparedStatement insertar;
+            String insertaParadas = "INSERT INTO regular (idregular) "
+                    + "VALUES (?)";
+            insertar = connection.prepareStatement(insertaParadas);
+            insertar.setInt(1, id);
+            insertar.executeUpdate();
+        } catch (SQLException ex) {
+            //Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
     public void dropTablaParadas() {
         Connection connection = con.getConnection();
         try {
@@ -195,6 +227,57 @@ public class ParadaDAOImp implements iParadaDAO {
             paradas = new ArrayList<Parada>();
             while (rs.next()) {
                 Parada parada = new Parada();
+                parada.setIdParada(rs.getInt(1));
+                parada.setIdZona(rs.getString(2));
+                parada.setNombreParada(rs.getString(3));
+                parada.setLatitud(rs.getString(4));
+                parada.setLongitud(rs.getString(5));
+                paradas.add(parada);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //con.disconect();
+        return paradas;
+    }
+    
+    @Override
+    public List<Cabecera> getAllCabecera() {
+        Connection connection = con.getConnection();
+        List<Cabecera> paradas = null;
+        PreparedStatement buscar;
+        try {
+            String buscaParadas = "SELECT * FROM parada JOIN cabecera ON idparada = idcabecera";
+            buscar = connection.prepareStatement(buscaParadas);
+            ResultSet rs = buscar.executeQuery();
+            paradas = new ArrayList<Cabecera>();
+            while (rs.next()) {
+                Cabecera parada = new Cabecera();
+                parada.setIdParada(rs.getInt(1));
+                parada.setIdZona(rs.getString(2));
+                parada.setNombreParada(rs.getString(3));
+                parada.setLatitud(rs.getString(4));
+                parada.setLongitud(rs.getString(5));
+                paradas.add(parada);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ParadaDAOImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return paradas;
+    }
+    
+    @Override
+    public List<Cabecera> getAllRegular() {
+        Connection connection = con.getConnection();
+        List<Cabecera> paradas = null;
+        PreparedStatement buscar;
+        try {
+            String buscaParadas = "SELECT * FROM parada JOIN regular ON idparada = idregular";
+            buscar = connection.prepareStatement(buscaParadas);
+            ResultSet rs = buscar.executeQuery();
+            paradas = new ArrayList<Cabecera>();
+            while (rs.next()) {
+                Cabecera parada = new Cabecera();
                 parada.setIdParada(rs.getInt(1));
                 parada.setIdZona(rs.getString(2));
                 parada.setNombreParada(rs.getString(3));
